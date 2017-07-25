@@ -177,18 +177,20 @@ class UtilisateursTable
 	
 	public function saveDonnees($donnees)
 	{
+		$role = "";
+		if($donnees->role){ $role = $donnees->role; }else { $role = $donnees->rolepolyclinique; }
+		
 		$date = new \DateTime ("now");
 		$formatDate = $date->format ( 'Y-m-d H:i:s' );
 		$data = array(
 				'username' => $donnees->username,
 				'password' => $this->_encryptPassword($donnees->password),
-				'role' => $donnees->role,
+				'role' => $role,
 				'fonction' => $donnees->fonction,
 				'id_personne' => $donnees->idPersonne,
 		);
 		
 		$id = (int)$donnees->id;
-		//var_dump($id); exit();
 		if($id == 0) {
 			$data['date_enregistrement'] = $formatDate;
 			$this->tableGateway->insert($data);
@@ -410,4 +412,20 @@ class UtilisateursTable
 		$this->tableGateway->update($data, array('username' => $ancienUsername));
 	}
 	
+	
+	public function modifierPersonne($donnees, $id_employe){
+		$db = $this->tableGateway->getAdapter();
+		$sql = new Sql($db);
+	
+		$data = array( 
+				'NOM' => $donnees->nomUtilisateur,
+				'PRENOM' => $donnees->prenomUtilisateur,
+		);
+	
+		$sQuery = $sql->update()
+		->table('personne')
+		->set( $data )->where(array('ID_PERSONNE' => $id_employe ));
+	
+		$sql->prepareStatementForSqlObject($sQuery)->execute();
+	}
 }

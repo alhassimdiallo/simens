@@ -10,7 +10,7 @@ function creerLaliste ($listeDesElements) {
                              "</th >"+
                              
                              "<th id='SelectElement_"+(index+1)+"' style='width: 28%;'>"+
-                             "<select style='width: 100%; margin-top: 3px; margin-bottom: 0px; font-size: 13px;' class='validate[required]' id='element_name_"+(index+1)+"'>"+
+                             "<select style='width: 100%; margin-top: 3px; margin-bottom: 0px; font-size: 13px;' class='validate[required]' name='element_name_"+(index+1)+"' id='element_name_"+(index+1)+"'>"+
 			                 "<option value=''> -- S&eacute;l&eacute;ctionner un examen -- </option>";
                              for(var i = 1 ; i < $listeDesElements.length ; i++){
                             	 if($listeDesElements[i]){
@@ -21,7 +21,7 @@ function creerLaliste ($listeDesElements) {
                              "</th>"+
                              
                              "<th id='note_"+(index+1)+"' style='width: 59%;'  >"+
-                             "<input type='text' style='width: 100%; margin-top: 3px; height: 30px; margin-bottom: 0px; font-size: 15px; padding-left: 10px;' >" +
+                             "<input  name='note_"+(index+1)+"' type='text' style='width: 100%; margin-top: 3px; height: 30px; margin-bottom: 0px; font-size: 15px; padding-left: 10px;' >" +
                              "</th >"+
                              
                              "<th id='icone_supp_vider' style='width: 9%;'  >"+
@@ -252,5 +252,20 @@ $(function(){
 		$("#bouton_morpho_valider_demande").toggle(true);
 		return false;
 	});
+	
+	$("#demandeExamenBioMorpho").click(function(){
+		for(var i = 1; i <= nbListe(); i++ ){
+			$('#element_name_'+i).attr('disabled',false); $('#element_name_'+i).css({'background':'white'});
+			$("#note_"+i+" input").attr('disabled',false); $("#note_"+i+" input").css({'background':'white'});
+		}
+		$("#controls_element div").toggle(true);
+		if(nbListe() == 1){
+			$("#supprimer_element").toggle(false);
+		}
+		$("#icone_supp_vider a img").toggle(true);
+		$("#bouton_morpho_modifier_demande").toggle(false);
+		$("#bouton_morpho_valider_demande").toggle(true);
+	});
+	
 });
 }

@@ -23,6 +23,9 @@ echo $this->headScript()->appendFile($this->basePath().'/js/consultation/ajouter
 echo $this->headScript()->appendFile($this->basePath().'/js/consultation/ajouterHospi.js');
 echo $this->headScript()->appendFile($this->basePath().'/js/consultation/ajouterMotifsHospi.js');
 ?> 
+<?php echo  $this->headScript()->appendFile($this->basePath().'/js/consultation/ajouterMedicamentsHospi.js'); ?>
+
+
 <!-- MES JS -->
 <?php 
 echo $this->headScript()->appendFile($this->basePath().'/js/jquery.dataTables.min.js');
@@ -39,14 +42,14 @@ echo $this->headScript()->appendFile($this->basepath().'/js/archivage/jsEncours.
   background: #eaecea;
 }
 
-#contenu{ visibility: hidden }
+#toutLeContenu{ visibility: hidden; }
 </style>
 
 <script>
 $(window).load(function () {
 
 	$('#wait').toggle(false);
-	$('#contenu').fadeIn().css({'visibility':'visible'});
+	$('#toutLeContenu').fadeIn().css({'visibility':'visible'});
 	 
 });
 </script>
@@ -60,6 +63,8 @@ $(window).load(function () {
 </div>
 
 <div id="wait" style="color: gray; font-size: 20px; text-align: center; margin-top: 80px;" > <span> Chargement ... </span> </div>
+
+<div id="toutLeContenu"> 
 
 <div id="contenu"> 
 
@@ -120,7 +125,7 @@ $(window).load(function () {
       $(function() {
     	 $('.SlectBox').SumoSelect({ csvDispCount: 6 });
     	 $( "#tabs" ).tabs();
-    	 $('#heure_recommandee').attr('autocomplete', 'off');
+    	 $('#heure_recommandee, #duree').attr('autocomplete', 'off');
 
     	 $( "#accordions_demande" ).accordion();
     	 $( "#accordions" ).accordion();
@@ -138,57 +143,17 @@ $(window).load(function () {
                   </ul>
                                    
     <div id="tabss-1"> 
-       <div id="accordions"> 
+             <div id="accordions"> 
           <!--**************** LISTE DES CONSULTATIONS LORS DE L'HOSPITALISATION *************-->
           <!--**************** LISTE DES CONSULTATIONS LORS DE L'HOSPITALISATION *************-->
           <!--**************** LISTE DES CONSULTATIONS LORS DE L'HOSPITALISATION *************-->
           <!-- **0** --> 
-          <div style='font-family: police2;font-size: 17px; font-weight: bold;'>Liste des consultations</div>
-            <div style='max-height: 200px;'>
+          <div id='listeDeTousLesExamens' style='font-family: police2;font-size: 17px; font-weight: bold;'>Liste des examens</div>
+            
+            <div id='listeDesExamens' >
                
-               
-               <table id="patient" class="table table-bordered tab_list_mini" >
-				<thead>
-					<tr id="nomMaj" style="height: 50px; width:100%;">
-						<th id="nom" style='cursor: pointer;'>Nom</th>
-						<th id="prenom" style='cursor: pointer;'>Pr&eacute;nom</th>
-						<th id="date" style='cursor: pointer;'>Date. N</th>
-						<th id="sexe" style='cursor: pointer;'>Sexe</th>
-						<th id="adresse" style='cursor: pointer;'>Date & Heure</th>
-						<th id="nationalite" style='cursor: pointer;'>Date Fin</th>
-						<th id="effectuer">Options</th>
-					</tr>
-				</thead>
-
-				<tbody id="donnees" class="liste_patient">
-
-					<!-- ************ On affiche les patients en une liste ordonnee************ -->
-
-				</tbody>
-
-				<tfoot id="foot" class="foot_style">
-					<tr>
-						<th id="nom_" style='width: 17%;'><input type="text" name="search_browser"
-							value=" Nom" class="search_init" /></th>
-						<th id="prenom_" style='width: 18%;'><input type="text" name="search_browser"
-							value=" Pr&eacute;nom" class="search_init" /></th>
-						<th id="date_" style='width: 12%;'><input type="text" name="search_browser"
-							value=" Date naissance" class="search_init" /></th>
-						<th id="sexe_" style='width: 7%;'><input type="text" name="search_browser"
-							value=" Sexe" class="search_init" /></th>
-						<th id="adresse_" style='width: 19%;'><input type="text" name="search_browser"
-							value=" Adresse" class="search_init" /></th>
-						<th id="nationalite_" style='width: 16%;'><input type="text" name="search_browser"
-							value=" Nationalite" class="search_init" /></th>
-						<th id="effectuer_" style='width: 11%;'><input type="hidden" name="search_browser"
-							value="" class="" /></th>
-					</tr>
-				</tfoot>
-			</table>
-               
-               
-               
-               
+                 <!-- AFFICHAGE DE LA LISTE DES EXAMENS  -->
+                           
             </div>
             
             
@@ -197,7 +162,7 @@ $(window).load(function () {
          <!-- ******************** PLAINTE ET EXAMEN DU JOUR ******************-->
          <!--*3*-->
          <div style='font-family: police2;font-size: 17px; font-weight: bold;'>Plainte et examens du jour</div>
-           <div style='height: 200px;'>
+           <div id='accordionListeDesPlaintesEtExamensDuJour' style='height: 200px;'>
                 
                 <div style='width: 100%; height: 30px;'>
                    <div style='width: 70%; float: left; '>
@@ -270,8 +235,8 @@ $(window).load(function () {
           <!--**************** sous accordeon LES CONSTANTES ************************-->
           <!--**************** sous accordeon LES CONSTANTES ************************-->
           <!-- **1** --> 
-          <div style='font-family: police2;font-size: 17px; font-weight: bold;'>Constantes</div>
-            <div>
+          <div id='listeDeToutesLesConstantes' style='font-family: police2;font-size: 17px; font-weight: bold;'>Constantes</div>
+            <div id='accordionListeDeToutesLesConstantes'>
              <table  id="respond" style="width: 100%">
 
                     <tr class="comment-form-author">
@@ -337,7 +302,7 @@ $(window).load(function () {
           <!-- ********************Accordeon DONNEES DE L'EXAMEN PHYSIQUE******************-->
           <!-- **2** --> 
           <div style='font-family: police2;font-size: 17px; font-weight: bold;'>Donn&eacute;es de l'examen physique</div>
-            <div style='height: 200px;'>
+            <div  id='accordionDonneesExamensPhysiques' >
             <p style='color: white; opacity: 0.5;'>
            <img id="" src='<?php echo $this->basePath().'/images_icons/examenphysique.jpg'?>'  alt="consult-motif" style='float:right; margin-right:0px; width:32%; height:270px;'/>
         </p>
@@ -401,7 +366,7 @@ $(window).load(function () {
          <!-- ********************Examen complï¿½mentaire (BIOLOGIQUES et MORPHOLOGIQUES)******************-->
          <!--*3*-->
          <div style='font-family: police2;font-size: 17px; font-weight: bold;'>Examens compl&eacute;mentaires</div>
-           <div style='height: 200px;'>
+           <div id='accordionExamensComplementaires' >
                           <div id="accordions_demande">
                           <?php 
                           /**
@@ -412,7 +377,7 @@ $(window).load(function () {
                            *=============================================================================================
                            **/?>
                           <div style='font-family: police2;font-size: 15px; font-weight: bold; color:green;'> Examens Biologiques </div>
-                             <div style=''>
+                             <div id='accordionExamensBiologiques' >
                              <div style="margin-bottom: 5px; border-bottom: 1.5px solid #cccccc; margin-top:-15px;"></div>
 
                            <?php 
@@ -501,7 +466,7 @@ $(window).load(function () {
                            *=============================================================================================
                           **/?>
                           <div style='font-family: police2;font-size: 15px; font-weight: bold; color:green;'> Examens Morphologiques </div>
-                           <div style="max-height: 250px;">
+                           <div id='accordionExamensMorphologiques'>
                             <div style="margin-bottom: 5px; border-bottom: 1.5px solid #cccccc; margin-top:-15px;"></div>
                                         
                             <?php 
@@ -589,6 +554,7 @@ $(window).load(function () {
                             
                             
                         </div>
+                        
            </div>
           
          
@@ -597,7 +563,7 @@ $(window).load(function () {
          <!-- ********************TRANSFERT TRANSFERT TRANSFERT ******************-->
          <!--*4*--> 
          <div style='font-family: police2;font-size: 17px; font-weight: bold;'>Transfert</div>
-           <div style='max-height: 240px;'>
+           <div id="accordionTransfert" style='max-height: 240px;'>
                          <table id="transfert" style="width: 100%;">
                              <tr class="form-transfert" style="width: 100%;">
                                 <th style="width: 45%;"><?php echo $this->formRow($form->get('motif_transfert'));?></th>
@@ -620,6 +586,17 @@ $(window).load(function () {
                          </table>
            </div>
          </div>
+         
+         <table style="width: 100%;">
+            <tr style="width: 100%;">
+                <td style="width: 50%;">
+                    <div> <button type="submit" name="annulerExamenDuJour" id="annulerExamenDuJour" style="float: right; right: 5px;  margin-top: 20px; font-family: police2;font-size: 18px; font-weight: bold;"> Annuler </button> </div>
+                </td>
+                <td style="width: 50%;">
+                   <div> <button type="submit" name="terminerExamenDuJour" id="terminerExamenDuJour" style="left: 5px; margin-top: 20px; font-family: police2;font-size: 18px; font-weight: bold;"> Enregistrer </button> </div>
+                </td>
+            </tr>
+         </table>
          
     </div>
     
@@ -644,14 +621,20 @@ $(window).load(function () {
       <tr class="comment-form-patient" style="width: 95%;">
          <td style="width: 25%;"> <?php echo $this->formRow($form->get('medicament'));?> </td> 
          <td style="width: 25%;"> <?php echo $this->formRow($form->get('voie_administration'));?> </td> 
-         <td style="width: 25%;"> <?php echo $this->formRow($form->get('frequence'));?> </td> 
          <td style="width: 25%;"> <?php echo $this->formRow($form->get('dosage'));?> </td> 
+         <td style="width: 25%;"> <?php echo $this->formRow($form->get('frequence'));?> </td> 
       </tr>
       
       <tr  style="width: 95%;">
          <td style="width: 25%;" class="comment-form-patient"> <?php echo $this->formRow($form->get('date_application'));?> </td> 
+         <td style="width: 25%;" class="comment-form-patient"> 
+         <label style="float:right; top: 35px; bottom:2px; right: 24px;"> 
+             <img id='fleche_moins' style='padding-right:10px; heigth: 19px; width: 19px;' src='/simens/public/images_icons/fleche_moins.png'>
+             <img id='fleche_plus' style='heigth: 19px; width: 19px;' src='/simens/public/images_icons/fleche_plus.png'>
+         </label>
+         <?php echo $this->formRow($form->get('duree'));?> 
+         </td>
          <td id="heure-recom" colspan="2" style="width: 50%;" class="comment-form-patient"> <?php echo $this->formRow($form->get('heure_recommandee_'));?> </td> 
-         <td style="width: 25%;"> </td> 
       </tr>
       
     </table>
@@ -705,6 +688,7 @@ $(window).load(function () {
     
 </div>
 
+</div>
 </div>
 <!--***********************************************************************************************-->                              
 
@@ -763,14 +747,136 @@ $(window).load(function () {
         </div>
         
         
-<style>
- #hospitaliser { 
- 	visibility: hidden; 
- } 
+<!--***********************************************************************************************-->                              
 
-</style>
+<!--==========================POP UP pour Afficher les détails =================================-->                              
+                          
+<!--***********************************************************************************************-->  
+        <div id="confirmationDeLaLiberation" title="Confirmation de la lib&eacute;ration" style="display:none;">
+             
+             <div style="font-size: 16px; width: 100%;">
+                 <p>
+                 <span style="float:left; margin:10px 10px 20px 0; font-size:17px; width: 100%;">
+                 <img src="<?php echo $this->basepath().'/images_icons/warning_16.png';?>" />
+                 Vous &ecirc;tes sur le point de lib&eacute;rer le patient ... </span> </p>
+                 
+                 <span style="float:left; border: 2px solid #cccccc; width: 100%;"> </span>
+                 
+                 <p>
+                 <span style="float:left; margin:10px 0px 20px 0; font-size:17px; width: 60%;">
+                 <img id="prescriptionOrdonnance" style="cursor:pointer;" src="<?php echo $this->basepath().'/images_icons/pdf.png';?>" />
+                 Prescrire une ordonnance</span> </p>
+             </div>
+             
+        </div>
+        
+        
+<!--***********************************************************************************************-->                              
+
+<!--==========================POP UP pour Afficher les détails =================================-->                              
+                          
+<!--***********************************************************************************************-->  
+        <div id="PrescriptionOrdonnancePopupInterface" title="Prescription de l'ordonnance" style="display:none;">
+             
+             <form id='Formulaire_Imprimer_Ordonnance'  method='post' action='/simens/public/consultation/impression-Pdf'  target='_blank'>
+        
+                 <div id="impressionPdf">
+                      <input type="submit"  title="Imprimer" name="ordonnance" id="ordonnance">
+                 </div>
+                      <input type="hidden"  id="id_consForOrdonnance">   
+                      <input type="hidden"  id="id_personneForOrdonnance">
+                      
+                      <input type="hidden"  id="nbMedecamentPourVisualisation">
+                 
+                 <div id="listeMedicaments" style="float:left; width: 100%;">
+				                  
+				    <table class="table table-bordered" style="width: 100%; margin-bottom: 0px; margin-left: 0px;">
+                      <thead style="width: 100%;">
+		                <tr style="width: 100%; height: 40px; font-family: police2;">
+		                  <th style="width: 4%;  font-weight: bold; font-size: 15px; ">N&ordm;</th>
+		                  <th style="width: 29%; font-weight: bold; font-size: 15px; text-align: left;">M&eacute;dicaments</th>
+		                  <th style="width: 29%; font-weight: bold; font-size: 15px; text-align: left;">Forme</th>
+		                  <th style="width: 29%; font-weight: bold; font-size: 15px; text-align: left;">Quantit&eacute;</th>
+		                  <th style="width: 9%;  font-weight: bold; font-size: 15px; ">Options</th>
+		                </tr>
+		              </thead>
+			        </table>
+			                         
+				    <div id="Medicament_0" style="width: 100%;">
+					    <!-- A ne pas enlever -->
+				    </div>
+        
+                    <!--********************* BOUTON AJOUTER-SUPPRIMER ************************-->
+			        <!--********************* BOUTON AJOUTER-SUPPRIMER ************************-->
+				    <div id="controls_medicament" style="margin-top: 20px; width: 100%;">
+					   <div style="width: 100%;">
+					      <div style="width: 3%; float: left; cursor: pointer; " id="supprimer_medicament">
+						     <img style='margin-left: 5px;' src='../images_icons/moin-green.png' title='supprimer' />
+					      </div>
+					      <div style="width: 3%; float: left; cursor: pointer; " id="ajouter_medicament">
+					         <img style='margin-left: 5px;' src='../images_icons/plus-green.png' title='ajouter' />
+					      </div>
+				       </div>
+				    </div>
+				 
+                 </div>
+                 
+                 <!--********************* CHARGEMENT DES DONNEES  ************************-->
+                 <!--********************* CHARGEMENT DES DONNEES  ************************-->
+                 <!--********************* CHARGEMENT DES DONNEES  ************************-->
+                 <script> 
+
+                   var myArrayMedicamentOrd = [''];
+                   var myArrayFormeOrd = [''];
+                   var myArrayTypeQuantiteMedicamentOrd = [''];
+
+                   /*Nouveau Code Ajouter*/
+                   /*Nouveau Code Ajouter*/
+                   /*Nouveau Code Ajouter*/ 
+                    var j = 0;
+                    <?php foreach($this->liste_medOrdonnance as $Liste) { ?>
+                           myArrayMedicamentOrd[j++] = "<?php echo $Liste['INTITULE']; ?>"; 
+                    <?php } ?>
+                    
+                    var j = 0;
+                    <?php foreach($this->listeFormeOrdonnance as $ListeForme) {?>
+                           myArrayFormeOrd[j++] = "<?php echo $ListeForme['libelleForme']; ?>"; 
+                    <?php } ?>
+
+                    var j = 0;
+                    <?php foreach($this->listetypeQuantiteMedicamentOrdonnance as $listetypeQuantiteMedicament) {?>
+                           myArrayTypeQuantiteMedicamentOrd[j++] = "<?php echo $listetypeQuantiteMedicament['libelleQuantite']; ?>"; 
+                    <?php } ?>
+
+                    partDefautMedicament(myArrayMedicamentOrd, myArrayFormeOrd, myArrayTypeQuantiteMedicamentOrd, 0);
+
+                 </script> 
+             
+             </form>
+             
+             
+        </div>  
+        
+        
+        
+<div id="context-menu">
+    <ul class="dropdown-menu" >
+         <li><a style="cursor: pointer;" ><img id="detailsCTX" style='margin-right: 10px; margin-left: -3px; width: 19px; height: 16px;' src='/simens/public/images_icons/voir.png'>D&eacute;tails</a></li>
+         <li class="divider2"></li>
+         <li class="lien1"><a style="cursor: pointer;"><img  id="administrerCTX" style='margin-right: 10px;  width: 16px; height: 16px;' src='/simens/public/images_icons/details.png'>Administrer</a></li>
+         <li class="divider2"></li>
+         <li class="lien1"><a style="cursor: pointer;" ><img id="libererCTX" style='margin-right: 10px; width: 16px; height: 16px;' src='/simens/public/images_icons/edit_item_btn.png'>Lib&eacute;rer</a></li>
+         <li class="divider"></li>
+         <li><a id="quitterCTX"  style="cursor: pointer;">Quitter</a></li>
+    </ul>
+</div>
+
+
 
 <script type="text/javascript">
+
+$("#hospitaliser").toggle(false);
+
 
 function FaireClignoterImage (){
     $("#clignoterHeure").fadeOut(900).fadeIn(800);
@@ -936,5 +1042,25 @@ $("button").button();
 $("#vue_patient").toggle(false);
 $("#vue_liberer_patient").toggle(false);
 $("#vue_detail_hospi_patient").toggle(false);
+
+//GESTION DE L'AUTO-INCREMENTATION POUR LA DUREE
+//GESTION DE L'AUTO-INCREMENTATION POUR LA DUREE
+//GESTION DE L'AUTO-INCREMENTATION POUR LA DUREE
+
+var LaDuree = 0;
+
+$("#fleche_moins").click(function(){
+	if(LaDuree > 1){
+		$("#duree").val(--LaDuree);
+	}
+});
+
+$("#fleche_plus").click(function(){
+	if(LaDuree < 10){
+		$("#duree").val(++LaDuree);
+	}
+});
+
+envoiDesDonnees();
 
 </script>

@@ -31,6 +31,11 @@ $("#AfficherLecteurInstrumental").hover(function(){ $('#temoinAudio').val(2); })
                     	        var formdata = (window.FormData) ? new FormData($form[0]) : null;
                     	        var data = (formdata !== null) ? formdata : $form.serialize();
                     	        
+                    	        if($("#fichier")[0].files[0].size > 12582912 ){
+                    	        	alert("La taille maximale est depassee: Choisissez une taille <= 12Mo"); 
+                    	        	return false;
+                    	        }
+                    	        
                     	        var type = $('#temoinAudio').val();
                     	        
                    	        var chemin = tabUrl[0]+'public/consultation/ajouter-mp3';
@@ -42,7 +47,11 @@ $("#AfficherLecteurInstrumental").hover(function(){ $('#temoinAudio').val(2); })
                    	            data: data,
                    	            success: function (response) { 
                    	                // La réponse du serveur
-                   	            	var result = jQuery.parseJSON(response); //alert(result); exit();
+                   	            	var result = jQuery.parseJSON(response); 
+                   	            	if(result == 0){
+                   	            		alert('format non reconnu: Choissisez un fichier mp3');
+                   	            		return false;
+                   	            	}
                    	            	$.ajax({
                            	        	url: tabUrl[0]+'public/consultation/inserer-bd-mp3',
                            	            type: $form.attr('method'),
@@ -81,6 +90,7 @@ $("#AfficherLecteurInstrumental").hover(function(){ $('#temoinAudio').val(2); })
                    	        	
                    	        }
                    	    });
+                   	    stopPropagation();
                    	}
                    	
                    	
@@ -118,6 +128,11 @@ $("#AfficherLecteurInstrumental").hover(function(){ $('#temoinAudio').val(2); })
                      	        var formdata = (window.FormData) ? new FormData($form[0]) : null;
                      	        var data = (formdata !== null) ? formdata : $form.serialize();
                      	        
+                     	        if($("#ajouter2 input")[0].files[0].size > 12582912 ){
+                   	        	  alert("La taille maximale est depassee: Choisissez une taille <= 12Mo"); 
+                   	        	  return false;
+                     	        }
+                     	       
                      	        var type = $('#temoinAudio').val();
                      	        
                     	        var chemin = tabUrl[0]+'public/consultation/ajouter-mp3';
@@ -130,6 +145,10 @@ $("#AfficherLecteurInstrumental").hover(function(){ $('#temoinAudio').val(2); })
                     	            success: function (response) { 
                     	                // La réponse du serveur
                     	            	var result = jQuery.parseJSON(response); 
+                    	            	if(result == 0){
+                       	            		alert('format non reconnu: Choissisez un fichier mp3');
+                       	            		return false;
+                       	            	}
                     	            	$.ajax({
                             	        	url: tabUrl[0]+'public/consultation/inserer-bd-mp3',
                             	            type: $form.attr('method'),
@@ -149,61 +168,3 @@ $("#AfficherLecteurInstrumental").hover(function(){ $('#temoinAudio').val(2); })
                      }
                    	 
                    	 
-                   	 
-                   	 
-                   	 
-                   //POUR LA VIDEO DU SCANNER DES EXAMENS COMPLEMENTAIRES 
-                   //POUR LA VIDEO DU SCANNER DES EXAMENS COMPLEMENTAIRES 
-                   //POUR LA VIDEO DU SCANNER DES EXAMENS COMPLEMENTAIRES 
-                   //POUR LA VIDEO DU SCANNER DES EXAMENS COMPLEMENTAIRES 
-                   //POUR LA VIDEO DU SCANNER DES EXAMENS COMPLEMENTAIRES 
-                   //POUR LA VIDEO DU SCANNER DES EXAMENS COMPLEMENTAIRES 
-                   function AppelLecteurVideo_Scanner(){
-                	   var chemin = tabUrl[0]+'public/consultation/afficher-video';
-                	   $.ajax({
-                		   url: chemin ,
-                		   type: 'POST',
-                		   data: {'id': 1},
-                		   success: function (response) { 
-                			   // La réponse du serveur
-                			   var result = jQuery.parseJSON(response); 
-                  	            	
-                			   $('#AfficherLecteurVideoScanner').empty(); 
-                			   $('#AfficherLecteurVideoScanner').html(result);
-                			   
-                			   $('#divImageScannerPourMenu').toggle(false);
-                			   $('#divVideoScannerPourMenu').toggle(false);
-                			   GestionDuMenuVideosImages();
-                		   }
-                	   });
-                   }
-                   AppelLecteurVideo_Scanner();
-                   
-                   
-                   function GestionDuMenuVideosImages(){
-                	   $('#IconeImagesMenu').click(function(){
-                		   $('#divPourMenuImagesVideos').fadeOut(function(){
-                			   $('#divImageScannerPourMenu').fadeIn('fast');
-                			   
-                			   $('#RetourDeImagesVersMenu').click(function(){
-                				   $('#divImageScannerPourMenu').fadeOut(function(){
-                        			   $('#divPourMenuImagesVideos').fadeIn('fast');
-                        		   });
-                			   });
-                		   });
-                		   return false;
-                	   });
-                	   
-                	   $('#IconeVideosMenu').click(function(){
-                		   $('#divPourMenuImagesVideos').fadeOut(function(){
-                			   $('#divVideoScannerPourMenu').fadeIn('fast');
-                			   
-                			   $('#RetourDeVideosVersMenu').click(function(){
-                				   $('#divVideoScannerPourMenu').fadeOut(function(){
-                        			   $('#divPourMenuImagesVideos').fadeIn('fast');
-                        		   });
-                			   });
-                		   });
-                		   return false;
-                	   });
-                   }

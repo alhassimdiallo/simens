@@ -19,19 +19,20 @@ $('#admission_style').css({'font-weight':'bold','color':'white','font-size':'22p
 
 $(window).load(function () {
 	$('#wait').toggle(false);
-	$('#contenu').fadeIn().css({'visibility':'visible'});
+	$('#contenuDesInterfaces').fadeIn().css({'visibility':'visible'});
 });
 </script>
 
 <style>
-#contenu{ visibility: hidden };
+#contenuDesInterfaces{ visibility: hidden; };
 </style>
 
 
-     <div id="titre" style='font-family: police2; text-decoration:none; color: green; font-size: 18px; font-weight: bold; padding-left: 35px;'><iS style='font-size: 25px;'>&curren;</iS> RECHERCHER LE PATIENT</div>
+<div id="titre" style='font-family: police2; text-decoration:none; color: green; font-size: 18px; font-weight: bold; padding-left: 35px;'><iS style='font-size: 25px;'>&curren;</iS> RECHERCHER LE PATIENT</div>
      
-     <div id="wait" style="color: gray; font-size: 20px; text-align: center; margin-top: 80px;" > <span> Chargement ... </span> </div>
+<div id="wait" style="color: gray; font-size: 20px; text-align: center; margin-top: 80px;" > <span> Chargement ... </span> </div>
      
+<div id="contenuDesInterfaces" >
      <div id="contenu" >
         <div style="margin-right: 45px; float:right; font-size: 15px; color: gray; margin-top:5px;"><a style="text-decoration: none; cursor:pointer;" href="javascript:ajouterMaman()" ><img src='../images_icons/aj.gif' title="ajouter" /><i style="font-family: Times New Roman; font-size: 15px; color: green;"> ajouter un patient</i></a></div>
 		<table style='width:95%; margin-left: 10px; align:center' class="table table-bordered tab_list_mini" id="patient">
@@ -42,7 +43,7 @@ $(window).load(function () {
 					<th id="prenom_" style='width: 17%;'><input type="text" name="search_browser" value=" Pr&eacute;nom" class="search_init" /></th>
 					<th id="date_" style='width: 13%;'><input type="text" name="search_browser" value=" Date naissance" class="search_init" /></th>
 					<th id="adresse_" style='width: 40%;'><input type="text" name="search_browser" value=" Adresse" class="search_init" /></th>
-					<th id="effectuer_" style='width: 5%;'><input type="hidden" name="search_browser" value="" class="" />Options</th>
+					<th id="effectuer_" style='width: 5%;'><input type="hidden" value="" class="" />Options</th>
 
 				</tr>
 
@@ -92,20 +93,32 @@ initialisation();
 
 		  <?php $form = $this->form ;
 		        $form->setAttribute ( 'action', $this->url ( 'facturation', array ('action' => 'enregistrer-admission') ) );
+		        $form->setAttribute ( 'id' , 'formulairePrincipal');
 		        $form->prepare();
 		        echo $this->form()->openTag($form);
 		       ?>
-		  <?php echo $this->formhidden($form->get('id_patient'))?>     
-		  <div id="info_bebe" style='width: 100%; margin-top:10px; height:80px;'>
+		  <?php echo $this->formhidden($form->get('id_patient')); ?>    
+		  <?php echo $this->formhidden($form->get('montant')); ?>    
+		  <div id="info_bebe" style='width: 100%; margin-top:10px; height:185px;'>
                <div style="float:left; width:18%; height:5%;">
 		       </div>
 		       
 		       <div style='width: 77%; float:left;'>
 		         <table id="form_patient" style="width:100%;">
+		             <tr id="form_patient_radio" style='width: 100%;'>
+		                 <td style='width: 33%;'>
+		                   <div class="comment-form-patient" ><label style='top: 5px;'> Type de facturation </label></div> 
+		                   <div class="comment-form-patient_radio" ><?php echo $this->formRow($form->get('type_facturation'));?></div>
+		                 </td>
+		                 
+		                 <td class="comment-form-patient organisme" style='width: 33%;'><?php echo $this->formRow($form->get('organisme'));?></td>
+		                 <td class="comment-form-patient taux" style='width: 33%;'><?php echo $this->formRow($form->get('taux'));?></td>
+		             </tr>
+		         
 		             <tr style='width: 100%;'>
-		                 <td class="comment-form-patient" style='width: 33%;'><?php echo $this->formRow($form->get('numero'))?></td>
-		                 <td class="comment-form-patient" style='width: 33%;'><?php echo $this->formRow($form->get('service'))?></td>
-		                 <td class="comment-form-patient" style='width: 33%;'><?php echo $this->formRow($form->get('montant'))?></td>
+		                 <td class="comment-form-patient" style='width: 33%;'><?php echo $this->formRow($form->get('numero'));?></td>
+		                 <td class="comment-form-patient" style='width: 33%;'><?php echo $this->formRow($form->get('service'));?></td>
+		                 <td class="comment-form-patient" style='width: 33%;'><?php echo $this->formRow($form->get('montant_avec_majoration'));?></td>
 		             </tr>
 		         </table>
 		       </div>
@@ -118,11 +131,11 @@ initialisation();
 		       <div style='width: 20%;'>
                   <div id="terminer_annuler">
                     <div class="block" id="thoughtbot">
-                       <button type="submit" id="termineradmissio" style=" height:35px; ">Terminer</button>
-                    </div>
-
-                    <div class="block" id="thoughtbot">
                        <button name="annuler" id="annuler" style=" height:35px; ">Annuler</button>
+                    </div>
+                    
+                    <div class="block termineradmission" id="thoughtbot">
+                       <button id="termineradmission" style=" height:35px; ">Terminer</button>
                     </div>
                   </div>
                 </div>
@@ -131,7 +144,25 @@ initialisation();
           <?php echo $this->form()->closeTag(); ?>
 		  
     </div>
+    
+</div>
 
+    <form id="FormulaireImprimerFacture" style="display: none;">
+    
+    <button id="ImprimerFacture"></button>
+    </form>
+
+<div id="context-menu">
+    <ul class="dropdown-menu" >
+         <li><a style="cursor: pointer;" ><img id="visualiserCTX" style='margin-right: 10px; width: 19px; height: 16px;' src='/simens/public/images_icons/voir2.png'>Visualiser</a></li>
+         <li class="divider2"></li>
+         <li><a style="cursor: pointer;"><img  id="suivantCTX" style='margin-right: 10px; width: 19px; height: 16px;' src='/simens/public/images_icons/transfert_droite.png'>Suivant</a></li>
+         <li class="divider"></li>
+         <li><a id="quitterCTX"  style="cursor: pointer;">Quitter</a></li>
+    </ul>
+</div>
+		
+		
 <script>
 animation();
 $('#service').val("");
@@ -140,6 +171,8 @@ function ajouterMaman(){
     $(location).attr("href",vart);
     return false;
 }
+
+scriptFactMajor();
 </script>
 
 

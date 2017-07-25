@@ -5,6 +5,7 @@ namespace Personnel\Form;
 use Zend\Form\Form;
 
 class PersonnelForm extends Form {
+	
 	public function __construct($name = null) {
 		parent::__construct ();
 
@@ -44,7 +45,6 @@ class PersonnelForm extends Form {
 				'attributes' => array (
 						'id' => 'civilite',
 						'classe' => 'civilite',
-						'required' => true,
 				)
 		) );
 		$this->add ( array (
@@ -57,6 +57,7 @@ class PersonnelForm extends Form {
 						'class' => 'only_Char',
 						'id' => 'nom',
 						'required' => true,
+						'tabindex' => 2,
 				)
 		) );
 		$this->add ( array (
@@ -69,6 +70,7 @@ class PersonnelForm extends Form {
 						'id' => 'prenom',
 						'class' => 'only_Char',
 						'required' => true,
+						'tabindex' => 3,
 				)
 		) );
 
@@ -86,7 +88,8 @@ class PersonnelForm extends Form {
 				),
 				'attributes' => array (
 						'id' => 'sexe',
-						//'required' => true,
+						'required' => true,
+						'tabindex' => 1,
 				)
 				) );
 
@@ -99,7 +102,7 @@ class PersonnelForm extends Form {
 				),
 				'attributes' => array (
 						'id' => 'date_naissance',
-						//'required' => true,
+						'tabindex' => 4,
 				)
 				) );
 
@@ -112,7 +115,7 @@ class PersonnelForm extends Form {
 				),
 				'attributes' => array (
 						'id' => 'lieu_naissance',
-						//'required' => true,
+						'tabindex' => 5,
 				)
 				) );
 
@@ -130,6 +133,7 @@ class PersonnelForm extends Form {
 				),
 				'attributes' => array (
 						'id' => 'situation_matrimoniale',
+						'tabindex' => 10,
 				)
 				) );
 		$this->add ( array (
@@ -140,7 +144,7 @@ class PersonnelForm extends Form {
 				),
 				'attributes' => array (
 						'id' => 'nationalite',
-						'required' => true,
+						'tabindex' => 11,
 				)
 				) );
 		$this->add ( array (
@@ -150,7 +154,8 @@ class PersonnelForm extends Form {
 						'label' => 'Adresse'
 				),
 				'attributes' => array (
-						'id' => 'adresse'
+						'id' => 'adresse',
+						'tabindex' => 8,
 				)
 		) );
 		$this->add ( array (
@@ -160,7 +165,8 @@ class PersonnelForm extends Form {
 						'label' => iconv ( 'ISO-8859-1', 'UTF-8', 'Téléphone' )
 				),
 				'attributes' => array (
-						'id' => 'telephone'
+						'id' => 'telephone',
+						'tabindex' => 6,
 				)
 		) );
 		$this->add ( array (
@@ -171,7 +177,8 @@ class PersonnelForm extends Form {
 				),
 				'attributes' => array (
 						'placeholder' => 'votre@domain.com',
-						'id' => 'email'
+						'id' => 'email',
+						'tabindex' => 9,
 				)
 		) );
 		$this->add ( array (
@@ -182,6 +189,7 @@ class PersonnelForm extends Form {
 				),
 				'attributes' => array (
 						'id' => 'profession',
+						'tabindex' => 7,
 				)
 		) );
 		
@@ -195,9 +203,6 @@ class PersonnelForm extends Form {
 				'type' => 'Zend\Form\Element\Select',
 				'options' => array (
 						'label' => 'Type Personnel',
-						'value_options' => array (
-								''=>'',1=>'MÃ©decin',2 =>'MÃ©dico-technique',3=>'Logistique',4=>'MÃ©dical'
-						)
 				),
 				'attributes' => array (
 						'id' => 'type_personnel',
@@ -353,7 +358,7 @@ class PersonnelForm extends Form {
 				),
 				'attributes' => array (
 						'id' => 'service_accueil',
-						'required' =>true,
+					    'required' => true,
 				)
 		) );
 		

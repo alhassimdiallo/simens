@@ -91,3 +91,44 @@
 	} );
 
     }
+    
+    
+    
+    
+
+    function clickRowHandler() 
+    {
+    	var id;
+    	$('#patient tbody tr').contextmenu({
+    		target: '#context-menu',
+    		onItem: function (context, e) {
+    			
+    			if($(e.target).text() == 'Détails' || $(e.target).is('#detailsCTX')){
+
+    				vart=tabUrl[0]+'public/archivage/info-dossier-patient/id_patient/'+id;
+                    $(location).attr("href",vart);
+
+    			} else 
+    				if($(e.target).text() == 'Modifier' || $(e.target).is('#modifierCTX')){
+    					
+    					vart=tabUrl[0]+'public/archivage/modifier/id_patient/'+id;
+                        $(location).attr("href",vart);
+    					
+    				} 
+    		}
+    	
+    	}).bind('mousedown', function (e) {
+    			var aData = oTable.fnGetData( this );
+    		    id = aData[7];
+    	});
+    	
+    	
+    	
+    	$("#patient tbody tr").bind('dblclick', function (event) {
+    		var aData = oTable.fnGetData( this );
+    		var id = aData[7];
+    		vart=tabUrl[0]+'public/archivage/info-dossier-patient/id_patient/'+id;
+            $(location).attr("href",vart);
+    	});
+    	
+    }

@@ -96,7 +96,7 @@ class DemandeTable {
 	 * Recuperer un enregistrement
 	 * @param l'id de la consultation : $id_cons
 	 */
-	public function getDemandeWithIdcons($id_cons) 
+	public function getDemandeWithIdcons($id_cons, $id_type) 
 	{
 		$db = $this->tableGateway->getAdapter();
 		
@@ -107,7 +107,8 @@ class DemandeTable {
 		->join(array('cons' => 'consultation'), 'cons.ID_PATIENT = pat.ID_PERSONNE', array('Datedemande'=>'DATE', 'Idcons'=>'ID_CONS'))
 		->join(array('d' => 'demande'), 'd.idCons = cons.ID_CONS' , array('*'))
 		->join(array('med' => 'personne') , 'med.ID_PERSONNE = cons.ID_MEDECIN' , array('NomMedecin' =>'NOM', 'PrenomMedecin' => 'PRENOM'))
-		->where(array('d.idCons' => $id_cons))
+		->join(array('e' => 'examens'), 'e.idExamen = d.idExamen', array('*'))
+		->where(array('d.idCons' => $id_cons, 'e.idType' => $id_type))
 		->group('d.idCons');
 		
 		$stat = $sql->prepareStatementForSqlObject($sQuery);
@@ -229,7 +230,7 @@ class DemandeTable {
 	
 		$db = $this->tableGateway->getAdapter();
 	
-		$aColumns = array('Nom','Prenom','Datenaissance','Sexe', 'Datedemande', 'medecinDemandeur' , 'id');
+		$aColumns = array('Nom','Prenom','Datenaissance','Sexe', 'dateDemande', 'medecinDemandeur' , 'id');
 	
 		/* Indexed column (used for fast and accurate table cardinality) */
 		$sIndexColumn = "id";
@@ -271,6 +272,9 @@ class DemandeTable {
 		->join(array('cons' => 'consultation'), 'cons.ID_PATIENT = pat.ID_PERSONNE', array('Datedemande'=>'DATE', 'Idcons'=>'ID_CONS'))
 		->join(array('d' => 'demande'), 'd.idCons = cons.ID_CONS' , array('*'))
 		->join(array('med' => 'personne') , 'med.ID_PERSONNE = cons.ID_MEDECIN' , array('NomMedecin' =>'NOM', 'PrenomMedecin' => 'PRENOM'))
+		
+		->join(array('e' => 'examens'), 'e.idExamen = d.idExamen', array('*'))
+		->where(array('e.idType' => 1))
 		->order('d.idDemande DESC')
 		->group('d.idCons');
 	
@@ -330,6 +334,10 @@ class DemandeTable {
 					else if ($aColumns[$i] == 'Datenaissance') {
 						$row[] = $Control->convertDate($aRow[ $aColumns[$i] ]);
 					}
+					
+					else if ($aColumns[$i] == 'dateDemande') {
+						$row[] = $Control->convertDateTime($aRow[ $aColumns[$i] ]);
+					}
 	
 					else if ($aColumns[$i] == 'Adresse') {
 						$row[] = $this->adresseText($aRow[ $aColumns[$i] ]);
@@ -377,14 +385,14 @@ class DemandeTable {
 	
 	/**
 	 * EXAMENS BIOLOGIQUES ,  EXAMENS BIOLOGIQUES , EXAMENS BIOLOGIQUES
-	 * Recuperation de la liste des patients pour les demandes d'examens
+	 * Recuperation de la liste des patients pour les demandes d'examens bio
 	 */
 	public function getListeDemandesExamens()
 	{
 	
 		$db = $this->tableGateway->getAdapter();
 	
-		$aColumns = array('Nom','Prenom','Datenaissance','Sexe', 'Datedemande', 'medecinDemandeur' , 'id');
+		$aColumns = array('Nom','Prenom','Datenaissance','Sexe', 'dateDemande', 'medecinDemandeur' , 'id');
 	
 		/* Indexed column (used for fast and accurate table cardinality) */
 		$sIndexColumn = "id";
@@ -427,7 +435,7 @@ class DemandeTable {
 		->join(array('d' => 'demande'), 'd.idCons = cons.ID_CONS' , array('*'))
 		->join(array('med' => 'personne') , 'med.ID_PERSONNE = cons.ID_MEDECIN' , array('NomMedecin' =>'NOM', 'PrenomMedecin' => 'PRENOM'))
 		->join(array('e' => 'examens'), 'e.idExamen = d.idExamen', array('*'))
-		->where(array('e.idType' => 2))
+		->where(array('e.idType' => 1))
 		->order('d.idDemande ASC')
 		->group('d.idCons');
 	
@@ -483,6 +491,10 @@ class DemandeTable {
 							$row[] = $Control->convertDate($aRow[ $aColumns[$i] ]);
 						}
 	
+						else if ($aColumns[$i] == 'dateDemande') {
+							$row[] = $Control->convertDateTime($aRow[ $aColumns[$i] ]);
+						}
+						
 						else if ($aColumns[$i] == 'Adresse') {
 							$row[] = $this->adresseText($aRow[ $aColumns[$i] ]);
 						}
@@ -538,7 +550,7 @@ class DemandeTable {
 	
 		$db = $this->tableGateway->getAdapter();
 	
-		$aColumns = array('Nom','Prenom','Datenaissance','Sexe', 'Datedemande', 'medecinDemandeur' , 'id');
+		$aColumns = array('Nom','Prenom','Datenaissance','Sexe', 'dateDemande', 'medecinDemandeur' , 'id');
 	
 		/* Indexed column (used for fast and accurate table cardinality) */
 		$sIndexColumn = "id";
@@ -632,6 +644,10 @@ class DemandeTable {
 							$row[] = $Control->convertDate($aRow[ $aColumns[$i] ]);
 						}
 	
+						else if ($aColumns[$i] == 'dateDemande') {
+							$row[] = $Control->convertDateTime($aRow[ $aColumns[$i] ]);
+						}
+						
 						else if ($aColumns[$i] == 'Adresse') {
 							$row[] = $this->adresseText($aRow[ $aColumns[$i] ]);
 						}
@@ -639,7 +655,7 @@ class DemandeTable {
 						else if ($aColumns[$i] == 'id') {
 	
 							$html  ="<infoBulleVue><a href='javascript:listeExamensMorpho(". $aRow[ $aColumns[$i] ] .",". $aRow[ 'idDemande' ] .")'>";
-							$html .="<img src='".$tabURI[0]."public/images_icons/voir2.png' title='détails'></a><infoBulleVue>";
+							$html .="<img src='".$tabURI[0]."public/images_icons/voir2.png' title='Détails'></a><infoBulleVue>";
 	
 							if($this->VerifierDemandeExamenMorphoSatisfaite($aRow[ 'Idcons' ]) == true ) {
 								$html .="<infoBulleVue><a>";
@@ -686,7 +702,7 @@ class DemandeTable {
 	
 		$db = $this->tableGateway->getAdapter();
 	
-		$aColumns = array('Nom','Prenom','Datenaissance','Sexe', 'Datedemande', 'medecinDemandeur' , 'id');
+		$aColumns = array('Nom','Prenom','Datenaissance','Sexe', 'dateDemande', 'medecinDemandeur' , 'id');
 	
 		/* Indexed column (used for fast and accurate table cardinality) */
 		$sIndexColumn = "id";
@@ -728,6 +744,9 @@ class DemandeTable {
 		->join(array('cons' => 'consultation'), 'cons.ID_PATIENT = pat.ID_PERSONNE', array('Datedemande'=>'DATE', 'Idcons'=>'ID_CONS'))
 		->join(array('d' => 'demande'), 'd.idCons = cons.ID_CONS' , array('*'))
 		->join(array('med' => 'personne') , 'med.ID_PERSONNE = cons.ID_MEDECIN' , array('NomMedecin' =>'NOM', 'PrenomMedecin' => 'PRENOM'))
+		
+		->join(array('e' => 'examens'), 'e.idExamen = d.idExamen', array('*'))
+		->where(array('e.idType' => 2))
 		->order('d.idDemande DESC')
 		->group('d.idCons');
 	
@@ -786,6 +805,10 @@ class DemandeTable {
 	
 						else if ($aColumns[$i] == 'Datenaissance') {
 							$row[] = $Control->convertDate($aRow[ $aColumns[$i] ]);
+						}
+						
+						else if ($aColumns[$i] == 'dateDemande') {
+							$row[] = $Control->convertDateTime($aRow[ $aColumns[$i] ]);
 						}
 	
 						else if ($aColumns[$i] == 'Adresse') {
@@ -904,7 +927,7 @@ class DemandeTable {
 		->join(array('cons' => 'consultation'), 'cons.ID_PATIENT = pat.ID_PERSONNE', array('Datedemande'=>'DATE', 'Idcons'=>'ID_CONS'))
 		->join(array('med' => 'personne') , 'med.ID_PERSONNE = cons.ID_MEDECIN' , array('NomMedecin' =>'NOM', 'PrenomMedecin' => 'PRENOM'))
 		->join(array('d' => 'demande_visite_preanesthesique'), 'd.ID_CONS = cons.ID_CONS' , array('*'))
-		->where(array (	new NotIn ( 'd.idVpa', $subselect )))
+		->where(array (	new NotIn ( 'd.idVpa', $subselect ), 'cons.ARCHIVAGE' => '0'))
 		->order('d.idVpa ASC');
 	
 		/* Data set length after filtering */

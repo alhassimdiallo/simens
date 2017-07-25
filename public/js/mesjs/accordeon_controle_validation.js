@@ -1,107 +1,236 @@
-var temoinTaille = 0;
-var temoinPoids = 0;
-var temoinTemperature = 0;
-var temoinPouls = 0;
+//var temoinTaille = 0;
+//var temoinPoids = 0;
+//var temoinTemperature = 0;
+//var temoinPouls = 0;
+//
+//function maskDeSaisie(){
+//	
+//	/****** MASK DE SAISIE ********/ 
+//   	/****** MASK DE SAISIE ********/ 
+// 	/****** MASK DE SAISIE ********/
+//	
+//    $(function(){
+//    	$("#pressionarterielle").mask("299/299");
+//    	$("#glycemie_capillaire").mask("9,99");
+//    });
+//    
+//    $("#taille").blur(function(){
+//    	var valeur = $('#taille').val();
+//    	if(isNaN(valeur/1) || valeur > 250 || valeur == ""){
+//			valeur = null;
+//			$("#taille").css("border-color","#FF0000");
+//            $("#erreur_taille").fadeIn().text("Max: 250cm").css({"color":"#ff5b5b","padding":" 0 10px 0 10px","margin-top":"-18px","font-size":"13px","font-style":"italic"});
+//            temoinTaille = 1;
+//    	} 
+//    	else{
+//    		$("#taille").css("border-color","");
+//			$("#erreur_taille").fadeOut();
+//			temoinTaille = 0;
+//    	}
+//    	return false;
+//    });
+//    
+//    $("#poids").blur(function(){
+//    	var valeur = $('#poids').val();
+//    	if(isNaN(valeur/1) || valeur > 300 || valeur == ""){
+//			valeur = null;
+//			$("#poids").css("border-color","#FF0000");
+//			$("#erreur_poids").fadeIn().text("Max: 300kg").css({"color":"#ff5b5b","padding":" 0 10px 0 10px","margin-top":"-18px","font-size":"13px","font-style":"italic"});
+//			temoinPoids = 2;
+//    	} 
+//    	else{
+//    		$("#poids").css("border-color","");
+//			$("#erreur_poids").fadeOut();
+//			temoinPoids = 0;
+//    	}
+//    	return false;
+//    });
+//    
+//    $("#temperature").blur(function(){
+//    	var valeur = $('#temperature').val();
+//    	if(isNaN(valeur/1) || valeur > 45 || valeur < 34 || valeur == ""){
+//			$("#temperature").css("border-color","#FF0000");
+//    		$("#erreur_temperature").fadeIn().text("Min: 34°C, Max: 45°C").css({"color":"#ff5b5b","padding":" 0 10px 0 10px","margin-top":"-18px","font-size":"13px","font-style":"italic"});
+//			temoinTemperature = 3;
+//    	} 
+//    	else{
+//    		$("#temperature").css("border-color","");
+//			$("#erreur_temperature").fadeOut();
+//			temoinTemperature = 0;
+//    	}
+//    	return false;
+//    });
+//    
+//    
+//    $("#pressionarterielle").blur(function(){
+//    	if( $("#pressionarterielle").val() == "___/___" || $("#pressionarterielle").val() == ""){
+//    		$("#pressionarterielle").val('');
+//    		$("#pressionarterielle").mask("299/299");
+//    		$("#pressionarterielle").css("border-color","#FF0000");
+//    		$("#erreur_pressionarterielle").fadeIn().text("300mmHg / 300mmHg").css({"color":"#ff5b5b","padding":" 0 10px 0 10px","margin-top":"-18px","font-size":"13px","font-style":"italic"});
+//    	} else{
+//    		$("#pressionarterielle").css("border-color","");
+//    		$("#erreur_pressionarterielle").fadeOut();
+//    	}
+//    	return false;
+//    });
+//    
+//    $("#pouls").blur(function(){
+//    	var valeur = $('#pouls').val();
+//		if(isNaN(valeur/1) || valeur > 150 || valeur == ""){
+//			$("#pouls").css("border-color","#FF0000");
+//			$("#erreur_pouls").fadeIn().text("Max: 150 battements").css({"color":"#ff5b5b","padding":" 0 10px 0 10px","margin-top":"-18px","font-size":"13px","font-style":"italic"});
+//			temoinPouls = 4;
+//		}else{
+//			$("#pouls").css("border-color","");
+//			$("#erreur_pouls").fadeOut();
+//			temoinPouls = 0;
+//		}
+//    });
+//    
+////    $("#frequence_respiratoire").keyup(function(){
+////    	var valeur = $('#frequence_respiratoire').val();
+////		if(isNaN(valeur/1) || valeur > 150){
+////			$('#frequence_respiratoire').val("");
+////			valeur = null;
+////			$("#frequence_respiratoire").css("border-color","#FF0000");
+////             $("#erreur_frequence").fadeIn().text("Ce champs est requis").css({"color":"#ff5b5b","padding":" 0 10px 0 10px","margin-top":"-18px","font-size":"13px","font-style":"italic"});
+////		}else{
+////			$("#frequence_respiratoire").css("border-color","");
+////			$("#erreur_frequence").fadeOut();
+////		}
+////    });
+//    
+//}            
 
-function maskDeSaisie(){
-	
+    var temoinTaille = 0;
+	var temoinPoids = 0;
+	var temoinTemperature = 0;
+	var temoinPouls = 0;
+	var temoinTensionMaximale = 0;
+	var temoinTensionMinimale = 0;
+		
+	var valid = true;  // VARIABLE GLOBALE utilis�e dans 'VALIDER LES DONNEES DU TABLEAU DES CONSTANTES'
+	/****** ======================================================================= *******/
+	/****** ======================================================================= *******/
+	/****** ======================================================================= *******/
 	/****** MASK DE SAISIE ********/ 
    	/****** MASK DE SAISIE ********/ 
  	/****** MASK DE SAISIE ********/
+	function maskDeSaisie() {
+	    $(function(){
+	    	$("#pressionarterielle").mask("299/299");
+	    	$("#glycemie_capillaire").mask("9,99");
+	    });
+	    
+	    $("#poids").blur(function(){
+	    	var valeur = $('#poids').val();
+	    	if(isNaN(valeur/1) || valeur > 300 || valeur == ""){
+				valeur = null;
+				$("#poids").css("border-color","#FF0000");
+				$("#erreur_poids").fadeIn().text("Max: 300kg").css({"color":"#ff5b5b","padding":" 0 10px 0 10px","margin-top":"-18px","font-size":"13px","font-style":"italic"});
+				temoinPoids = 2;
+	    	} 
+	    	else{
+	    		$("#poids").css("border-color","");
+				$("#erreur_poids").fadeOut();
+				temoinPoids = 0;
+	    	}
+	    	return false;
+	    });
+	    
+	    $("#temperature").blur(function(){
+	    	var valeur = $('#temperature').val();
+	    	if(isNaN(valeur/1) || valeur > 45 || valeur < 34  || valeur == ""){
+				$("#temperature").css("border-color","#FF0000");
+	    		$("#erreur_temperature").fadeIn().text("Min: 34°C, Max: 45°C").css({"color":"#ff5b5b","padding":" 0 10px 0 10px","margin-top":"-18px","font-size":"13px","font-style":"italic"});
+				temoinTemperature = 3;
+	    	} 
+	    	else{
+	    		$("#temperature").css("border-color","");
+				$("#erreur_temperature").fadeOut();
+				temoinTemperature = 0;
+	    	}
+	    	return false;
+	    });
+	    
+	    $("#tensionmaximale").blur(function(){
+	    	var valeur = $('#tensionmaximale').val();
+			if(isNaN(valeur/1) || valeur > 300 || valeur == ""){
+				$("#tensionmaximale").css("border-color","#FF0000");
+	    		$("#erreur_tensionmaximale").fadeIn().text("300mmHg").css({"color":"#ff5b5b","padding":" 0 10px 0 10px","margin-top":"-18px","font-size":"13px","font-style":"italic"});
+				temoinTensionMaximale = 5;
+			}else{
+				$("#tensionmaximale").css("border-color","");
+				$("#erreur_tensionmaximale").fadeOut();
+				temoinTensionMaximale = 0;
+			}
+	    });
+	    
+	    $("#tensionminimale").blur(function(){
+	    	var valeur = $('#tensionminimale').val();
+			if(isNaN(valeur/1) || valeur > 200 || valeur == ""){
+				$("#tensionminimale").css("border-color","#FF0000");
+	    		$("#erreur_tensionminimale").fadeIn().text("200mmHg").css({"color":"#ff5b5b","padding":" 0 10px 0 105px","margin-top":"-18px","font-size":"13px","font-style":"italic"});
+				temoinTensionMinimale = 6;
+			}else{
+				$("#tensionminimale").css("border-color","");
+				$("#erreur_tensionminimale").fadeOut();
+				temoinTensionMinimale = 0;
+			}
+	    });
+	}
 	
-    $(function(){
-    	$("#pressionarterielle").mask("299/299");
-    	$("#glycemie_capillaire").mask("9,99");
-    });
-    
-    $("#taille").blur(function(){
-    	var valeur = $('#taille').val();
-    	if(isNaN(valeur/1) || valeur > 250 || valeur == ""){
-			valeur = null;
-			$("#taille").css("border-color","#FF0000");
-            $("#erreur_taille").fadeIn().text("Max: 250cm").css({"color":"#ff5b5b","padding":" 0 10px 0 10px","margin-top":"-18px","font-size":"13px","font-style":"italic"});
-            temoinTaille = 1;
-    	} 
-    	else{
-    		$("#taille").css("border-color","");
-			$("#erreur_taille").fadeOut();
-			temoinTaille = 0;
-    	}
-    	return false;
-    });
-    
-    $("#poids").blur(function(){
-    	var valeur = $('#poids').val();
-    	if(isNaN(valeur/1) || valeur > 300 || valeur == ""){
-			valeur = null;
-			$("#poids").css("border-color","#FF0000");
-			$("#erreur_poids").fadeIn().text("Max: 300kg").css({"color":"#ff5b5b","padding":" 0 10px 0 10px","margin-top":"-18px","font-size":"13px","font-style":"italic"});
-			temoinPoids = 2;
-    	} 
-    	else{
-    		$("#poids").css("border-color","");
-			$("#erreur_poids").fadeOut();
-			temoinPoids = 0;
-    	}
-    	return false;
-    });
-    
-    $("#temperature").blur(function(){
-    	var valeur = $('#temperature').val();
-    	if(isNaN(valeur/1) || valeur > 45 || valeur < 34 || valeur == ""){
-			$("#temperature").css("border-color","#FF0000");
-    		$("#erreur_temperature").fadeIn().text("Min: 34°C, Max: 45°C").css({"color":"#ff5b5b","padding":" 0 10px 0 10px","margin-top":"-18px","font-size":"13px","font-style":"italic"});
-			temoinTemperature = 3;
-    	} 
-    	else{
-    		$("#temperature").css("border-color","");
-			$("#erreur_temperature").fadeOut();
-			temoinTemperature = 0;
-    	}
-    	return false;
-    });
-    
-    
-    $("#pressionarterielle").blur(function(){
-    	if( $("#pressionarterielle").val() == "___/___" || $("#pressionarterielle").val() == ""){
-    		$("#pressionarterielle").val('');
-    		$("#pressionarterielle").mask("299/299");
-    		$("#pressionarterielle").css("border-color","#FF0000");
-    		$("#erreur_pressionarterielle").fadeIn().text("300mmHg / 300mmHg").css({"color":"#ff5b5b","padding":" 0 10px 0 10px","margin-top":"-18px","font-size":"13px","font-style":"italic"});
-    	} else{
-    		$("#pressionarterielle").css("border-color","");
-    		$("#erreur_pressionarterielle").fadeOut();
-    	}
-    	return false;
-    });
-    
-    $("#pouls").blur(function(){
-    	var valeur = $('#pouls').val();
-		if(isNaN(valeur/1) || valeur > 150 || valeur == ""){
-			$("#pouls").css("border-color","#FF0000");
-			$("#erreur_pouls").fadeIn().text("Max: 150 battements").css({"color":"#ff5b5b","padding":" 0 10px 0 10px","margin-top":"-18px","font-size":"13px","font-style":"italic"});
-			temoinPouls = 4;
-		}else{
-			$("#pouls").css("border-color","");
-			$("#erreur_pouls").fadeOut();
-			temoinPouls = 0;
-		}
-    });
-    
-//    $("#frequence_respiratoire").keyup(function(){
-//    	var valeur = $('#frequence_respiratoire').val();
-//		if(isNaN(valeur/1) || valeur > 150){
-//			$('#frequence_respiratoire').val("");
-//			valeur = null;
-//			$("#frequence_respiratoire").css("border-color","#FF0000");
-//             $("#erreur_frequence").fadeIn().text("Ce champs est requis").css({"color":"#ff5b5b","padding":" 0 10px 0 10px","margin-top":"-18px","font-size":"13px","font-style":"italic"});
-//		}else{
-//			$("#frequence_respiratoire").css("border-color","");
-//			$("#erreur_frequence").fadeOut();
-//		}
-//    });
-    
-}            
+	
+	/****** CONTROLE APRES VALIDATION ********/ 
+	/****** CONTROLE APRES VALIDATION ********/ 
+
+//     $("#terminer,#bouton_constantes_valider, #terminer2, #terminer3").click(function(){
+//
+//	     	 valid = true;
+//	         
+//	         if( $("#poids").val() == "" || temoinPoids == 2){
+//	         	 $("#poids").css("border-color","#FF0000");
+//	             $("#erreur_poids").fadeIn().text("Max: 300kg").css({"color":"#ff5b5b","padding":" 0 10px 0 10px","margin-top":"-18px","font-size":"13px","font-style":"italic"});
+//	             valid = false;
+//	         }
+//	         else{
+//	         	$("#poids").css("border-color", "");
+//	         	$("#erreur_poids").fadeOut();
+//	         }
+//	         
+//	         if( $('#temperature').val() == "" || temoinTemperature == 3){
+//	         	$("#temperature").css("border-color","#FF0000");
+//	         	$("#erreur_temperature").fadeIn().text("Min: 34°C, Max: 45°C").css({"color":"#ff5b5b","padding":" 0 10px 0 10px","margin-top":"-18px","font-size":"13px","font-style":"italic"});
+//	             valid = false;
+//	         }
+//	         else{
+//	         	$("#temperature").css("border-color", "");
+//	         	$("#erreur_temperature").fadeOut();
+//	         }
+//	         
+//	         if( $("#tensionmaximale").val() == "" || temoinTensionMaximale == 5){
+//	         	 $("#tensionmaximale").css("border-color","#FF0000");
+//		    	 $("#erreur_tensionmaximale").fadeIn().text("300mmHg").css({"color":"#ff5b5b","padding":" 0 10px 0 10px","margin-top":"-18px","font-size":"13px","font-style":"italic"});
+//	             valid = false;
+//	         }
+//	         else{
+//	         	 $("#tensionmaximale").css("border-color", "");
+//	             $("#erreur_tensionmaximale").fadeOut();
+//	         }
+//	         
+//	         if( $("#tensionminimale").val() == "" || temoinTensionMinimale == 6 ){
+//	         	 $("#tensionminimale").css("border-color","#FF0000");
+//		    	 $("#erreur_tensionminimale").fadeIn().text("200mmHg").css({"color":"#ff5b5b","padding":" 0 10px 0 105px","margin-top":"-18px","font-size":"13px","font-style":"italic"});
+//	             valid = false;
+//	         }
+//	         else{
+//	         	 $("#tensionminimale").css("border-color", "");
+//	             $("#erreur_tensionminimale").fadeOut();
+//	         }
+//	         
+//	         return false;
+//	 	}); 
 
 function supprimer_dernier_caractere(elm) {
 	  var val = $(elm).val();
@@ -124,79 +253,49 @@ $(function() {
 
     	 	 var valid = true;  // VARIABLE GLOBALE utilis�e dans 'VALIDER LES DONNEES DU TABLEAU DES CONSTANTES'
 
-    	 	     $("#terminer,#bouton_constantes_valider").click(function(){
-
-    	 	     	valid = true;
-    	 	         if( $("#taille").val() == "" || temoinTaille == 1){
-    	 	             $("#taille").css("border-color","#FF0000");
-    	 	             $("#erreur_taille").fadeIn().text("Max: 250cm").css({"color":"#ff5b5b","padding":" 0 10px 0 10px","margin-top":"-18px","font-size":"13px","font-style":"italic"});
-    	 	             valid = false;
-    	 	         }
-    	 	         else{
-    	 	         	$("#taille").css("border-color","");
-    	 	         	$("#erreur_taille").fadeOut();
-    	 	         }
-
-    	 	         
-    	 	         
-    	 	         if( $("#poids").val() == "" || temoinPoids == 2){
-    	 	         	 $("#poids").css("border-color","#FF0000");
-    	 	             $("#erreur_poids").fadeIn().text("Max: 300kg").css({"color":"#ff5b5b","padding":" 0 10px 0 10px","margin-top":"-18px","font-size":"13px","font-style":"italic"});
-    	 	             valid = false;
-    	 	         }
-    	 	         else{
-    	 	         	$("#poids").css("border-color", "");
-    	 	         	$("#erreur_poids").fadeOut();
-    	 	         }
-    	 	         
-    	 	         
-    	 	         
-    	 	         if( $('#temperature').val() == "" || temoinTemperature == 3){
-    	 	         	$("#temperature").css("border-color","#FF0000");
-    	 	         	$("#erreur_temperature").fadeIn().text("Min: 34°C, Max: 45°C").css({"color":"#ff5b5b","padding":" 0 10px 0 10px","margin-top":"-18px","font-size":"13px","font-style":"italic"});
-    	 	             valid = false;
-    	 	         }
-    	 	         else{
-    	 	         	$("#temperature").css("border-color", "");
-    	 	         	$("#erreur_temperature").fadeOut();
-    	 	         }
-    	 	         
-    	 	         
-    	 	         
-    	 	         if( $("#pouls").val() == "" || temoinPouls == 4){
-    	 	         	 $("#pouls").css("border-color","#FF0000");
-    	 	             $("#erreur_pouls").fadeIn().text("Max: 150 battements").css({"color":"#ff5b5b","padding":" 0 10px 0 10px","margin-top":"-18px","font-size":"13px","font-style":"italic"});
-    	 	             valid = false;
-    	 	         }
-    	 	         else{
-    	 	         	 $("#pouls").css("border-color", "");
-    	 	             $("#erreur_pouls").fadeOut();
-    	 	         }
-    	 	         
-    	 	         
-    	 	         
-//    	 	         if( $("#frequence_respiratoire").val() == ""){
-//    	 	         	 $("#frequence_respiratoire").css("border-color","#FF0000");
-//    	 	             $("#erreur_frequence").fadeIn().text("Ce champs est requis").css({"color":"#ff5b5b","padding":" 0 10px 0 10px","margin-top":"-18px","font-size":"13px","font-style":"italic"});
-//    	 	             valid = false;
-//    	 	         }
-//    	 	         else{
-//    	 	        	 $("#frequence_respiratoire").css("border-color", "");
-//    	 	             $("#erreur_frequence").fadeOut();
-//    	 	         }
-    	 	         
-    	 	         
-    	 	         if( $("#pressionarterielle").val() == ""){
-    	 	        	 $("#pressionarterielle").css("border-color","#FF0000");
-    	 	        	 $("#erreur_pressionarterielle").fadeIn().text("300mmHg / 300mmHg").css({"color":"#ff5b5b","padding":" 0 10px 0 10px","margin-top":"-18px","font-size":"13px","font-style":"italic"});
-    	 	        	 valid = false;
-    	 	         }
-    	 	         else{
-    	 	        	 $("#pressionarterielle").css("border-color", "");
-    	 	        	 $("#erreur_pressionarterielle").fadeOut();
-    	 	         }
-    	 	         return valid;
-    	 	 	}); 
+    	 	     $("#terminer,#bouton_constantes_valider").click(function(){valid = true;
+    	         
+    	         if( $("#poids").val() == "" || temoinPoids == 2){
+    	         	 $("#poids").css("border-color","#FF0000");
+    	             $("#erreur_poids").fadeIn().text("Max: 300kg").css({"color":"#ff5b5b","padding":" 0 10px 0 10px","margin-top":"-18px","font-size":"13px","font-style":"italic"});
+    	             valid = false;
+    	         }
+    	         else{
+    	         	$("#poids").css("border-color", "");
+    	         	$("#erreur_poids").fadeOut();
+    	         }
+    	         
+    	         if( $('#temperature').val() == "" || temoinTemperature == 3){
+    	         	$("#temperature").css("border-color","#FF0000");
+    	         	$("#erreur_temperature").fadeIn().text("Min: 34°C, Max: 45°C").css({"color":"#ff5b5b","padding":" 0 10px 0 10px","margin-top":"-18px","font-size":"13px","font-style":"italic"});
+    	             valid = false;
+    	         }
+    	         else{
+    	         	$("#temperature").css("border-color", "");
+    	         	$("#erreur_temperature").fadeOut();
+    	         }
+    	         
+    	         if( $("#tensionmaximale").val() == "" || temoinTensionMaximale == 5){
+    	         	 $("#tensionmaximale").css("border-color","#FF0000");
+    		    	 $("#erreur_tensionmaximale").fadeIn().text("300mmHg").css({"color":"#ff5b5b","padding":" 0 10px 0 10px","margin-top":"-18px","font-size":"13px","font-style":"italic"});
+    	             valid = false;
+    	         }
+    	         else{
+    	         	 $("#tensionmaximale").css("border-color", "");
+    	             $("#erreur_tensionmaximale").fadeOut();
+    	         }
+    	         
+    	         if( $("#tensionminimale").val() == "" || temoinTensionMinimale == 6 ){
+    	         	 $("#tensionminimale").css("border-color","#FF0000");
+    		    	 $("#erreur_tensionminimale").fadeIn().text("200mmHg").css({"color":"#ff5b5b","padding":" 0 10px 0 105px","margin-top":"-18px","font-size":"13px","font-style":"italic"});
+    	             valid = false;
+    	         }
+    	         else{
+    	         	 $("#tensionminimale").css("border-color", "");
+    	             $("#erreur_tensionminimale").fadeOut();
+    	         }
+    	         
+    	         return false;}); 
       	 	 	
   			   //******************* VALIDER LES DONNEES DU TABLEAU DES MOTIFS ******************************** 
   			   //******************* VALIDER LES DONNEES DU TABLEAU DES MOTIFS ******************************** 
@@ -221,7 +320,8 @@ $(function() {
   	var glycemie_capillaire = $('#glycemie_capillaire');
   	var pouls = $('#pouls');
   	var frequence_respiratoire = $('#frequence_respiratoire');
-  	var pressionarterielle = $("#pressionarterielle");
+  	var tensionmaximale = $("#tensionmaximale");
+  	var tensionminimale = $("#tensionminimale");
   	
 	  //Au debut on cache le bouton modifier et on affiche le bouton valider
   	$( "#bouton_constantes_valider" ).toggle(true);
@@ -236,7 +336,8 @@ $(function() {
   	glycemie_capillaire.attr( 'readonly', false).css({'background':'#fff'});
   	pouls.attr( 'readonly', false).css({'background':'#fff'});
   	frequence_respiratoire.attr( 'readonly', false).css({'background':'#fff'});
-  	pressionarterielle.attr( 'readonly', false ).css({'background':'#fff'});
+  	tensionmaximale.attr( 'readonly', false ).css({'background':'#fff'});
+  	tensionminimale.attr( 'readonly', false ).css({'background':'#fff'});
 
   	$( "#bouton_constantes_valider" ).click(function(){
   		if(valid == true){
@@ -248,7 +349,9 @@ $(function() {
 	   		glycemie_capillaire.attr( 'readonly', true).css({'background':'#f8f8f8'});
 	   		pouls.attr( 'readonly', true).css({'background':'#f8f8f8'});
 	   		frequence_respiratoire.attr( 'readonly', true).css({'background':'#f8f8f8'});
-	   		pressionarterielle.attr( 'readonly', true ).css({'background':'#f8f8f8'});
+	   		tensionmaximale.attr( 'readonly', true ).css({'background':'#f8f8f8'});
+	   		tensionminimale.attr( 'readonly', true ).css({'background':'#f8f8f8'});
+	   		
 	   		
   		    $("#bouton_constantes_modifier").toggle(true);  //on affiche le bouton permettant de modifier les champs
   		    $("#bouton_constantes_valider").toggle(false); //on cache le bouton permettant de valider les champs
@@ -265,7 +368,8 @@ $(function() {
   		glycemie_capillaire.attr( 'readonly', false).css({'background':'#fff'});
   		pouls.attr( 'readonly', false).css({'background':'#fff'});
   		frequence_respiratoire.attr( 'readonly', false).css({'background':'#fff'});
-  		pressionarterielle.attr( 'readonly', false ).css({'background':'#fff'});
+  		tensionmaximale.attr( 'readonly', false ).css({'background':'#fff'});
+  		tensionminimale.attr( 'readonly', false ).css({'background':'#fff'});
   		
   	 	$("#bouton_constantes_modifier").toggle(false);   //on cache le bouton permettant de modifier les champs
   	 	$("#bouton_constantes_valider").toggle(true);    //on affiche le bouton permettant de valider les champs

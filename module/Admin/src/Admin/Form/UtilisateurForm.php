@@ -157,7 +157,6 @@ class UtilisateurForm extends Form
 				),
 				'attributes' => array(
 						'id' => 'fonction',
-						//'required' => true,
 				),
 		));
 		
@@ -182,6 +181,31 @@ class UtilisateurForm extends Form
 				),
 				'attributes' => array(
 						'id' => 'role',
+						'required' => true,
+				),
+		));
+		
+		//Les roles au niveau de la polyclinique
+		//Les roles au niveau de la polyclinique
+		//Les roles au niveau de la polyclinique
+		$this->add(array(
+				'name' => 'rolepolyclinique',
+				'type' => 'Zend\Form\Element\radio',
+				'options' => array (
+						'label' => 'Role',
+						'value_options' => array(
+								'cardiologue' => 'Cardiologue',
+								'gynecologue' => iconv ( 'ISO-8859-1', 'UTF-8','Gynécologue') ,
+								'pediatre' => iconv ( 'ISO-8859-1', 'UTF-8','Pédiatre') ,
+								'psychiatre' => 'Psychiatre',
+								'pneumologue' => 'Pneumologue',
+								'orl' => 'ORL',
+								'kinesiterapeute' => iconv ( 'ISO-8859-1', 'UTF-8','Kinésitérapeute') ,
+								'sage_femme' => iconv ( 'ISO-8859-1', 'UTF-8','Sage femme') ,
+						),
+				),
+				'attributes' => array(
+						'id' => 'rolepolyclinique',
 						'required' => true,
 				),
 		));

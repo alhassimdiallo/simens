@@ -23,8 +23,9 @@
     	  });
     }
     
+    var  oTable;
     function initialisation(){
-        var  oTable = $('#patient').dataTable
+           oTable = $('#patient').dataTable
     	( {
     					"sPaginationType": "full_numbers",
     					"aLengthMenu": [5,7,10,15],
@@ -42,7 +43,13 @@
     							}
     					   },
 
-    					"sAjaxSource": ""+tabUrl[0]+"public/archivage/liste-demandes-examens-ajax", 
+    					"sAjaxSource": ""+tabUrl[0]+"public/archivage/liste-demandes-examens-ajax",
+
+    					"fnDrawCallback": function() 
+    					{
+    						//markLine();
+    						clickRowHandler();
+    					}
     					
     	}); 
         
@@ -98,6 +105,35 @@
       
     }
     
+
+    function clickRowHandler() 
+    {
+    	var id;
+    	var idDemande;
+    	$('#patient tbody tr').contextmenu({
+    		target: '#context-menu',
+    		onItem: function (context, e) {
+    			
+    			if( $(e.target).text() == 'Détails' || $(e.target).is('#detailsCTX') ){
+    				listeExamensBio(id, idDemande);
+    			} 
+    			
+    		}
+    	
+    	}).bind('mousedown', function (e) {
+    			var aData = oTable.fnGetData( this );
+    		    id = aData[7];
+    		    idDemande = aData[8];
+    	});
+    	
+    	$("#patient tbody tr").bind('dblclick', function (event) {
+    		var aData = oTable.fnGetData( this );
+    		id = aData[7];
+		    idDemande = aData[8];
+		    listeExamensBio(id, idDemande);
+    	});
+    	
+    }
     /************************************************************************************************************************/
     /************************************************************************************************************************/
     /************************************************************************************************************************/
@@ -636,7 +672,7 @@
             data:{'id_personne':id_personne, 'id_cons':id_cons, 'encours':111, 'examensBio': 1},
             success: function(data) {
            	         
-            	$("#titre").replaceWith("<div id='titre2' style='font-family: police2; color: green; font-size: 20px; font-weight: bold; padding-left:20px;'><iS style='font-size: 25px;'>&curren;</iS> AJOUTER LES R&Eacute;SULTATS DES EXAMENS </div>");
+            	$("#titre").replaceWith("<div id='titre2' style='font-family: police2; color: green; font-size: 20px; font-weight: bold; padding-left:20px;'><iS style='font-size: 25px;'>&curren;</iS> R&Eacute;SULTATS DES EXAMENS </div>");
             	var result = jQuery.parseJSON(data);
             	$("#contenu").fadeOut(function(){$("#vue_patient").html(result).fadeIn("fast").css({'visibility':'visible'}); }); 
             	     
@@ -677,6 +713,14 @@
     	    		    		data:({'id_cons':id_cons}),
     	    		    		success: function(data) {    
     	    		    			var result = jQuery.parseJSON(data);
+    	    		    			var ctg = "<div id='info_liste' style='width: 100%;'>"+
+    	                            "<table style='width:100%;'>"+
+    			                      "<tr style='width:100%;'>"+
+    	                            "<td style='width: 18%;'> </td>"+
+    	                            "<td id='info_liste_table' style='width: 80%;'>";
+    	    		    			var ctd = "</td> </tr> </table> </div>";
+    	    		    			result = ctg+result+ctd;
+    	    		    			
     	    		    			$("#info_liste").fadeOut(function(){$("#info_liste").html(result).fadeIn("fast"); });
     	    		    			
     	    		    			$('#technique_utilise').val('');
@@ -747,6 +791,14 @@
     		    		data:({'idDemande':idDemande, 'id_cons':id_cons}),
     		    		success: function(data) {    
     		    			var result = jQuery.parseJSON(data);
+    		    			var ctg = "<div id='info_liste' style='width: 100%;'>"+
+                            "<table style='width:100%;'>"+
+		                      "<tr style='width:100%;'>"+
+                            "<td style='width: 18%;'> </td>"+
+                            "<td id='info_liste_table' style='width: 80%;'>";
+    		    			var ctd = "</td> </tr> </table> </div>";
+    		    			result = ctg+result+ctd;
+    		    			
     		    			$("#info_liste").fadeOut(function(){$("#info_liste").html(result).fadeIn("fast"); });
     		    			
     		    		},
@@ -806,6 +858,13 @@
     	    		    		data:({'id_cons':id_cons}),
     	    		    		success: function(data) {    
     	    		    			var result = jQuery.parseJSON(data);
+    	    		    			var ctg = "<div id='info_liste' style='width: 100%;'>"+
+		                                      "<table style='width:100%;'>"+
+                		                      "<tr style='width:100%;'>"+
+		                                      "<td style='width: 18%;'> </td>"+
+		                                      "<td id='info_liste_table' style='width: 80%;'>";
+    	    		    			var ctd = "</td> </tr> </table> </div>";
+    	    		    			result = ctg+result+ctd;
     	    		    			$("#info_liste").fadeOut(function(){$("#info_liste").html(result).fadeIn("fast"); });
     	    		    			
     	    		    			$('#technique_utilise').val('');
@@ -918,8 +977,9 @@
     /** POUR LA LISTE DES EXAMENS DEJA EFFECTUES --- POUR LA LISTE DES EXAMENS DEJA EFFECTUES **/
     /** POUR LA LISTE DES EXAMENS DEJA EFFECTUES --- POUR LA LISTE DES EXAMENS DEJA EFFECTUES **/
     /** POUR LA LISTE DES EXAMENS DEJA EFFECTUES --- POUR LA LISTE DES EXAMENS DEJA EFFECTUES **/
+    var  oTable2;
     function initialisationListeRehercheExamensEffectues(){
-        var  oTable = $('#patient').dataTable
+          oTable2 = $('#patient').dataTable
     	( {
     					"sPaginationType": "full_numbers",
     					"aLengthMenu": [5,7,10,15],
@@ -939,6 +999,12 @@
 
     					"sAjaxSource": ""+tabUrl[0]+"public/archivage/liste-recherche-examens-effectues-ajax", 
     					
+    					"fnDrawCallback": function() 
+    					{
+    						//markLine();
+    						clickRowHandler2();
+    					}
+    					
     	}); 
         
         var asInitVals = new Array();
@@ -946,18 +1012,18 @@
    	//le filtre du select
    	$('#filter_statut').change(function() 
    	{					
-   		oTable.fnFilter( this.value );
+   		oTable2.fnFilter( this.value );
    	});
 
    	//le filtre du select du type personnel
 	$('#type_personnel').change(function() 
 	{					
-		oTable.fnFilter( this.value );
+		oTable2.fnFilter( this.value );
 	});
    	
    	$("tfoot input").keyup( function () {
    		/* Filter on the column (the index) of this element */
-   		oTable.fnFilter( this.value, $("tfoot input").index(this) );
+   		oTable2.fnFilter( this.value, $("tfoot input").index(this) );
    	} );
    	
    	/*
@@ -991,4 +1057,34 @@
 	    return false;
 	});
       
+    }
+    
+
+    function clickRowHandler2() 
+    {
+    	var id;
+    	var idDemande;
+    	$('#patient tbody tr').contextmenu({
+    		target: '#context-menu',
+    		onItem: function (context, e) {
+    			
+    			if( $(e.target).text() == 'Détails' || $(e.target).is('#detailsCTX') ){
+    				listeExamensBio(id, idDemande);
+    			} 
+    			
+    		}
+    	
+    	}).bind('mousedown', function (e) {
+    			var aData = oTable2.fnGetData( this );
+    		    id = aData[7];
+    		    idDemande = aData[8];
+    	});
+    	
+    	$("#patient tbody tr").bind('dblclick', function (event) {
+    		var aData = oTable2.fnGetData( this );
+    		id = aData[7];
+		    idDemande = aData[8];
+		    listeExamensBio(id, idDemande);
+    	});
+    	
     }

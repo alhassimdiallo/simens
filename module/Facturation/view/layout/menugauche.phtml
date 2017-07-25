@@ -1,6 +1,22 @@
 <style>
+#sideBareMenuGaucheFacturation{ visibility: hidden }
+
+#sideBareMenuGaucheFacturation{ min-width:200px; max-width: 430px;}
 </style>
-<ul>
+
+<script>
+$(window).load(function () {
+
+	$('#waitMenuGaucheFacturation').toggle(false);
+	$('#sideBareMenuGaucheFacturation').fadeIn().css({'visibility':'visible'});
+	 
+});
+</script>
+
+<div id="waitMenuGaucheFacturation" style="color: #cccccc; font-size: 13px;  margin-top: 80px;  margin-left: 60px;" > <span> Chargement ... </span> </div>
+
+
+<ul id="sideBareMenuGaucheFacturation">
 	<!-- MENU ***DOSSIER PATIENT*** -->
 	<li id="dossier_patient"><a href="">
 	    <span style="margin-left:0px; color: #48ce77; font-weight:bold; font-size:20px; font-family:Times New Roman;"> <img id="image" style="display: inline;" src='<?php echo $this->basePath().'/images_icons/plus-green1.png'?>' alt='Liste' /> Dossier patient </span></a> </li>
@@ -55,26 +71,32 @@
 
 	<!-- MENU ***ADMISSION*** -->
 	<li id="admission"><a href="">
-	    <span style="margin-left:0px; color: #48ce77; font-weight:bold; font-size:20px; font-family:Times New Roman;"> <img id="image" style="display: inline;" src='<?php echo $this->basePath().'/images_icons/plus-green1.png'?>' alt='Liste' /> Facturation </span></a> </li>
+	   <span style="margin-left:0px; color: #48ce77; font-weight:bold; font-size:20px; font-family:Times New Roman;"> <img id="image" style="display: inline;" src='<?php echo $this->basePath().'/images_icons/plus-green1.png'?>' alt='Liste' /> Facturation </span></a> 
+	</li>
 
 	<li id="plus_admission" style="background: #4a5765;" >
 
 	   <div style="margin-left:30px; height:40px; padding-top:20px;"><a href="<?php echo $this->basePath()."/facturation/admission";?>"  >
-	       <span id="admission_style" style="margin-left:5px; color: white; font-size:15px; font-family:Times New Roman;"><img style="display: inline;" src='<?php echo $this->basePath().'/images_icons/dossier.PNG'?>' alt='Liste' /> Admission</span></a>
+	      <span id="admission_style" style="margin-left:5px; color: white; font-size:15px; font-family:Times New Roman;"><img style="display: inline;" src='<?php echo $this->basePath().'/images_icons/dossier.PNG'?>' alt='Liste' /> Admission</span></a>
 	   </div>
 
 	   <div style="margin-left:30px; height:40px;"><a href="<?php echo $this->basePath()."/facturation/liste-patients-admis";?>">
-	       <img style="margin-left:5px; display: inline;" src='<?php echo $this->basePath().'/images_icons/liste.PNG'?>' alt='Liste' />
-	       <span id="liste_admission_style" style="font-size:15px; color: white; font-family:Times New Roman;">Liste</span></a>
+	      <img style="margin-left:5px; display: inline;" src='<?php echo $this->basePath().'/images_icons/liste.PNG'?>' alt='Liste' />
+	      <span id="liste_admission_style" style="font-size:15px; color: white; font-family:Times New Roman;">Liste des admis</span></a>
 	   </div>
+	   
+	   <div style="margin-left:30px; height:40px;"><a href="<?php echo $this->basePath()."/facturation/liste-actes";?>">
+	      <img style="margin-left:5px; display: inline;" src='<?php echo $this->basePath().'/images_icons/liste.PNG'?>' alt='Liste' />
+	      <span id="liste_acte_style" style="font-size:15px; color: white; font-family:Times New Roman;">Liste des actes</span></a>
+	   </div>
+	   
 	</li>
 
-	<li><a> <span>...............................................</span></a> </li>
 </ul>
 
 
 <?php
-//CHOISIR LE MENU A AFFICHER SELON QUE C'EST LE MEDECIN OU SUR LE SURVEILLANT
+//CHOISIR LE MENU A AFFICHER SELON QUE C'EST LE MEDECIN OU LE SURVEILLANT
 $user = $this->layout()->user;
 $role = $user['role'];
 

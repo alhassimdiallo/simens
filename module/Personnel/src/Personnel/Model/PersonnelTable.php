@@ -23,17 +23,21 @@ class PersonnelTable {
 		$id_personne  = (int) $id_personne;
 		$rowset = $this->tableGateway->select(array('id_personne' => $id_personne));
 		$row = $rowset->current();
-		if (!$row) {
-			//throw new \Exception("Could not find row $id_personne");
-			return null;
-		}
-		return $row;
+		if (!$row) { return null; }
+		$db = $this->tableGateway->getAdapter();
+		$sql = new Sql($db);
+		$sQuery = $sql->select()
+		->from(array('p' => 'personne'))->columns(array('*'))
+		->join(array('e' => 'employe'), 'p.ID_PERSONNE = e.id_personne' , array('*'))
+		->join(array('te' => 'type_employe'), 'e.id_type_employe = te.id' , array('NOM_TYPE' => 'nom'))
+		->where(array('p.ID_PERSONNE' => $id_personne));
+		return $sql->prepareStatementForSqlObject($sQuery)->execute()->current();
 	}
 	
 	public function getPhoto($id_personne) {
 		$donneesPersonne =  $this->getPersonne($id_personne);
 	
-		$nom = $donneesPersonne->photo;
+		$nom = $donneesPersonne['PHOTO'];
 		if ($nom) {
 			return $nom . '.jpg';
 		} else {
@@ -51,45 +55,70 @@ class PersonnelTable {
 		}
 	}
 	
+	public function updateEmploye($id_employe, $type_personnel){
+		$db = $this->tableGateway->getAdapter();
+		$sql = new Sql($db);
+		
+		$donnees = array('id_type_employe' => $type_personnel);
+		
+		$sQuery = $sql->update()
+		->table('employe')
+		->set( $donnees )->where(array('id_personne' => $id_employe ));
+		$sql->prepareStatementForSqlObject($sQuery)->execute();
+		
+	}
+	
+	public function saveEmploye($id_personne, $type_personnel, $date_enregistrement){
+		
+		$db = $this->tableGateway->getAdapter();
+		$sql = new Sql($db);
+		
+		$donnees = array(
+				'id_personne' => $id_personne,
+				'id_type_employe' => $type_personnel,
+				'date_enregistrement' => $date_enregistrement,
+				'etat' => 1
+		);
+		
+		$sQuery = $sql->insert() ->into('employe') ->values( $donnees );
+		
+		$sql->prepareStatementForSqlObject($sQuery)->execute();
+	
+	}
+	
 	public function savePersonnel(Personnel $personnel, $nomphoto = null)
 	{
 		$this->getConversionDate();
-		$typePersonnelString = "";
-		if($personnel->type_personnel == 1) {
-			$typePersonnelString = "Médecin";
-		} else if($personnel->type_personnel == 2){
-			$typePersonnelString = "Médico-technique";
-		} else if($personnel->type_personnel == 3){
-			$typePersonnelString = "Logistique";
-		}
+		
+		$date = $personnel->date_naissance;
+		if($date){ $date = $this->conversionDate->convertDateInAnglais($personnel->date_naissance); } else { $date = null; }
 		
 		$data = array(
-				'civilite' => $personnel->civilite,
-				'nom'  => $personnel->nom,
-				'prenom'  => $personnel->prenom,
-				'date_naissance'  => $this->conversionDate->convertDateInAnglais($personnel->date_naissance),
-				'lieu_naissance'  => $personnel->lieu_naissance,
-				'nationalite'  => $personnel->nationalite,
-				'situation_matrimoniale' => $personnel->situation_matrimoniale,
-				'adresse'  => $personnel->adresse,
-				'telephone'  => $personnel->telephone,
-				'email'  => $personnel->email,
-				'type_personnel'  => $typePersonnelString,
-				'sexe'  => $personnel->sexe,
-				'profession'  => $personnel->profession,
-				'date_enregistrement'  => $personnel->date_enregistrement,
-				'photo'  => $nomphoto,
+				'NOM'  => $personnel->nom,
+				'PRENOM'  => $personnel->prenom,
+				'DATE_NAISSANCE'  => $date,
+				'LIEU_NAISSANCE'  => $personnel->lieu_naissance,
+				'NATIONALITE_ACTUELLE'  => $personnel->nationalite,
+				'SITUATION_MATRIMONIALE' => $personnel->situation_matrimoniale,
+				'ADRESSE'  => $personnel->adresse,
+				'TELEPHONE'  => $personnel->telephone,
+				'EMAIL'  => $personnel->email,
+				'SEXE'  => $personnel->sexe,
+				'PROFESSION'  => $personnel->profession,
+				'PHOTO'  => $nomphoto,
 		);
-
+		
 		$id_personne = (int)$personnel->id_personne;
+		
 		if($id_personne == 0) {
-			return($this->tableGateway->getLastInsertValue($this->tableGateway->insert($data)));
+			$id_personne_inserer = $this->tableGateway->getLastInsertValue($this->tableGateway->insert($data));
+			$this->saveEmploye($id_personne_inserer, $personnel->type_personnel, $personnel->date_enregistrement);
+			return($id_personne_inserer);
  		} else {
 			if ($this->getPersonne($id_personne)) {
 				$this->tableGateway->update($data, array('id_personne' => $id_personne));
-			} else {
-				throw new \Exception('Cette personne n existe pas');
- 			}
+				$this->updateEmploye($id_personne, $personnel->type_personnel);
+			} 
 		}
 	
 	}
@@ -97,8 +126,20 @@ class PersonnelTable {
 	//Réduire la chaine addresse
 	function adresseText($Text){
 		$chaine = $Text;
-		if(strlen($Text)>36){
-			$chaine = substr($Text, 0, 36);
+		if(strlen($Text)>30){
+			$chaine = substr($Text, 0, 30);
+			$nb = strrpos($chaine, ' ');
+			$chaine = substr($chaine, 0, $nb);
+			$chaine .=' ...';
+		}
+		return $chaine;
+	}
+	
+	//Réduire la chaine nationalit�
+	function nationaliteText($Text){
+		$chaine = $Text;
+		if(strlen($Text)>20){
+			$chaine = substr($Text, 0, 20);
 			$nb = strrpos($chaine, ' ');
 			$chaine = substr($chaine, 0, $nb);
 			$chaine .=' ...';
@@ -108,11 +149,9 @@ class PersonnelTable {
 	
 	/**
 	 * POUR LA LISTE DES AGENTS DU SERVICE
-	 * @return Ambigous <multitype:multitype: number , multitype:string Ambigous <string, unknown> unknown >
 	 */
 	public function getListePersonnel() 
 	{
-
 
 		$db = $this->tableGateway->getAdapter();
 		
@@ -153,7 +192,9 @@ class PersonnelTable {
 		*/
 		$sql = new Sql($db);
 		$sQuery = $sql->select()
-		->from(array('pers' => 'personnel2'))->columns(array('Nom'=>'nom','Prenom'=>'prenom','Datenaissance'=>'date_naissance','Sexe'=>'sexe','Adresse'=>'adresse','Nationalite'=>'nationalite','Typepersonnel'=>'type_personnel','id'=>'id_personne'))
+		->from(array('e' => 'employe'))->columns(array('*'))
+		->join(array('pers' => 'personne'), 'pers.ID_PERSONNE = e.id_personne', array('Nom'=>'NOM','Prenom'=>'PRENOM','Datenaissance'=>'DATE_NAISSANCE','Sexe'=>'SEXE','Adresse'=>'ADRESSE','Nationalite'=>'NATIONALITE_ACTUELLE','id'=>'ID_PERSONNE'))
+		->join(array('te' => 'type_employe'), 'te.id = e.id_type_employe', array('Typepersonnel'=>'nom'))
 		->where(array('etat' => 1));
 		
 		/* Data set length after filtering */
@@ -162,7 +203,7 @@ class PersonnelTable {
 		$iFilteredTotal = count($rResultFt);
 		
 		$rResult = $rResultFt;
-		
+		//var_dump($rResultFt); exit();
 		$output = array(
 				//"sEcho" => intval($_GET['sEcho']),
 				//"iTotalRecords" => $iTotal,
@@ -197,22 +238,27 @@ class PersonnelTable {
 					}
 		
 					else if ($aColumns[$i] == 'Datenaissance') {
-						$row[] = $Control->convertDate($aRow[ $aColumns[$i] ]);
+						$date = $aRow[ $aColumns[$i] ];
+						if($date){ $row[] = $Control->convertDate($aRow[ $aColumns[$i] ]); } else { $row[] = ""; }
 					}
 		
 					else if ($aColumns[$i] == 'Adresse') {
 						$row[] = $this->adresseText($aRow[ $aColumns[$i] ]);
 					}
 		
+					else if($aColumns[$i] == 'Nationalite') {
+						$row[] = $this->nationaliteText($aRow[ $aColumns[$i] ]);
+					}
+					
 					else if ($aColumns[$i] == 'id') {
 						$html  ="<a href='javascript:affichervue(".$aRow[ $aColumns[$i] ].")'>";
-						$html .="<img style='display: inline; margin-right: 15%;' src='".$tabURI[0]."public/images_icons/vue.PNG' title='détails'></a>";
+						$html .="<img style='display: inline; margin-right: 15%;' src='".$tabURI[0]."public/images_icons/voir2.png' title='détails'></a>";
 		
 						$html .="<a href='".$tabURI[0]."public/personnel/modifier-dossier/id_personne/".$aRow[ $aColumns[$i] ]."'>";
-						$html .="<img style='display: inline; margin-right: 15%;' src='".$tabURI[0]."public/images_icons/modifier.PNG' title='Modifier'></a>";
+						$html .="<img style='display: inline; margin-right: 15%;' src='".$tabURI[0]."public/images_icons/pencil_16.png' title='Modifier'></a>";
 		
-						$html .="<a id='".$aRow[ $aColumns[$i] ]."' href='javascript:supprimer(".$aRow[ $aColumns[$i] ].")'>";
-						$html .="<img style='display: inline;' src='".$tabURI[0]."public/images_icons/trash_16.PNG' title='Supprimer'></a>";
+						//$html .="<a id='".$aRow[ $aColumns[$i] ]."' href='javascript:supprimer(".$aRow[ $aColumns[$i] ].")'>";
+						//$html .="<img style='display: inline;' src='".$tabURI[0]."public/images_icons/trash_16.PNG' title='Supprimer'></a>";
 						
 						$html .="<input type='hidden' value='".$aRow[ 'Typepersonnel' ]."'>";
 						

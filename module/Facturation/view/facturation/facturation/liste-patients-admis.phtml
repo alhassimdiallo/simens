@@ -24,24 +24,22 @@ $Control = new DateHelper();?>
 	margin-left: -10px;
 }
 
-#contenu{ visibility: hidden }
+#contenuInterface{ visibility: hidden; }
 </style>
 
 <script>
 $(window).load(function () {
 
 	$('#wait').toggle(false);
-	$('#contenu').fadeIn().css({'visibility':'visible'});
+	$('#contenuInterface').fadeIn().css({'visibility':'visible'});
 	 
 });
 </script>
 
 
-
-<div id="contenuInterface" >
-
 <div id="titre" style='font-family: police2; text-decoration:none; color: green; font-size: 18px; font-weight: bold; padding-left: 20px;'><iS style='font-size: 25px;'>&curren;</iS> LISTE DES PATIENTS ADMIS</div>
 <div id="wait" style="color: gray; font-size: 20px; text-align: center; margin-top: 80px;" > <span> Chargement ... </span> </div>
+<div id="contenuInterface" >
 <div id="contenu" >
 
         <div id="liste_personnel" style="float:right; margin-right: 75px; height:5px; margin-top: 5px; width: 150px;">
@@ -67,11 +65,18 @@ $(window).load(function () {
 
 				<?php foreach($this->listePatientsAdmis as $donnees):?>
 
+				
+				 <?php 
+	   		       $date_naissance = $donnees['Datenaissance'];
+	   		       if($date_naissance){ $date_naissance = $Control->convertDate($donnees['Datenaissance']); }else{ $date_naissance = "";}
+	   		     ?> 
+				
+				
 				<tr id="<?php echo $this->escapeHtml($donnees['Id_admission']);?>">
 
 				    <td style='text-transform : uppercase;'><?php echo $this->escapeHtml($donnees['Nom']);?></td>
 				    <td><?php echo $this->escapeHtml($donnees['Prenom']);?></td>
-					<td><?php echo $Control->convertDate($this->escapeHtml($donnees['Datenaissance']));?></td>
+					<td><?php echo $this->escapeHtml($date_naissance);?></td>
 					<td><?php echo $this->escapeHtml($donnees['Sexe']);?></td>
 					<td><?php echo $this->escapeHtml($donnees['Adresse']);?></td>
 					<td><?php echo $this->escapeHtml($donnees['Nationalite']);?></td>
@@ -81,9 +86,11 @@ $(window).load(function () {
 					       <img  src='<?php echo $this->basePath().'/images_icons/voir2.png'?>' title="details" />
 					    </a>&nbsp;&nbsp;
 
-					   <a href="javascript:envoyer('<?php echo $this->escapeHtml($donnees['Id_admission']);?>')" >
-					    	<img  src='<?php echo $this->basePath().'/images_icons/symbol_supprimer.png'?>' title="Annuler" />
-					    </a>&nbsp;
+					    <?php if(!in_array($id, $this->listePatientsCons) ) { ?>
+					      <a href="javascript:envoyer('<?php echo $this->escapeHtml($donnees['Id_admission']);?>','<?php echo $this->escapeHtml($donnees['Id']);?>','<?php echo $this->escapeHtml($donnees['Id_Service']);?>')" >
+					    	 <img  src='<?php echo $this->basePath().'/images_icons/symbol_supprimer.png'?>' title="Annuler" />
+					      </a>&nbsp;
+					    <?php } ?>
 
 					    <a id='<?php echo 'Service'.$id ?>'>
 					    <?php echo $this->escapeHtml($donnees['Nomservice']);?>
@@ -94,6 +101,17 @@ $(window).load(function () {
 
 			    <script>
 				$("<?php echo '#Service'.$id ?>").toggle(false);
+				
+				$('#donnees tr').contextmenu({
+					target: '#context-menu',
+					onItem: function (context, e) {
+						
+						if($(e.target).text() == 'Visualiser' || $(e.target).is('#visualiserCTX')){
+							affichervue('<?php echo $id; ?>','<?php echo $this->escapeHtml($donnees['Id_admission']);?>');
+						}
+					}
+
+				})
 				</script>
 
 				<?php endforeach; ?>
@@ -115,7 +133,7 @@ $(window).load(function () {
 		</table>
 
 </div>
-</div>
+
 <!-- POP UP pour Confirmation Suppression -->
                             <div id="confirmation" title="Confirmation de l'annulation" style="display:none;">
                               <p style="font-size: 19px;">
@@ -132,6 +150,18 @@ $(window).load(function () {
 <div id="vue_patient">
 
 </div>
+
+</div>
+
+
+<div id="context-menu">
+    <ul class="dropdown-menu" >
+         <li><a style="cursor: pointer;" ><img id="visualiserCTX" style='margin-right: 10px; width: 19px; height: 16px;' src='/simens/public/images_icons/voir2.png'>Visualiser</a></li>
+         <li class="divider"></li>
+         <li><a id="quitterCTX"  style="cursor: pointer;">Quitter</a></li>
+    </ul>
+</div>
+
 
 <script type="text/javascript">
 $(function(){

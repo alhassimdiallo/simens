@@ -54,9 +54,10 @@ function infoBulle(){
 	  });
 }
 
+var  oTable;
 function initialisation(){
 	var asInitVals = new Array();
-	var  oTable = $('#patientAdmission').dataTable
+	oTable = $('#patientAdmission').dataTable
 	( {
 		"sPaginationType": "full_numbers",
 		"aLengthMenu": [5,7,10,15],
@@ -75,6 +76,11 @@ function initialisation(){
 		   },
 
 		"sAjaxSource": ""+tabUrl[0]+"public/archivage/liste-admission-ajax", 
+		"fnDrawCallback": function() 
+		{
+			//markLine();
+			clickRowHandler();
+		}
 						
 	} );
 
@@ -121,7 +127,41 @@ function initialisation(){
 		$('#afficherArchive').css({'font-weight':'normal', 'font-size': '15px'});
 		$('#afficherTous').css({'font-weight':'bold', 'font-size': '17px' });
 	});
-   }
+}
+
+
+
+function clickRowHandler() 
+{
+	var id;
+	$('#patientAdmission tbody tr').contextmenu({
+		target: '#context-menu',
+		onItem: function (context, e) {
+			
+			if($(e.target).text() == 'Visualiser' || $(e.target).is('#visualiserCTX')){
+				visualiser(id);
+			} else 
+				if($(e.target).text() == 'Suivant' || $(e.target).is('#suivantCTX')){
+					admettre(id);
+				}
+			
+		}
+	
+	}).bind('mousedown', function (e) {
+			var aData = oTable.fnGetData( this );
+		    id = aData[0];
+	});
+	
+	
+	
+	$("#patientAdmission tbody tr").bind('dblclick', function (event) {
+		var aData = oTable.fnGetData( this );
+		var id = aData[0];
+		visualiser(id);
+	});
+	
+}
+
 
 function animation(){
 //ANIMATION
@@ -185,8 +225,6 @@ function admettre(id){
     });
     
     $("#id_patient").val(id);
-    
-    //return false;
 }
 
 
@@ -229,6 +267,7 @@ $(function(){
 					firstDay: 1,
 					isRTL: false,
 					showMonthAfterYear: false,
+					maxDate : '0',
 					yearRange: '1900:2050',
 					showAnim : 'bounce',
 					changeMonth: true,

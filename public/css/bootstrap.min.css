@@ -2007,8 +2007,18 @@ background-image:url("../img/glyphicons-halflings-white.png")
 .dropdown-menu .divider {
 *width:100%;
 	height: 1px;
-	margin: 9px 1px;
+	margin-bottom: 9px;
+	margin-top: 2px;
 *margin:-5px 0 5px;
+	overflow: hidden;
+	background-color: #e5e5e5;
+	border-bottom: 1px solid #fff
+}
+.dropdown-menu .divider2 {
+    *width:100%;
+	height: 1px;
+	margin: 2px 1px;
+    *margin:-5px 0 5px;
 	overflow: hidden;
 	background-color: #e5e5e5;
 	border-bottom: 1px solid #fff
@@ -2025,13 +2035,16 @@ background-image:url("../img/glyphicons-halflings-white.png")
 .dropdown-menu>li>a:hover, .dropdown-menu>li>a:focus, .dropdown-submenu:hover>a, .dropdown-submenu:focus>a {
 	color: #fff;
 	text-decoration: none;
-	background-color: #0081c2;
-	background-image: -moz-linear-gradient(top, #08c, #0077b3);
+	background-color: #3ead65;
+	
+	/*Pour avoir la couleur bleue du menu contextuel*/
+	/*Pour avoir la couleur bleue du menu contextuel*/
+	/* background-image: -moz-linear-gradient(top, #08c, #0077b3);
 	background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#08c), to(#0077b3));
 	background-image: -webkit-linear-gradient(top, #08c, #0077b3);
 	background-image: -o-linear-gradient(top, #08c, #0077b3);
 	background-image: linear-gradient(to bottom, #08c, #0077b3);
-	background-repeat: repeat-x;
+	 */background-repeat: repeat-x;
 filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#ff0088cc', endColorstr='#ff0077b3', GradientType=0)
 }
 .dropdown-menu>.active>a, .dropdown-menu>.active>a:hover, .dropdown-menu>.active>a:focus {

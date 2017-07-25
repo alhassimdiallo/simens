@@ -22,8 +22,9 @@
     	  });
     }
     
+    var  oTable;
     function initialisation(){
-        var  oTable = $('#patient').dataTable
+           oTable = $('#patient').dataTable
     	( {
     					"sPaginationType": "full_numbers",
     					"aLengthMenu": [5,7,10,15],
@@ -266,6 +267,7 @@
     	    				$('.imageRadio').toggle(false);
     	    				$('.imageEchographie').toggle(false);
     	    				$('.imageFibroscopie').toggle(false);
+    	    				AppelLecteurVideo_Scanner();
     	    			}
     	    			if($('#typeExamen_tmp').val() == 12){
     	    				$("#libelleInformation5").replaceWith("<td colspan='3' id='libelleInformation5'> <i style='color: green; font-family: time new romans; font-size: 17px;'> Imagerie (FIBROSCOPIE) </i> </td>");
@@ -286,6 +288,25 @@
     		dataType: "html"
     	});
     	
+    }
+    
+    function AppelLecteurVideo_Scanner(){
+
+    	var $id_cons = $('#Examen_id_cons').val();
+    	
+    	var chemin = tabUrl[0]+'public/archivage/afficher-video';
+    	$.ajax({
+    		url: chemin ,
+    		type: 'POST',
+    		data: {'id_cons': $id_cons, 'ajoutVid': 0}, //ajoutVid: afficher l'icone permettant d'ajoutter des videos
+    		success: function (response) { 
+    			// La réponse du serveur
+    			var result = jQuery.parseJSON(response); 
+    			$('#tabs-2').empty(); 
+    			$('#tabs-2').html(result);
+    		}
+    	});
+        
     }
     
     /*************************************************************************************************************************/
@@ -826,9 +847,10 @@
     /** POUR LA LISTE DES EXAMENS DEJA EFFECTUES --- POUR LA LISTE DES EXAMENS DEJA EFFECTUES **/
     /** POUR LA LISTE DES EXAMENS DEJA EFFECTUES --- POUR LA LISTE DES EXAMENS DEJA EFFECTUES **/
     /** POUR LA LISTE DES EXAMENS DEJA EFFECTUES --- POUR LA LISTE DES EXAMENS DEJA EFFECTUES **/
+    var  oTable;
     function initialisationListeRehercheExamensEffectuesMorpho(){
         
-        var  oTable = $('#patient').dataTable
+           oTable = $('#patient').dataTable
     	( {
     					"sPaginationType": "full_numbers",
     					"aLengthMenu": [5,7,10,15],
@@ -847,6 +869,12 @@
     					   },
 
     					"sAjaxSource": ""+tabUrl[0]+"public/archivage/liste-recherche-examens-effectues-morpho-ajax", 
+    					
+    					"fnDrawCallback": function() 
+    					{
+    						//markLine();
+    						clickRowHandler();
+    					}
     					
     	}); 
         
@@ -901,3 +929,38 @@
 	});
       
     }
+
+    
+
+    function clickRowHandler() 
+    {
+    	var id;
+    	var idDemande;
+    	$('#patient tbody tr').contextmenu({
+    		target: '#context-menu',
+    		onItem: function (context, e) {
+    			
+    			if( $(e.target).text() == 'DÃ©tails' || $(e.target).is('#detailsCTX') ){
+    				listeExamensMorpho(id, idDemande);
+    			} 
+    			
+    		}
+    	
+    	}).bind('mousedown', function (e) {
+    			var aData = oTable.fnGetData( this );
+    		    id = aData[7];
+    		    idDemande = aData[8];
+    	});
+    	
+    	
+    	
+    	$("#patient tbody tr").bind('dblclick', function (event) {
+    		var aData = oTable.fnGetData( this );
+    		id = aData[7];
+		    idDemande = aData[8];
+		    listeExamensMorpho(id, idDemande);
+    	});
+    	
+    }
+    
+    

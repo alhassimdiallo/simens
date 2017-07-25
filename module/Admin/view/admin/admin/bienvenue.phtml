@@ -1,10 +1,12 @@
-<?php  echo $this->headLink()->prependStylesheet($this->basePath().'/css/bootstrap.min.css');?>
+<?php echo $this->headLink()->prependStylesheet($this->basePath().'/css/bootstrap.min.css');?>
+<?php echo $this->headScript()->prependFile($this->basePath() . '/js/admin/jsBienvenue.js');?>
+
 <style type="text/css">
 .module {
 	background: url("<?php echo $this->basePath()."/images_icons/fond_module.jpg";?>") no-repeat;
 	display: inline-block;
-	width: 170px;
-	height: 140px;
+	width: 160px; 
+	height: 130px;
 	border: 1px dashed #ccc;
     border-top-right-radius: 40px;
 	border-top-left-radius: 40px;
@@ -17,25 +19,64 @@
 	text-shadow: green;
 	text-transform: capitalize;
 	vertical-align: middle;
-	padding: 15px;
+	padding: 10px;
 	padding-top: 40px;
+	border: 6px solid #ccc;
+	box-shadow: 0pt 7pt 10px rgba(0, 0, 0, 1.5);
 }
 
 #module {
  	margin: auto; 
 }
 
-body {
-	background-color: #2E363F;
+#module p {
+	text-align: center;
 }
+
+body {
+/* 	background-color: #5c6489; */
+ 	background: url(/simens/public/img/ugb_sanar_2.jpg)  no-repeat center fixed;
+	}
+ 	
+#enteteMenuAcceuilSA {
+	border: 6px solid rgba(221, 218, 215, 3.9);
+	box-shadow: 0pt 7pt 10px rgba(0, 0, 0, 1.5);
+	border-bottom-right-radius: 40px;
+	border-bottom-left-radius: 40px;
+ 	padding-bottom: 30px;
+ 	padding-top: 10px; 
+	padding-left: 20px; 
+	padding-right: 20px; 
+	background: gray;
+	width: 95%;
+	font-family: times new roman;
+}
+	
+
+.module1:hover .module, .module2:hover .module, .module3:hover .module, .module4:hover .module,
+.module5:hover .module, .module6:hover .module, .module7:hover .module, .module8:hover .module{
+	width: 170px;
+	height: 142px;
+	box-shadow: 0pt 10pt 25px rgba(0, 0, 0, 9.5);
+	border: 7px solid #9a9b9f;
+	font-family: times new roman;
+	font-weight: bold;
+}
+
 </style>
 
-<table style="width: 100%; height: 30px;">
 
-  <tr style="width: 100%;">
-     <td>
+<script type="text/javascript">
+    initialise(document);
+</script>
+  
+
+<table  style="width: 100%;">
+
+  <tr  style="width: 100%; ">
+     <td colspan="4" style="padding-bottom: 50px;">
      
-        <div style='width: 100%; margin-top: 15px; font-family: times new roman;'>
+        <div id="enteteMenuAcceuilSA" >
 	      <div style="width: 70%; float:left; text-align: left; margin-left: 10px;  font-size: 20px; color: white;">
 		    <?php echo "<i>Bienvenue:</i>  M. ".$this->user['Prenom']."  ".$this->user['Nom'];?>
 	      </div>
@@ -50,41 +91,93 @@ body {
   </tr>
   
   
-  <tr>
-     <td style=''>
-      <div id="module" style='width: 100%;  margin-top: 70px; '> 
-		
-		<a
-			href="<?php echo $this->url('consultation', array('action'=>'recherche'));?>">
+  <tr style="width: 100%; ">
+    <td style='width: 25%; height: 250px; '>
+      <div id="module" > 
+		<p>
+		<a class="module1"
+			href="<?php echo $this->url('consultation', array('action'=>'recherche'));?>" onmouseover="jouer_son();" >
 			<span class="module" > Module Consultation </span>
-		</a>
-		<a
-			href="<?php echo $this->url('hospitalisation', array('action'=>'index'));?>">
+		</a></p> 
+	</div>
+	</td>	
+		
+    <td style='width: 25%; height: 250px; '>
+		<div id="module"  >
+	    <p>
+		<a class="module2"
+			href="<?php echo $this->url('hospitalisation', array('action'=>'index'));?>" onmouseover="jouer_son();" >
 			<span class="module" > Module Hospitalisation </span>
-		</a> <a
-			href="<?php echo $this->url('facturation', array('action'=>'liste-patient'));?>">
+		</a></p> 
+	</div>
+	</td>	
+		
+	<td style='width: 25%; height: 250px; '>
+		<div id="module" >
+	    <p> 
+		 <a class="module3"
+			href="<?php echo $this->url('facturation', array('action'=>'liste-patient'));?>" onmouseover="jouer_son();" >
 			<span class="module" > Module Facturation </span>
-		</a> <a
-			href="<?php echo $this->url('espace-patient', array('action'=>'recherche'));?>">
+		</a></p> 
+	</div>
+	</td>	
+		
+    <td style='width: 25%; height: 250px; '>
+		<div id="module" >
+	    <p>
+		<a class="module4"
+			href="<?php echo $this->url('espace-patient', array('action'=>'recherche'));?>" onmouseover="jouer_son();" >
 			<span class="module" > Module Espace patient </span>
-		</a> <a
-			href="<?php echo $this->url('personnel', array('action'=>'index'));?>">
+		</a> </p> 
+	</div>
+	</td>	
+ </tr>
+ 
+ 
+ 
+ 
+ <tr>
+   <td style='width: 25%; height: 250px; '>
+    <div id="module" >
+	    <p>
+	    <a class="module5"
+			href="<?php echo $this->url('personnel', array('action'=>'liste-personnel'));?>" onmouseover="jouer_son();" >
 			<span class="module" > Module Personnel </span>
-		</a> <a
-			href="<?php echo $this->url('pharmacie', array('action'=>'index'));?>">
+		</a></p> 
+	</div>
+   </td>	
+		
+   <td style='width: 25%; height: 250px; '>
+    <div id="module" >
+		<p>
+		<a class="module6"
+			href="<?php echo $this->url('pharmacie', array('action'=>'index'));?>" onmouseover="jouer_son();" >
 			<span class="module" > Module Pharmacie </span>
-		</a> <a
-			href="<?php echo $this->url('admin', array('action'=>'parametrages'));?>">
+		</a></p>
+	</div>
+   </td>
+    
+   <td style='width: 25%; height: 250px; '> 
+    <div id="module" >
+		<p>
+		<a class="module7"
+			href="<?php echo $this->url('admin', array('action'=>'parametrages'));?>" onmouseover="jouer_son();" >
 			<span class="module" style="color:green;"> Module Param&eacute;trages </span>
-		</a> <a
-			href="<?php echo $this->url('admin', array('action'=>'utilisateurs'));?>">
+		</a></p>
+    </div>
+   </td>
+	
+   <td style='width: 25%; height: 250px; '> 
+    <div id="module" >
+		<p>
+		<a class="module8"
+			href="<?php echo $this->url('admin', array('action'=>'utilisateurs'));?>" onmouseover="jouer_son();" >
 			<span class="module" style="color:green;"> Gestion des utilisateurs </span>
-		</a>
-		
-		
+		</a></p>
+	</div>
+   </td>
 
-	  </div>
-     </td>
-  </tr>
+ </tr>
   
 </table>
+<div  id="sonAuSurvol"></div>

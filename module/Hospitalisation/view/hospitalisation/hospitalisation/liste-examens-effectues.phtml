@@ -8,7 +8,7 @@
 <?php $form = $this->form; ?>
 
 <style>
-#contenu{ visibility: hidden }
+#toutLeContenu{ visibility: hidden; }
 </style>
 
 <script>
@@ -16,14 +16,14 @@ var base_url = window.location.toString();
 var tabUrl = base_url.split("public");
 /***POUR LE MENU GAUCHE dans -elementgauche.phtml***/
 $('#plus_operation').toggle(true); 
-$("#operation").replaceWith("<li id='operation' style='background:#4a5765;'><a href=''><span style='margin-left:0px; color: #ffffff; font-weight:bold; font-size:18px; font-family:Times New Roman;'> <img style='display: inline;' src='"+tabUrl[0]+"public/images_icons/moins-vert.PNG' alt='Liste' /> Demandes d'examen </span></a></li>");
+$("#operation").replaceWith("<li id='operation' style='background:#4a5765;'><a href=''><span style='margin-left:0px; color: #ffffff; font-weight:bold; font-size:18px; font-family:Times New Roman;'> <img style='display: inline;' src='"+tabUrl[0]+"public/images_icons/moin-green2.png' alt='Liste' /> Demandes d'examen </span></a></li>");
 dep1();
 $('#liste_style').css({'font-weight':'bold','color':'white','font-size':'21px'});
 
 
 $(window).load(function () {
 	$('#wait').toggle(false);
-	$('#contenu').fadeIn().css({'visibility':'visible'});
+	$('#toutLeContenu').fadeIn().css({'visibility':'visible'});
 });
 </script>
 
@@ -32,6 +32,7 @@ $(window).load(function () {
 	LISTE DES PATIENTS
 </div>
 <div id="wait" style="color: gray; font-size: 20px; text-align: center; margin-top: 80px;" > <span> Chargement ... </span> </div>
+<div id="toutLeContenu">
 <div id="contenu"> 
 
             <table id="patient" class="table table-bordered tab_list_mini" >
@@ -82,7 +83,7 @@ $(window).load(function () {
 <div id="vue_detail_hospi_patient">
 
 </div>
-
+</div>
 <!--***********************************************************************************************-->                              
 
 <!--==========================POP UP pour Afficher les détails =================================-->                              

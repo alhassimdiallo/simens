@@ -90,6 +90,18 @@ $(window).load(function () {
 </div>
 
 
+<div id="context-menu">
+    <ul class="dropdown-menu" >
+         <li><a style="cursor: pointer;" ><img id="detailsCTX" style='margin-right: 10px; width: 19px; height: 16px;' src='/simens/public/images_icons/voir2.png'>D&eacute;tails</a></li>
+         <li class="divider2"></li>
+         <li><a style="cursor: pointer;"><img  id="modifierCTX" style='margin-right: 10px; width: 19px; height: 16px;' src='/simens/public/images_icons/pencil_16.png'>Modifier</a></li>
+         <li class="divider"></li>
+         <li><a id="quitterCTX"  style="cursor: pointer;">Quitter</a></li>
+    </ul>
+</div>
+
+
+
 <!-- LES BOUTONS "TERMINER" ou "VALIDER" -->
 
 <script type="text/javascript">
@@ -120,6 +132,7 @@ var oTable = $('#patient').dataTable
 					"sInfo": "_START_ &agrave; _END_ sur _TOTAL_ &eacute;l&eacute;ments",
 					"sInfoEmpty": "0 &eacute;l&eacute;ment &agrave; afficher",
 					"sInfoFiltered": "",
+					"sEmptyTable": "Chargement...",
 					"sUrl": "",
 					"oPaginate": {
 						"sFirst":    "|<",
@@ -130,6 +143,11 @@ var oTable = $('#patient').dataTable
 				   },
 
 				"sAjaxSource":  "<?php echo $this->url('archivage', array('action' => 'liste-patient-ajax', 'format' => 'json')); ?>",
+				"fnDrawCallback": function() 
+				{
+					//markLine();
+					clickRowHandler();
+				}
 
 } );
 $('#afficherArchive').css({'font-weight':'bold', 'font-size': '17px' });
@@ -145,4 +163,5 @@ $('#afficherTous').click(function(){
 	$('#afficherArchive').css({'font-weight':'normal', 'font-size': '15px'});
 	$('#afficherTous').css({'font-weight':'bold', 'font-size': '17px' });
 });
+
 </script>

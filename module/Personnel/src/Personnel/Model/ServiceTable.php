@@ -30,6 +30,7 @@ class ServiceTable{
 		$select->order('ID_SERVICE ASC');
 		$stat = $sql->prepareStatementForSqlObject($select);
 		$result = $stat->execute();
+		$options = array();
 		foreach ($result as $data) {
 			$options[$data['NOM']] = $data['NOM'];
 		}
@@ -43,6 +44,8 @@ class ServiceTable{
 		$select->columns(array('ID_SERVICE', 'NOM'));
 		$stat = $sql->prepareStatementForSqlObject($select);
 		$result = $stat->execute();
+		
+		$options = array();
 		foreach ($result as $data) {
 			$options[$data['ID_SERVICE']] = $data['NOM'];
 		}
@@ -84,6 +87,7 @@ class ServiceTable{
 		$stat = $sql->prepareStatementForSqlObject($select);
 		$result = $stat->execute();
 		
+		$options = array();
 		foreach ($result as $data) {
 			$options[$data['Id_service']] = $data['Nom_service'];
 		}

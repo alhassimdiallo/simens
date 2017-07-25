@@ -34,6 +34,7 @@ class TraitementChirurgicalPdf
 	protected $_DonneesDemande;
 	protected $_policeContenu;
 	protected $_newPolice;
+	protected $_Service;
 	
 	public function __construct()
 	{
@@ -72,33 +73,36 @@ class TraitementChirurgicalPdf
 	}
 	
 	public function setEnTete(){
-		$imageHeader = ZendPdf\Image::imageWithPath('C:\wamp\www\simens\public\img\logo_vert.png');
-		$this->_page->drawImage($imageHeader, 445,
-				$this->_pageHeight - 85,
-				655,//largeur
-				640);//hauteur
+		$baseUrl = $_SERVER['SCRIPT_FILENAME'];
+		$tabURI  = explode('public', $baseUrl);
+		
+		$imageHeader = ZendPdf\Image::imageWithPath($tabURI[0].'public/img/polycliniquelogo.png');
+		$this->_page->drawImage($imageHeader, 505, //-x
+				$this->_pageHeight - 130, //-y
+				600, //+x
+				650); //+y
 		
 		$this->_page->setFont($this->_newTime, 10);
 		$this->_page->drawText('République du Sénégal',
 				$this->_leftMargin,
 				$this->_pageHeight - 50);
 		$this->_page->setFont($this->_newTime, 10);
-		$this->_page->drawText('Ministère de la santé et de la prévention',
+		$this->_page->drawText('Ministère de la santé et de l\'action sociale',
 				$this->_leftMargin,
 				$this->_pageHeight - 65);
 		$this->_page->setFont($this->_newTime, 10);
-		$this->_page->drawText('Hopital Régional de Saint-Louis',
+		$this->_page->drawText('Polyclinique de l\'UGB de Saint-Louis',
 				$this->_leftMargin,
 				$this->_pageHeight - 80);
 		$this->_page->setFont($this->_newTime, 10);
-		$this->_page->drawText('Service Orthopédie et traumathologie',
+		$this->_page->drawText('Service: '.iconv ('UTF-8' ,'ISO-8859-1' ,$this->_Service),
 				$this->_leftMargin,
 				$this->_pageHeight - 95);
-		$font = ZendPdf\Font::fontWithName(ZendPdf\Font::FONT_HELVETICA_OBLIQUE);
+		$font = ZendPdf\Font::fontWithName(ZendPdf\Font::FONT_TIMES_ROMAN);
 		$this->_page->setFont($font, 8);
 		$today = new \DateTime ();
 		$dateNow = $today->format ( 'd/m/Y' );
-		$this->_page->drawText('Saint-Louis le ' . $dateNow, 500,
+		$this->_page->drawText('Saint-Louis le, ' . $dateNow, 510,
 				$this->_pageHeight - 50);
 		
 		$this->_yPosition -= 35;
@@ -109,7 +113,7 @@ class TraitementChirurgicalPdf
 				$this->_yPosition);
 		$this->_yPosition -= 5;
 		$this->_page->setlineColor(new ZendPdf\Color\Html('green'));
-		$this->_page->setLineWidth(2);
+		$this->_page->setLineWidth(1);
 		$this->_page->drawLine($this->_leftMargin,
 				$this->_yPosition,
 				$this->_pageWidth -
@@ -128,6 +132,10 @@ class TraitementChirurgicalPdf
 	
 	public function setDonneesDemandeTC($donneesDemande){
 		$this->_DonneesDemande = $donneesDemande;
+	}
+
+	public function setService($service){
+		$this->_Service = $service;
 	}
 	
 	public function setIdConsTC($id_cons){
@@ -152,6 +160,16 @@ class TraitementChirurgicalPdf
 		return $tab;
 	}
 	
+	protected function nbAnnees($debut, $fin) {
+		//60 secondes X 60 minutes X 24 heures dans une journee
+		$nbSecondes = 60*60*24*365;
+	
+		$debut_ts = strtotime($debut);
+		$fin_ts = strtotime($fin);
+		$diff = $fin_ts - $debut_ts;
+		return (int)($diff / $nbSecondes);
+	}
+	
 	protected  function getNoteTC(){
 		//\Zend\Debug\Debug::dump($this->_DonneesPatient); exit();
 		$Control = new DateHelper();
@@ -160,50 +178,56 @@ class TraitementChirurgicalPdf
 		
 		$this->_page->setLineColor(new ZendPdf\Color\Html('#999999')); //Pour les ligne
 		$this->_page->setLineWidth(0.2);
-		$this->_page->setLineDashingPattern(array(1, 2));
+		$this->_page->setLineDashingPattern(array(0, 0));
+		
+		$today = new \DateTime();
+		$date_actu = $today->format('Y-m-d');
 
 			//-----------------------------------------------
-			$this->_page->setFont($this->_newTimeGras, 10);
-			$this->_page->drawText('NOM :',
-					$this->_leftMargin+175,
-					$this->_yPosition);
-			$this->_page->setFont($this->_newTime, 11);
-			$this->_page->drawText($this->_DonneesPatient['nomPatient'],
-					$this->_leftMargin+210,
-					$this->_yPosition);
- 			//-----------------------------------------------
-    		$this->_yPosition -= 15;// allez a ligne suivante
- 			//----- -----------------------------------------
-			$this->_page->setFont($this->_newTimeGras, 10);
-			$this->_page->drawText('PRENOM :',
+			$this->_page->setFont($this->_newTimeGras, 9);
+			$this->_page->drawText('PRENOM & NOM :',
 					$this->_leftMargin+155,
 					$this->_yPosition);
 			$this->_page->setFont($this->_newTime, 11);
-			$this->_page->drawText($this->_DonneesPatient['prenomPatient'],
-					$this->_leftMargin+210,
-					$this->_yPosition);
- 			//-----------------------------------------------
-			$this->_yPosition -= 15;// allez a ligne suivante
-			//----- -----------------------------------------
-			$this->_page->setFont($this->_newTimeGras, 10);
-			$this->_page->drawText('DATE DE NAISSANCE :',
-					$this->_leftMargin+95,
-					$this->_yPosition);
-			$this->_page->setFont($this->_newTime, 11);
-			$this->_page->drawText($Control->convertDate($this->_DonneesPatient['dateNaissancePatient']),
-					$this->_leftMargin+210,
+			$this->_page->drawText($this->_DonneesPatient['PRENOM'].' '.$this->_DonneesPatient['NOM'],
+					$this->_leftMargin+240,
 					$this->_yPosition);
 			//-----------------------------------------------
 			$this->_yPosition -= 15;// allez a ligne suivante
 			//----- -----------------------------------------
-			$this->_page->setFont($this->_newTimeGras, 10);
+			$this->_page->setFont($this->_newTimeGras, 9);
 			$this->_page->drawText('SEXE :',
-					$this->_leftMargin+173,
+					$this->_leftMargin+205,
 					$this->_yPosition);
 			$this->_page->setFont($this->_newTime, 11);
-			$this->_page->drawText(iconv ('UTF-8' ,'ISO-8859-1' ,$this->_DonneesPatient['sexePatient']),
-					$this->_leftMargin+210,
+			$this->_page->drawText(iconv ('UTF-8' ,'ISO-8859-1' ,$this->_DonneesPatient['SEXE']),
+					$this->_leftMargin+240,
 					$this->_yPosition);
+			
+ 			//-----------------------------------------------
+			$this->_yPosition -= 15;// allez a ligne suivante
+			//----- -----------------------------------------
+			$this->_page->setFont($this->_newTimeGras, 9);
+			$this->_page->drawText('DATE DE NAISSANCE :',
+					$this->_leftMargin+135,
+					$this->_yPosition);
+			$this->_page->setFont($this->_newTime, 11);
+			$this->_page->drawText($Control->convertDate($this->_DonneesPatient['DATE_NAISSANCE'])."  (".$this->nbAnnees($this->_DonneesPatient['DATE_NAISSANCE'],$date_actu)." ans)",
+					$this->_leftMargin+240,
+					$this->_yPosition);
+			
+			//-----------------------------------------------
+			$this->_yPosition -= 15;// allez a ligne suivante
+			//----- -----------------------------------------
+			$this->_page->setFont($this->_newTimeGras, 9);
+			$this->_page->drawText('ADRESSE :',
+					$this->_leftMargin+187,
+					$this->_yPosition);
+			$this->_page->setFont($this->_newTime, 11);
+			$this->_page->drawText(iconv ('UTF-8' ,'ISO-8859-1' ,$this->_DonneesPatient['ADRESSE']),
+					$this->_leftMargin+240,
+					$this->_yPosition);
+			
 			
 			$this->_page->setlineColor(new ZendPdf\Color\Html('green'));
 			$this->_page->setLineWidth(1);

@@ -425,12 +425,12 @@ font-size: 14px;
     /****-webkit-appearance: none;*****/
 }
 
-#form_patient option{ 
+#form_patient option, #form_patient2 option{ 
    /*min-width:100px;*/
    color:blue;
    background-color:#eee;
-   /*font-size: 13pt;
-   overflow: auto;
+/*    font-size: 13pt; */
+/*   overflow: auto;
    width: 100px; */
 }
 

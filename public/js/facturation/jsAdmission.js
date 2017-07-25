@@ -53,12 +53,12 @@ function infoBulle(){
 	    tooltips.tooltip( 'open' );
 	  });
 }
-
+var  oTable
 function initialisation(){
 	
     
 	var asInitVals = new Array();
-	var  oTable = $('#patient').dataTable
+        oTable = $('#patient').dataTable
 	( {
 		"sPaginationType": "full_numbers",
 		"aLengthMenu": [5,7,10,15],
@@ -77,6 +77,12 @@ function initialisation(){
 		   },
 
 		"sAjaxSource": ""+tabUrl[0]+"public/facturation/liste-admission-ajax", 
+
+		"fnDrawCallback": function() 
+		{
+			//markLine();
+			clickRowHandler();
+		}
 						
 	} );
 
@@ -108,7 +114,41 @@ function initialisation(){
 			this.value = asInitVals[$("thead input").index(this)];
 		}
 	} );
-   }
+
+}
+
+
+function clickRowHandler() 
+{
+	var id;
+	$('#patient tbody tr').contextmenu({
+		target: '#context-menu',
+		onItem: function (context, e) {
+			
+			if($(e.target).text() == 'Visualiser' || $(e.target).is('#visualiserCTX')){
+				visualiser(id);
+			} else 
+				if($(e.target).text() == 'Suivant' || $(e.target).is('#suivantCTX')){
+					declarer(id);
+				}
+			
+		}
+	
+	}).bind('mousedown', function (e) {
+			var aData = oTable.fnGetData( this );
+		    id = aData[0];
+	});
+	
+	
+	
+	$("#patient tbody tr").bind('dblclick', function (event) {
+		var aData = oTable.fnGetData( this );
+		var id = aData[0];
+		visualiser(id);
+	});
+	
+}
+
 
 function animation(){
 //ANIMATION
@@ -132,6 +172,7 @@ $('#precedent').click(function(){
      
      return false;
 });
+
 }
 
 function declarer(id){
@@ -167,50 +208,17 @@ function declarer(id){
     $("#annuler").click(function(){
     	$("#annuler").css({"border-color":"#ccc", "background":"-webkit-linear-gradient( #555, #CCC)", "box-shadow":"1px 1px 5px black inset,0 1px 0 rgba( 255, 255, 255, 0.4)"});
     	
-    	//ANNULER
-//	      $('#contenu').animate({
-//	         height : 'toggle'
-//	      },1000);
-//	      $('#declarer_deces').animate({
-//	         height : 'toggle'
-//	      },1000);
-	      
-	    vart=tabUrl[0]+'public/facturation/admission';
+	    vart = tabUrl[0]+'public/facturation/admission';
 	    $(location).attr("href",vart);
         return false;
     });
-    
-    //Insertion des donnï¿½es dans la base de donnï¿½es
-//    $('#termineradmission').click(function(){
-//    	//alert('test');
-//    	$("#termineradmission").css({"border-color":"#ccc", "background":"-webkit-linear-gradient( #555, #CCC)", "box-shadow":"1px 1px 10px black inset,0 1px 0 rgba( 255, 255, 255, 0.4)"});
-//    	$("#termineradmission").attr( 'disabled', true );
-//    	$("#annuler").attr( 'disabled', true );
-//    	var numero = $("#numero").val();
-//    	var service = $("#service").val();
-//    	var montant = $("#montant").val();
-//    	
-//    	$.ajax({
-//            type: 'POST',
-//            url: tabUrl[0]+'public/facturation/enregistrer-admission' ,  
-//            data: {'id':cle , 'numero':numero , 'service':service , 'montant':montant },
-//    	    success: function(data) {    
-//    	    	
-//              vart=tabUrl[0]+'public/facturation/liste-patients-admis';
-//              $(location).attr("href",vart);
-//                
-//            }
-//    	});
-//    });
-    //Fin insertion des donnï¿½es
     
     $("#id_patient").val(id);
   
 }
 
-
+var montant;
 function getmontant(id){
-	//Rï¿½cupï¿½ration des donnï¿½es du patient
     var cle = id;
     var chemin = tabUrl[0]+'public/facturation/montant';
     $.ajax({
@@ -218,11 +226,151 @@ function getmontant(id){
         url: chemin ,
         data:'id='+cle,
         success: function(data) {    
-        	    var result = jQuery.parseJSON(data);  
-        	     $("#montant").val(result);
+        	var result = parseInt(jQuery.parseJSON(data));  
+        	montant = result;
+        	$("#montant").val(result);
+        	
+        	var taux = $("#taux").val();
+        	if(taux){
+        		$("#montant_avec_majoration").val(result+(result*taux)/100);
+        	} else {
+        		$("#montant_avec_majoration").val(result);
+        	}
+
         },
-        error:function(e){console.log(e);alert("Une erreur interne est survenue!");},
+        
+        error:function(e){ console.log(e); alert("Une erreur interne est survenue!"); },
         dataType: "html"
     });
+}
+
+function getTarif(taux){
+	var service = $('#service').val();
+	var montantMajore;
 	
+	if(service && montant && taux){
+		montantMajore = montant + (montant*taux)/100;
+		$('#montant_avec_majoration').val(montantMajore);
+	} else if(service && !taux){
+		$('#montant_avec_majoration').val(montant);
+	}
+	
+}
+
+var temoin = 0;
+function scriptFactMajor(){
+	$('.organisme').toggle(false);
+	$('.taux').toggle(false);
+
+	var boutons = $('input[name=type_facturation]');
+	$(boutons[0]).trigger('click');
+	
+	$(boutons).click(function(){
+		if(boutons[0].checked){
+			$('#service').attr('disabled', false).css('background', '#ffffff');
+			$('.organisme').toggle(false);
+			$('.taux').toggle(false);
+			
+			if(temoin == 1){
+				$('#montant_avec_majoration').val("");
+				$('#service').val("");
+				temoin = 0;
+			}
+			$('#taux').val("");
+
+			$('#organisme').attr('required', false);
+		} else 
+			if(boutons[1].checked){
+				$('#service').attr('disabled', false).css('background', '#ffffff');
+				$('.organisme').toggle(true);
+				$('.taux').toggle(true);
+
+				if(temoin == 0){
+					$('#montant_avec_majoration').val("");
+					$('#service').val("");
+					temoin = 1;
+				}
+				
+				$('#organisme').attr('required', true);
+			}
+	});
+	
+	
+
+	//Pour l'impression de la facture
+	//Pour l'impression de la facture
+	$('.termineradmission').click(function(){
+
+		var donnees = new Array();
+		donnees['id_patient'] = $('#id_patient').val();
+		donnees['numero'] = $('#numero').val();
+		donnees['service'] = $('#service').val();
+		donnees['montant_avec_majoration'] = $('#montant_avec_majoration').val();
+		donnees['montant'] = $('#montant').val();
+		
+		if( temoin == 0 ){
+			
+			donnees['type_facturation'] = 1;
+			var vart = tabUrl[0]+'public/facturation/impression-pdf';
+		    
+			var formulaireImprimerFacture = document.getElementById("FormulaireImprimerFacture");
+			formulaireImprimerFacture.setAttribute("action", vart);
+			formulaireImprimerFacture.setAttribute("method", "POST");
+			formulaireImprimerFacture.setAttribute("target", "_blank");
+			
+			for( donnee in donnees ){
+				// Ajout dynamique de champs dans le formulaire
+				var champ = document.createElement("input");
+				champ.setAttribute("type", "hidden");
+				champ.setAttribute("name", donnee);
+				champ.setAttribute("value", donnees[donnee]);
+				formulaireImprimerFacture.appendChild(champ);
+			}
+
+			if( donnees['service'] ){
+				// Envoi de la requête
+				$("#ImprimerFacture").trigger('click');
+				setTimeout(function(){
+					document.getElementById("formulairePrincipal").submit();
+				});
+				return false;
+			} else if( !donnees['service'] ){
+				return true;
+			}
+		 
+		} else if( temoin == 1 ){
+			
+			donnees['type_facturation'] = 2;
+			donnees['organisme'] = $('#organisme').val();
+			donnees['taux'] = $('#taux').val();
+			var vart = tabUrl[0]+'public/facturation/impression-pdf';
+		    
+			var formulaireImprimerFacture = document.getElementById("FormulaireImprimerFacture");
+			formulaireImprimerFacture.setAttribute("action", vart);
+			formulaireImprimerFacture.setAttribute("method", "POST");
+			formulaireImprimerFacture.setAttribute("target", "_blank");
+			
+			for( donnee in donnees ){
+				// Ajout dynamique de champs dans le formulaire
+				var champ = document.createElement("input");
+				champ.setAttribute("type", "hidden");
+				champ.setAttribute("name", donnee);
+				champ.setAttribute("value", donnees[donnee]);
+				formulaireImprimerFacture.appendChild(champ);
+			}
+
+			if( donnees['service'] && donnees['organisme']){
+				// Envoi de la requête
+				$("#ImprimerFacture").trigger('click');
+				setTimeout(function(){
+					document.getElementById("formulairePrincipal").submit();
+				});
+				return false;
+			} else if( !donnees['service'] || !donnees['organisme']){
+				return true;
+			}
+			
+		}
+		
+	});
 }

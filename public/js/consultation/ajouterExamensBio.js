@@ -10,7 +10,7 @@ function creerLalisteExamenBio ($listeDesElements) {
                              "</th >"+
                              
                              "<th id='SelectExamenBio_"+(index+1)+"' style='width: 28%;'>"+
-                             "<select style='width: 100%; margin-top: 3px; margin-bottom: 0px; font-size: 13px;' id='examenBio_name_"+(index+1)+"'>"+
+                             "<select style='width: 100%; margin-top: 3px; margin-bottom: 0px; font-size: 13px;' name='examenBio_name_"+(index+1)+"' id='examenBio_name_"+(index+1)+"'>"+
 			                 "<option value=''> -- S&eacute;l&eacute;ctionner un examen -- </option>";
                              for(var i = 1 ; i < $listeDesElements.length ; i++){
                             	 if($listeDesElements[i]){
@@ -20,8 +20,8 @@ function creerLalisteExamenBio ($listeDesElements) {
                     $liste +="</select>"+                           
                              "</th>"+
                              
-                             "<th id='noteExamenBio_"+(index+1)+"' style='width: 59%;'  >"+
-                             "<input type='text' style='width: 100%; margin-top: 3px; height: 30px; margin-bottom: 0px; font-size: 15px; padding-left: 10px;' >" +
+                             "<th id='noteExamenBio_"+(index+1)+"'  style='width: 59%;'  >"+
+                             "<input name='noteExamenBio_"+(index+1)+"' type='text' style='width: 100%; margin-top: 3px; height: 30px; margin-bottom: 0px; font-size: 15px; padding-left: 10px;' >" +
                              "</th >"+
                              
                              "<th id='iconeExamenBio_supp_vider' style='width: 9%;'  >"+
@@ -277,5 +277,21 @@ $(function(){
 		$("#bouton_ExamenBio_valider_demande").toggle(true);
 		return false;
 	});
+	
+	$("#demandeExamenBioMorpho").click(function(){
+		for(var i = 1; i <= nbListeExamenBio(); i++ ){
+			$('#examenBio_name_'+i).attr('disabled',false); $('#examenBio_name_'+i).css({'background':'white'});
+			$("#noteExamenBio_"+i+" input").attr('disabled',false); $("#noteExamenBio_"+i+" input").css({'background':'white'});
+		}
+		$("#controls_examenBio div").toggle(true);
+		if(nbListeExamenBio() == 1){
+			$("#supprimer_examenBio").toggle(false);
+		}
+		$("#iconeExamenBio_supp_vider a img").toggle(true);
+		$("#bouton_ExamenBio_modifier_demande").toggle(false);
+		$("#bouton_ExamenBio_valider_demande").toggle(true);
+		return true;
+	});
+	
 });
 }

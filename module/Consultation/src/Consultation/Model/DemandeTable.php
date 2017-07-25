@@ -65,6 +65,40 @@ class DemandeTable{
 	}
 	
 	/**
+	 * Recuperer la liste des examens Biologiques
+	 */
+	public function getDemandeDesExamensBiologiques(){
+		$adapter = $this->tableGateway->getAdapter();
+		$sql = new Sql($adapter);
+		$select = $sql->select();
+		$select->columns(array('*'));
+		$select->from(array('e'=>'examens'));
+		$select->where(array('idType' => 1));
+		$select->order('idExamen ASC');
+		$stat = $sql->prepareStatementForSqlObject($select);
+		$result = $stat->execute();
+	
+		return $result;
+	}
+	
+	/**
+	 * Recuperer la liste des examens Biologiques
+	 */
+	public function getDemandeDesExamensMorphologiques(){
+		$adapter = $this->tableGateway->getAdapter();
+		$sql = new Sql($adapter);
+		$select = $sql->select();
+		$select->columns(array('*'));
+		$select->from(array('e'=>'examens'));
+		$select->where(array('idType' => 2));
+		$select->order('idExamen ASC');
+		$stat = $sql->prepareStatementForSqlObject($select);
+		$result = $stat->execute();
+	
+		return $result;
+	}
+	
+	/**
 	 * Recuperer la liste des examens Biologiques Effectués et Envoyés par le laborantion (biologiste)
 	 */
 	public function getDemandeExamensBiologiquesEffectuesEnvoyer($id){

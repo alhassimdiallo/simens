@@ -64,4 +64,5 @@ class TarifConsultationTable {
 		$result = $stat->execute()->current();
 		return $result;
 	}
+	
 }

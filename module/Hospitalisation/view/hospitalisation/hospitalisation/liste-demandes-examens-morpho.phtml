@@ -19,7 +19,7 @@
 <?php $form = $this->form; ?>
 
 <style>
-#toutLeContenu{ visibility: hidden }
+#toutLeContenu{ visibility: hidden; }
 
 /*====== IMAGE RADIO ======*/
 /*====== IMAGE RADIO ======*/
@@ -54,7 +54,7 @@ var base_url = window.location.toString();
 var tabUrl = base_url.split("public");
 /***POUR LE MENU GAUCHE dans -elementgauche.phtml***/
 $('#plus_operationMorpho').toggle(true); 
-$("#operationMorpho").replaceWith("<li id='operationMorpho' style='background:#4a5765;'><a href=''><span style='margin-left:0px; color: #ffffff; font-weight:bold; font-size:18px; font-family:Times New Roman;'> <img style='display: inline;' src='"+tabUrl[0]+"public/images_icons/moins-vert.PNG' alt='Liste' /> Demandes d'examen </span></a></li>");
+$("#operationMorpho").replaceWith("<li id='operationMorpho' style='background:#4a5765;'><a href=''><span style='margin-left:0px; color: #ffffff; font-weight:bold; font-size:18px; font-family:Times New Roman;'> <img style='display: inline;' src='"+tabUrl[0]+"public/images_icons/moin-green2.png' alt='Liste' /> Demandes d'examen </span></a></li>");
 dep3();
 $('#liste_styleMorpho').css({'font-weight':'bold','color':'white','font-size':'21px'});
 
@@ -63,6 +63,10 @@ $('#liste_styleMorpho').css({'font-weight':'bold','color':'white','font-size':'2
 $(window).load(function () {
 	$('#wait').toggle(false);
 	$('#toutLeContenu').fadeIn().css({'visibility':'visible'});
+});
+
+$(function() {
+	$( "#tabs" ).tabs();
 });
 </script>
 
@@ -303,7 +307,12 @@ $(window).load(function () {
                                    
                             </table>
                             
-                            
+                 <?php
+                   echo $this->headLink()->appendStylesheet($this->basePath().'/js/plugins/jPlayer-2.9.2/dist/skin/blue.monday/css/jplayer.blue.monday.min.css');
+                   echo $this->headScript()->appendFile($this->basePath().'/js/plugins/jPlayer-2.9.2/dist/jplayer/jquery.jplayer.min.js');
+                   echo $this->headScript()->appendFile($this->basePath().'/js/plugins/jPlayer-2.9.2/dist/add-on/jplayer.playlist.min.js');
+                   //echo $this->headScript()->appendFile($this->basePath().'/js/consultation/jsAjouterSuppimerVideos.js');
+                 ?>
                                  <!-- SCANNER SCANNER SCANNER  -->
                                  <!-- SCANNER SCANNER SCANNER  -->
                                  <!-- SCANNER SCANNER SCANNER  -->
@@ -316,25 +325,43 @@ $(window).load(function () {
                                        <th colspan="3"><div style="width:100%; margin-top: 1px; margin-bottom: 10px; border-bottom: 3px solid #ccc; "></div></th>
                                    </tr>
                                    <tr class="form-examen-morphologique" style="width: 100%; height: 240px;">
-                                       <th style="width: 15%; vertical-align: top;"> </th>
-                                       <th style="position: relative; width: 67%; padding-top: 10px"> 
-                                           <!-- PIKACHOOSE -->
-                                           <!-- PIKACHOOSE -->
-                                           <div id="pika7">
-                                             <div id="pika8">
+                                       <th style="position: relative; width: 95%; padding-top: 10px"> 
+                                           
+                                         <div id="tabs" >
+                                             <ul>
+                                               <li><a href="#tabs-1">Images</a></li>
+                                               <li id='CompteRenduTabs'><a href="#tabs-2">Videos</a></li>
+                                             </ul>
+                                   
+                                           <div id="tabs-1" style="height: 250px"> 
+                                           
+                                             <!-- PIKACHOOSE -->
+                                             <!-- PIKACHOOSE -->
+                                             <div id="pika7">
+                                               <div id="pika8">
                                                 <!-- EMPLACEMENT DES IMAGES -->
                                                 <!-- EMPLACEMENT DES IMAGES -->
                                                 <!-- EMPLACEMENT DES IMAGES -->
+                                               </div>
                                              </div>
-                                           </div>
-                                           <div id="AjoutImageScanner" style="position: absolute; right: 25px; bottom: -20px;">
+                                             <div id="AjoutImageScanner" style="position: absolute; right: 25px; bottom: -20px;">
                                                   <input type='file' name="fichierScanner" />
 			                                      <!-- RECUPERER L'IMAGE -->
 			                                      <input type='hidden' id="fichierScanner_tmp" name="fichierScanner_tmp" />
 			                                      <!-- FICHIER TAMPON POUR RECUPERER L'IMAGE DANS LE CONTROLLER -->
+                                             </div>
+                                           
                                            </div>
+                                           
+                                           <div id="tabs-2" style="height: 250px; overflow: auto;">
+                                             <!-- EMPLACEMENT DES VIDEOS -->
+                                             <!-- EMPLACEMENT DES VIDEOS -->
+                                             <!-- EMPLACEMENT DES VIDEOS -->
+                                           </div>
+                                           
+                                         </div>
+                                           
                                        </th>
-                                       <th style="width: 18%; vertical-align: top;"> </th>
                                    </tr>
                             </table>
                             

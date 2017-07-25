@@ -95,7 +95,7 @@ class Soinhospitalisation3Table {
 		$select = $sql->select();
 		$select->from('heures_soins');
 		$select->where(array('id_sh'=>$id_sh, 'applique'=>0));
-		$select->order('heure ASC');
+		$select->order(array('date ASC','heure ASC'));
 	
 		$stat = $sql->prepareStatementForSqlObject($select);
 		$result = $stat->execute()->current();

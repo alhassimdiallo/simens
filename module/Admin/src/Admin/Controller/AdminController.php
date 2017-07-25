@@ -30,6 +30,8 @@ use Zend\Form\View\Helper\FormText;
 use Zend\Form\View\Helper\FormSubmit;
 use Admin\Form\HopitalForm;
 use Zend\Form\View\Helper\FormSelect;
+use Admin\Form\ServiceForm;
+use Admin\Form\ActeForm;
 
 /**
  * User Controller Class
@@ -201,6 +203,10 @@ class AdminController extends AbstractActionController
     	{
     		return $this->redirect()->toRoute('archivage', array('action' => 'ajouter'));
     	}
+    	else if($user['role'] == "admin")
+    	{
+    		return $this->redirect()->toRoute('personnel', array('action' => 'liste-personnel'));
+    	}
     	
     	
     	echo '<div style="font-size: 25px; color: green; padding-bottom: 15px;" >vous n\'avez aucun privilège. Contacter l\'administrateur ----> Merci !!! </div>'; 
@@ -235,6 +241,7 @@ class AdminController extends AbstractActionController
     			  $('#idPersonne').val('".$utilisateur->id_personne."'); 
     			  $('#LesChoixRadio input[name=role]').attr('checked', false);
     			  $('#LesChoixRadio input[name=role][value=".$utilisateur->role."] ').attr('checked', true);
+    			  $('#LesChoixRadioPoly input[name=rolepolyclinique][value=".$utilisateur->role."] ').attr('checked', true);
     			 
     			  $('.nom').text('".$unAgent['NOM']."');
     			  $('.prenom').text('".$unAgent['PRENOM']."');
@@ -273,7 +280,7 @@ class AdminController extends AbstractActionController
     	if ($request->isPost()){
     	
     		$donnees = $request->getPost ();
-    		//var_dump($donnees); exit();
+    		//var_dump($donnees->role); exit();
     		$this->getUtilisateurTable()->saveDonnees($donnees);
     	    
     		return $this->redirect()->toRoute('admin' , array('action' => 'utilisateurs'));
@@ -313,6 +320,8 @@ class AdminController extends AbstractActionController
   			
   			$this->getUtilisateurTable()->modifierPassword($donnees);
    
+  			$this->getUtilisateurTable()->modifierPersonne($donnees, $user['id_employe']);
+  			
   			if($controller == 1){
   				return $this->redirect()->toRoute('consultation' , array('action' => 'consultation-medecin'));
   			} else if($controller == 2){
@@ -331,14 +340,12 @@ class AdminController extends AbstractActionController
   				return $this->redirect()->toRoute('hospitalisation' , array('action' => 'demande-hospitalisation'));
   			} else if($controller == 9){
   				return $this->redirect()->toRoute('facturation' , array('action' => 'liste-naissance'));
-  			} 
+  			} else if($controller == 10){
+  				return $this->redirect()->toRoute('personnel' , array('action' => 'liste-personnel'));
+  			}
   			
   		}
     
-  		$uAuth = $this->getServiceLocator()->get('Admin\Controller\Plugin\UserAuthentication'); //@todo - We must use PluginLoader $this->userAuthentication()!!
-  		$username = $uAuth->getAuthService()->getIdentity();
-  		$user = $this->getUtilisateurTable()->getUtilisateursWithUsername($username);
-  		
   		$data = array(
   				'id' => $user['id'],
   				'nomUtilisateur' => $user['Nom'],
@@ -738,11 +745,11 @@ class AdminController extends AbstractActionController
     	$infos = $this->getParametragesTable()->getInfosHopital($id_hopital);
     	
     	$html ="<script> 
-    			$('#nomVue').html('".$infos['Nom']."'); 
+    			$('#nomVue').html('".str_replace("'", "\'", $infos['Nom'])."'); 
     			$('#departementVue').html('".$infos['Departement']."');
     			$('#regionVue').html('".$infos['Region']."');	
-    		    $('#directeurVue').html('".$infos['Directeur']."');	
-    		    $('#noteVue').html('".$infos['Note']."');	
+    		    $('#directeurVue').html('".str_replace("'", "\'", $infos['Directeur'])."');	
+    		    $('#noteVue').html('".str_replace("'", "\'", $infos['Note'])."');	
     		    </script>";
     	
     	
@@ -761,108 +768,514 @@ class AdminController extends AbstractActionController
     	}
     	
     	$html ="<script>
-    			 $('#nom').val('".$infos['Nom']."');
+    			 $('#nom').val('".str_replace("'", "\'", $infos['Nom'])."');
     			 $('#region').val('".$infos['Id_region']."');
     			 $('#departement').html('".$liste_select."');               //On charge la liste
     			 $('#departement').val('".$infos['Id_departement']."');     //On selectionne le departement
     			 		
-    			 $('#directeur').val('".$infos['Directeur']."').css({'font-size':'13px'});
-    	         $('#note').val('".$infos['Note']."').css({'font-size':'13px'});
+    			 $('#directeur').val('".str_replace("'", "\'", $infos['Directeur'])."').css({'font-size':'13px'});
+    	         $('#note').val('".str_replace("'", "\'", $infos['Note'])."').css({'font-size':'13px'});
     		    </script>";
     	 
     	$this->getResponse ()->setMetadata ( 'Content-Type', 'application/html' );
     	return $this->getResponse ()->setContent ( Json::encode ( $html ) );
     }
     
+    public function listeServicesAjaxAction() {
+    	$output = $this->getParametragesTable()->getListeService();
+    	return $this->getResponse ()->setContent ( Json::encode ( $output, array (
+    			'enableJsonExprFinder' => true
+    	) ) );
+    }
     
+    public function gestionDesServicesAction() {
+
+    	$id = ( int ) $this->params ()->fromPost ( 'id', 0 );
+    	 
+     	$formHopital = new ServiceForm();
+    	 
+     	$formRow = new FormRow();
+     	$formText = new FormText();
+     	$formSubmit = new FormSubmit();
+     	$formSelect = new FormSelect();
+    	 
+    	$html ="
+    			<table style='width: 100%;'>
+                  <tr style='width: 100%; background: white;'>
+    	
     
-//     public function gestionDesBatimentsAction() {
-    	 
-//     	$id = ( int ) $this->params ()->fromPost ( 'id', 0 );
-    	 
-//     	$formBatiment = new BatimentForm();
-    	 
-//     	$formRow = new FormRow();
-//     	$formButton = new FormButton();
-//     	$formText = new FormText();
-//     	$formSubmit = new FormSubmit();
-    	 
-    	 
-//     	$html ="
-//     			<table style='width: 100%;'>
-//                   <tr style='width: 100%; background: white;'>
+    			      <!-- FORMULAIRE DE SAISIE DES DONNEES POUR AJOUT D'UN NOUVEAU SERVICE -->
+    			      <!-- FORMULAIRE DE SAISIE DES DONNEES POUR AJOUT D'UN NOUVEAU SERVICE -->
+    			      <!-- FORMULAIRE DE SAISIE DES DONNEES POUR AJOUT D'UN NOUVEAU SERVICE -->
+    			      <!-- FORMULAIRE DE SAISIE DES DONNEES POUR AJOUT D'UN NOUVEAU SERVICE -->
     
-//     			      <td style='width: 40%; height: 300px; vertical-align: top;'>
-//                           <table style='width: 95%; margin-top: 7px; border: 1px solid #cccccc; box-shadow: 0pt 1pt 8px rgba(0, 0, 1, 0.4);'>
+    			      <td style='width: 42%; height: 350px; vertical-align: top;'>
+    			          <!-- AFFICHAGE VISUALISATION -->
+    			          <!-- AFFICHAGE VISUALISATION -->
+                          <table id='VueDetailsService' style='width: 95%; margin-top: 7px; border: 1px solid #cccccc; box-shadow: 0pt 1pt 8px rgba(0, 0, 1, 0.4);'>
+    	
+    			            <tr style='vertical-align: top; background: #efefef; border: 1px solid #cccccc;'>
+                               <td colspan='2' style='font-size: 15px; padding: 7px; font-family: times new roman; color: green; font-weight: bold;'> D&eacute;tails des infos sur le service <img id='PlusFormulaireAjouterService' style='float: right; cursor:pointer;' src='/simens/public/images_icons/Add14X14.png' title='Ajouter' /></td>
+                            </tr>
     
-//     			            <tr style='vertical-align: top; background: #efefef; border: 1px solid #cccccc;'>
-//                                <td colspan='3' style='font-size: 15px; padding: 7px; font-family: times new roman; color: green; font-weight: bold;'> D&eacute;tails des infos sur l'h&ocirc;pital <img style='float: right; cursor:pointer;' src='/simens/public/images_icons/infos.png' title='informations' /></td>
-//                             </tr>
+    			            <tr style='vertical-align: top; background: white;'>
+                               <td colspan='2' style='width: 100%; height: 50px; padding: 7px;'>
+                                  <a style='text-decoration:underline; font-size:12px;'>Nom:</a><br>
+                                  <p style='font-weight:bold; font-size:17px;' id='nomVue'> Nom </p>
+                               </td>
+                            </tr>
     
-//     			            <tr style='vertical-align: top; background: white;'>
-//                                <td style='width: 33%; height: 50px; padding: 7px;'>
-//                                   <a style='text-decoration:underline; font-size:12px;'>Intitul&eacute;:</a><br>
-//                                   <p style='font-weight:bold; font-size:17px;' id='intitule'> Intitule </p>
-//                                </td>
+    			            <tr style='vertical-align: top; background: white;'>
+                               
+    			               <td style='width: 50%; height: 50px; padding: 7px;'>
+                                  <a style='text-decoration:underline; font-size:12px;'>Domaine:</a><br>
+                                  <p style='font-weight:bold; font-size:17px;' id='domaineVue'> Domaine </p>
+                               </td>
+    			
+    			               <td style='width: 50%; height: 50px; padding: 7px;'>
+                                  <a style='text-decoration:underline; font-size:12px;'>Tarif (frs):</a><br>
+                                  <p style='font-weight:bold; font-size:17px;' id='tarifVue'> Tarif </p>
+                               </td>
             
-//                                <td style='width: 33%; height: 50px; padding: 7px;'>
-//                                   <a style='text-decoration:underline; font-size:12px;'>Salle:</a><br>
-//                                   <p style='font-weight:bold; font-size:17px;' id='sallevue'> Salle </p>
-//                                </td>
-            
-//                                <td style='width: 33%; height: 50px; padding: 7px;'>
-//                                   <a style='text-decoration:underline; font-size:12px;'>Batiment:</a><br>
-//                                   <p style='font-weight:bold; font-size:17px;' id='batiment'> Batiment </p>
-//                                </td>
-//                             </tr>
-//                           </table>
-//                       </td>
+                            </tr>
     
+    			            <tr style='vertical-align: top; background: white;'>
+                 	           <td colspan='2' style='padding-top: 10px; padding-bottom: 0px; padding-right: 30px; width: 20%; padding: 7px;'>
+                 	              <a style='text-decoration:underline; font-size:13px;'>Note:</a>
+                 	              <p id='noteVue' style='background:#f8faf8; font-weight:bold; font-size:17px;'> Note </p>
+                 	           </td>
+                            </tr>
     
-//                       <td style='width: 60%; vertical-align: top;'>
-//                           <table id='patient' style=' margin-top:5px;' class='table table-bordered tab_list_mini' >
-// 				            <thead>
-// 					          <tr style='height: 40px; width:100%; cursor: pointer; font-family: times new roman;'>
-// 						        <th style='width:22%; font-size:17px; '>I<minus>ntitul&eacute;</minus></th>
-// 						        <th style='width:18%; font-size:17px; '>S<minus>alle</minus></th>
-// 						        <th style='width:22%; font-size:17px; '>B<minus>atiment</minus></th>
-// 						        <th style='width:20%; font-size:17px; '>E<minus>tat</minus></th>
-// 						        <th style='width:18%; font-size:17px; '>O<minus>ptions</minus></th>
-// 					          </tr>
-// 				            </thead>
+                          </table>
+    			  
+    			 <!-- FORMULAIRE_DE_SAISIE -->
+                 <!-- FORMULAIRE_DE_SAISIE -->
+    			 <!-- FORMULAIRE_DE_SAISIE -->
+    			 <!-- FORMULAIRE_DE_SAISIE -->
+    			 <form id='FormulaireAjouterService'>
+    			   <table style='width: 95%; border: 1px solid #cccccc; margin-top: 7px; box-shadow: 0pt 1pt 5px rgba(0, 0, 0, 0.4);'>
+    			   
+    			     <tr style='width: 100%; vertical-align: top; background: #efefef; border-bottom: 1px solid #cccccc;'>
+                         <td colspan='2' style='font-size: 15px; padding: 7px; font-family: times new roman; color: green; font-weight: bold;'> <span id='labelInfos'> Cr&eacute;ation d'un nouveau service </span> <img style='float: right; cursor:pointer;' src='/simens/public/images_icons/infos.png'/></td>
+                     </tr>
     
-//     			            <tbody id='donnees' class='liste_patient'>
+    			     <tr id='form_patient' style='vertical-align: top; background: white;'>
+                        <td colspan='2' class='comment-form-patient' style='padding: 8px;'>
+                          ". $formRow($formHopital->get ( 'nom' )) . $formText($formHopital->get ( 'nom' )) ."
+                        </td>
+                     </tr>
+                   
+                     <tr  id='form_patient' style='vertical-align: top; background: white;'>
+                        <td  class='comment-form-patient' style='width: 50%; padding: 8px; '>
+                          ". $formRow($formHopital->get ( 'domaine' )) . $formSelect($formHopital->get ( 'domaine' )) ."
+                        </td>
+                        <td  class='comment-form-patient' style='width: 50%; padding: 8px;'>
+                          ". $formRow($formHopital->get ( 'tarif' )) . $formText($formHopital->get ( 'tarif' )) ."
+                        </td>
+                     </tr>
+                   
+                     <tr  id='form_patient' style='vertical-align: top; background: white;'>
+                        <td colspan='2' class='comment-form-patient' style='width: 100%; padding: 8px;'>
+                                   <table style='width: 100%;'>
+                                   		<tr style='background: white;'>
+                   
+                                   		    <td style='width: 50%;'>
+                                   		       <div style='float:right'>
+                                   		         ". $formSubmit($formHopital->get ( 'annuler' )) ."
+                                               </div>
+                                   		    </td>
+    	
+                                   		    <td style='width: 50%;'>
+                                   		       <div style='margin-left: 5px;'>
+                                   		         ". $formSubmit($formHopital->get ( 'enregistrer' )) ."
+                                               </div>
+                                   		    </td>
+    	
+                                   		</tr>
+                                   </table>
+                               </td>
+                     </tr>
+                   </table>
+                  </form>
+                   
+                  </td>
     
-// 					           <!-- ************ On affiche les patients en une liste ordonnï¿½e************ -->
+    			      <!-- LISTE DES SERVICES -->
+                      <!-- LISTE DES SERVICES -->
+                      <!-- LISTE DES SERVICES -->
+                      <!-- LISTE DES SERVICES -->
+                      <td style='width: 58%; vertical-align: top;'>
+                          <table id='listeDesServicesAjax' style=' margin-top:5px;' class='table table-bordered tab_list_mini' >
+				            <thead>
+					          <tr style='height: 40px; width:100%; cursor: pointer; font-family: times new roman;'>
+						        <th style='width:45%; font-size:17px; '>N<minus>om du service</minus></th>
+						        <th style='width:25%; font-size:17px; '>D<minus>omaine</minus></th>
+						        <th style='width:15%; font-size:17px; '>T<minus>arif <span style='font-size: 13px;'>(frs)</span> </minus></th>
+						        <th style='width:15%; font-size:17px; '>O<minus>ptions</minus></th>
+					          </tr>
+				            </thead>
     
-// 				            </tbody>
-    
-// 				            <tfoot id='foot' class='foot_style'>
-// 					          <tr style='height: 35px;'>
-// 						        <th id='intitule' style='width: 22%;'><input type='text' name='search_browser'
-// 							       value=' Intitul&eacute;' class='search_init' /></th>
-// 						        <th id='salleFooter' style='width: 18%;'><input type='text' name='search_browser'
-// 							       value=' Salle' class='search_init' /></th>
-// 						        <th id='batiment' style='width: 22%;'><input type='text' name='search_browser'
-// 							       value=' Batiment' class='search_init' /></th>
-// 						        <th id='etat' style='width: 20%;'><input type='text' name='search_browser'
-// 							       value=' Etat' class='search_init' /></th>
-// 						        <th id='options' style='width: 18%;'><input type='hidden' name='search_browser'/></th>
-// 					          </tr>
-// 				            </tfoot>
-// 			              </table>
-// 			          </td>
+    			            <tbody>
+    	
+					           <!-- ************ On affiche les patients en une liste ordonnï¿½e************ -->
+    	
+				            </tbody>
+    	
+				            <tfoot id='foot' class='foot_style'>
+					          <tr style='height: 35px;'>
+						        <th id='nom' style='width: 45%;'><input type='text' name='search_browser'
+							       value=' Nom du service' class='search_init' /></th>
+						        <th id='region' style='width: 25%;'><input type='text' name='search_browser'
+							       value=' Domaine' class='search_init' /></th>
+						        <th id='departement' style='width: 15%;'><input type='text' name='search_browser'
+							       value=' Tarif' class='search_init' /></th>
+						        <th id='options' style='width: 15%;'><input type='hidden' name='search_browser'/></th>
+					          </tr>
+				            </tfoot>
+			              </table>
+			          </td>
 		
-// 		          </tr>
+		          </tr>
     
-//     			  <tr style='width: 100%; background: white;' >
-//     			      <td style='width: 40%;'> </td>
+    			  <tr style='width: 100%; background: white;' >
+    			      <td style='width: 42%;'> </td>
     
-//     			      <td style='width: 60%; padding-left: 20px;'>". $formSubmit($formBatiment->get ( 'terminer' )) ."</td>
-//     			  </tr>
-//               </table>";
+    			      <td style='width: 58%; padding-left: 20px;' id='tester'>". $formSubmit($formHopital->get ( 'terminer' )) ."</td>
+    			  </tr>
+              </table>
+    		  <div id='scriptVueService'> </div>
+    	
+    	      <script>
+     			//EMPECHER LA TOUCHE ENTREE DE SOUMETTRE DE FORMULAIRE
+    			//EMPECHER LA TOUCHE ENTREE DE SOUMETTRE DE FORMULAIRE
+    			$('table tr td input').keypress(function(event) {
+	               if (event.keyCode == 13) {
+		             return false;
+	               }
+                });
+    		  </script>
+    	      "; 
     	 
-//     	$this->getResponse ()->setMetadata ( 'Content-Type', 'application/html' );
-//     	return $this->getResponse ()->setContent ( Json::encode ( $html ) );
-//     }
+    	$this->getResponse ()->setMetadata ( 'Content-Type', 'application/html' );
+    	return $this->getResponse ()->setContent ( Json::encode ( $html ) );
+    }
+    
+    public function prixMill($prix) {
+    	$str="";
+    	$long =strlen($prix)-1;
+    
+    	for($i = $long ; $i>=0; $i--)
+    	{
+    	$j=$long -$i;
+    	if( ($j%3 == 0) && $j!=0)
+    	{ $str= " ".$str;   }
+    	$p= $prix[$i];
+    
+    	$str = $p.$str;
+    	}
+    	return($str);
+    }
+    	
+    public function getInfosServiceAction() {
+    	$id_service = $this->params()->fromPost ('id');
+    	 
+    	$infos = $this->getParametragesTable()->getInfosService($id_service);
+    	 
+    	$html ="<script> 
+    			  $('#nomVue').html('".str_replace("'", "\'", $infos['NOM'])."');
+    			  $('#domaineVue').html('".$infos['DOMAINE']."');
+    			  $('#tarifVue').html('".$this->prixMill($infos['TARIF'] )."');
+    		    </script>";
+    	 
+    	 
+    	$this->getResponse ()->setMetadata ( 'Content-Type', 'application/html' );
+    	return $this->getResponse ()->setContent ( Json::encode ( $html ) );
+    }
+    
+    public function getInfosModificationServiceAction() {
+    	$id_service = $this->params()->fromPost ('id');
+    
+    	$infos = $this->getParametragesTable()->getInfosService($id_service);
+    
+    	$html ="<script>
+    			 $('#nom').val('".str_replace("'", "\'", $infos['NOM'])."');
+    			 $('#domaine').val('".$infos['DOMAINE']."');
+    			 $('#tarif').val('".$infos['TARIF']."');           
+    		    </script>";
+    
+    	$this->getResponse ()->setMetadata ( 'Content-Type', 'application/html' );
+    	return $this->getResponse ()->setContent ( Json::encode ( $html ) );
+    }
+    
+    public function ajouterServiceAction()
+    {
+    	$nom = $this->params()->fromPost ('nom');
+    	$domaine = $this->params()->fromPost ('domaine');
+    	$tarif = $this->params()->fromPost ('tarif');
+     	$updateService = (int) $this->params()->fromPost ('updateService', 0);
+    	 
+    
+    	$uAuth = $this->getServiceLocator()->get('Admin\Controller\Plugin\UserAuthentication'); //@todo - We must use PluginLoader $this->userAuthentication()!!
+    	$username = $uAuth->getAuthService()->getIdentity();
+    	$user = $this->getUtilisateurTable()->getUtilisateursWithUsername($username);
+    	
+    	$html = "";
+    
+    	if($updateService == 0){
+    		$this->getParametragesTable()->addService($nom, $domaine, $tarif, $user['id_personne']);
+    	} else {
+    		$this->getParametragesTable()->updateService($updateService, $nom, $domaine, $tarif, $user['id_personne']);
+    		$html .="entre";
+    	}
+    
+    
+    	$this->getResponse ()->setMetadata ( 'Content-Type', 'application/html' );
+    	return $this->getResponse ()->setContent ( Json::encode (  ) );
+    }
+    
+    public function supprimerServiceAction(){
+    	$id_service = $this->params()->fromPost ('id');
+    	
+    	$result = $this->getParametragesTable()->supprimerService($id_service);
+    	
+    	$this->getResponse ()->setMetadata ( 'Content-Type', 'application/html' );
+    	return $this->getResponse ()->setContent ( Json::encode ( $result ) );
+    }
+    
+    public function gestionDesActesAction(){
+
+    	$id = ( int ) $this->params ()->fromPost ( 'id', 0 );
+    	
+    	$formActe = new ActeForm();
+    	
+    	$formRow = new FormRow();
+    	$formText = new FormText();
+    	$formSubmit = new FormSubmit();
+    	$formSelect = new FormSelect();
+    	
+    	$html ="
+    			<table style='width: 100%;'>
+                  <tr style='width: 100%; background: white;'>
+   
+    	
+    			      <!-- FORMULAIRE DE SAISIE DES DONNEES POUR AJOUT D'UN NOUVEAU ACTE -->
+    			      <!-- FORMULAIRE DE SAISIE DES DONNEES POUR AJOUT D'UN NOUVEAU ACTE -->
+    			      <!-- FORMULAIRE DE SAISIE DES DONNEES POUR AJOUT D'UN NOUVEAU ACTE -->
+    			      <!-- FORMULAIRE DE SAISIE DES DONNEES POUR AJOUT D'UN NOUVEAU ACTE -->
+    	
+    			      <td style='width: 42%; height: 350px; vertical-align: top;'>
+    			          <!-- AFFICHAGE VISUALISATION -->
+    			          <!-- AFFICHAGE VISUALISATION -->
+                          <table id='VueDetailsActe' style='width: 95%; margin-top: 7px; border: 1px solid #cccccc; box-shadow: 0pt 1pt 8px rgba(0, 0, 1, 0.4);'>
+   
+    			            <tr style='vertical-align: top; background: #efefef; border: 1px solid #cccccc;'>
+                               <td colspan='2' style='font-size: 15px; padding: 7px; font-family: times new roman; color: green; font-weight: bold;'> D&eacute;tails des infos sur l'acte <img id='PlusFormulaireAjouterActe' style='float: right; cursor:pointer;' src='/simens/public/images_icons/Add14X14.png' title='Ajouter' /></td>
+                            </tr>
+    	
+    			            <tr style='vertical-align: top; background: white;'>
+                               <td colspan='2' style='width: 100%; height: 50px; padding: 7px;'>
+                                  <a style='text-decoration:underline; font-size:12px;'>Designation:</a><br>
+                                  <p style='font-weight:bold; font-size:17px;' id='designationVue'> Designation </p>
+                               </td>
+                            </tr>
+    	
+    			            <tr style='vertical-align: top; background: white;'>
+                
+    			               <td style='width: 50%; height: 50px; padding: 7px;'>
+                                  <a style='text-decoration:underline; font-size:12px;'>Tarif (frs):</a><br>
+                                  <p style='font-weight:bold; font-size:17px;' id='tarifVue'> Tarif </p>
+                               </td>
+    			
+    			               <td style='width: 50%; height: 50px; padding: 7px;'>
+                                  <a style='text-decoration:underline; font-size:12px;'></a><br>
+                                  <p style='font-weight:bold; font-size:17px;'> </p>
+                               </td>
+    
+                            </tr>
+    	
+    			            <tr style='vertical-align: top; background: white;'>
+                 	           <td colspan='2' style='padding-top: 10px; padding-bottom: 0px; padding-right: 30px; width: 20%; padding: 7px;'>
+                 	              <a style='text-decoration:underline; font-size:13px;'>Note:</a>
+                 	              <p id='noteVue' style='background:#f8faf8; font-weight:bold; font-size:17px;'> Note </p>
+                 	           </td>
+                            </tr>
+    	
+                          </table>
+    	
+    			 <!-- FORMULAIRE_DE_SAISIE -->
+                 <!-- FORMULAIRE_DE_SAISIE -->
+    			 <!-- FORMULAIRE_DE_SAISIE -->
+    			 <!-- FORMULAIRE_DE_SAISIE -->
+    			 <form id='FormulaireAjouterActe'>
+    			   <table style='width: 95%; border: 1px solid #cccccc; margin-top: 7px; box-shadow: 0pt 1pt 5px rgba(0, 0, 0, 0.4);'>
+    	
+    			     <tr style='width: 100%; vertical-align: top; background: #efefef; border-bottom: 1px solid #cccccc;'>
+                         <td colspan='2' style='font-size: 15px; padding: 7px; font-family: times new roman; color: green; font-weight: bold;'> <span id='labelInfos'> Cr&eacute;ation d'un nouvel acte </span> <img style='float: right; cursor:pointer;' src='/simens/public/images_icons/infos.png'/></td>
+                     </tr>
+    	
+    			     <tr id='form_patient' style='vertical-align: top; background: white;'>
+                        <td colspan='2' class='comment-form-patient' style='padding: 8px;'>
+                          ". $formRow($formActe->get ( 'designation' )) . $formText($formActe->get ( 'designation' )) ."
+                        </td>
+                     </tr>
+          
+                     <tr  id='form_patient' style='vertical-align: top; background: white;'>
+                        <td  class='comment-form-patient' style='width: 50%; padding: 8px; '>
+                          ". $formRow($formActe->get ( 'tarif' )) . $formText($formActe->get ( 'tarif' )) ."
+                        </td>
+                        <td  class='comment-form-patient' style='width: 50%; padding: 8px;'>
+                        </td>
+                     </tr>
+          
+                     <tr  id='form_patient' style='vertical-align: top; background: white;'>
+                        <td colspan='2' class='comment-form-patient' style='width: 100%; padding: 8px;'>
+                                   <table style='width: 100%;'>
+                                   		<tr style='background: white;'>
+          
+                                   		    <td style='width: 50%;'>
+                                   		       <div style='float:right'>
+                                   		         ". $formSubmit($formActe->get ( 'annuler' )) ."
+                                               </div>
+                                   		    </td>
+   
+                                   		    <td style='width: 50%;'>
+                                   		       <div style='margin-left: 5px;'>
+                                   		         ". $formSubmit($formActe->get ( 'enregistrer' )) ."
+                                               </div>
+                                   		    </td>
+   
+                                   		</tr>
+                                   </table>
+                               </td>
+                     </tr>
+                   </table>
+                  </form>
+          
+                  </td>
+    	
+    			      <!-- LISTE DES ACTES -->
+                      <!-- LISTE DES ACTES -->
+                      <!-- LISTE DES ACTES -->
+                      <!-- LISTE DES ACTES -->
+                      <td style='width: 58%; vertical-align: top;'>
+                          <table id='listeDesActesAjax' style=' margin-top:5px;' class='table table-bordered tab_list_mini' >
+				            <thead>
+					          <tr style='height: 40px; width:100%; cursor: pointer; font-family: times new roman;'>
+						        <th style='width:60%; font-size:17px; '>D<minus>&eacute;signation </minus></th>
+						        <th style='width:22%; font-size:17px; '>T<minus>arif <span style='font-size: 13px;'>(frs)</span> </minus></th>
+						        <th style='width:18%; font-size:17px; '>O<minus>ptions</minus></th>
+					          </tr>
+				            </thead>
+    	
+    			            <tbody>
+   
+					           <!-- ************ On affiche les patients en une liste ordonnï¿½e************ -->
+   
+				            </tbody>
+   
+				            <tfoot id='foot' class='foot_style'>
+					          <tr style='height: 35px;'>
+						        <th id='nom' style='width: 60%;'><input type='text' name='search_browser'
+							       value=' D&eacute;signation' class='search_init' /></th>
+						        <th id='departement' style='width: 22%;'><input type='text' name='search_browser'
+							       value=' Tarif' class='search_init' /></th>
+						        <th id='options' style='width: 18%;'><input type='hidden' name='search_browser'/></th>
+					          </tr>
+				            </tfoot>
+			              </table>
+			          </td>
+    	
+		          </tr>
+    	
+    			  <tr style='width: 100%; background: white;' >
+    			      <td style='width: 42%;'> </td>
+    	
+    			      <td style='width: 58%; padding-left: 20px;' id='tester'>". $formSubmit($formActe->get ( 'terminer' )) ."</td>
+    			  </tr>
+              </table>
+    		  <div id='scriptVueActe'> </div>
+   
+    	      <script>
+     			//EMPECHER LA TOUCHE ENTREE DE SOUMETTRE DE FORMULAIRE
+    			//EMPECHER LA TOUCHE ENTREE DE SOUMETTRE DE FORMULAIRE
+    			$('table tr td input').keypress(function(event) {
+	               if (event.keyCode == 13) {
+		             return false;
+	               }
+                });
+    		  </script>
+    	      ";
+    	
+    	$this->getResponse ()->setMetadata ( 'Content-Type', 'application/html' );
+    	return $this->getResponse ()->setContent ( Json::encode ( $html ) );
+    }
+    
+    public function listeActesAjaxAction() {
+    	$output = $this->getParametragesTable()->getListeActes();
+    	return $this->getResponse ()->setContent ( Json::encode ( $output, array (
+    			'enableJsonExprFinder' => true
+    	) ) );
+    }
+    
+    public function getInfosActeAction() {
+    	$id_acte = $this->params()->fromPost ('id');
+    
+    	$infos = $this->getParametragesTable()->getInfosActe($id_acte);
+    
+    	$html ="<script>
+    			  $('#designationVue').html('".str_replace("'", "\'", $infos['designation'])."');
+    			  $('#tarifVue').html('".$this->prixMill($infos['tarif'] )."');
+    		    </script>";
+    
+    
+    	$this->getResponse ()->setMetadata ( 'Content-Type', 'application/html' );
+    	return $this->getResponse ()->setContent ( Json::encode ( $html ) );
+    }
+    
+    public function getInfosModificationActeAction() {
+
+    	$id_acte = $this->params()->fromPost ('id');
+    	
+    	$infos = $this->getParametragesTable()->getInfosActe($id_acte);
+    	
+    	$html ="<script>
+    			 $('#designation').val('".str_replace("'", "\'", $infos['designation'])."');
+    			 $('#tarif').val('".$infos['tarif']."');
+    		    </script>";
+    	
+    	$this->getResponse ()->setMetadata ( 'Content-Type', 'application/html' );
+    	return $this->getResponse ()->setContent ( Json::encode ( $html ) );
+    	
+    }
+    
+    public function ajouterActeAction(){ 
+    	
+    	$designation = $this->params()->fromPost ('designation');
+    	$tarif = $this->params()->fromPost ('tarif');
+    	$updateActe = (int) $this->params()->fromPost ('updateActe', 0);
+    
+    
+    	$uAuth = $this->getServiceLocator()->get('Admin\Controller\Plugin\UserAuthentication'); //@todo - We must use PluginLoader $this->userAuthentication()!!
+    	$username = $uAuth->getAuthService()->getIdentity();
+    	$user = $this->getUtilisateurTable()->getUtilisateursWithUsername($username);
+    	 
+    	if($updateActe == 0){
+    		$this->getParametragesTable()->addActe($designation, $tarif, $user['id_personne']);
+    	} else {
+    		$this->getParametragesTable()->updateActe($updateActe, $designation, $tarif, $user['id_personne']);
+    	}
+    
+    
+    	$this->getResponse ()->setMetadata ( 'Content-Type', 'application/html' );
+    	return $this->getResponse ()->setContent ( Json::encode (  ) );
+    }
+    
+    public function supprimerActeAction(){
+    	$id_acte = (int)$this->params()->fromPost ('id');
+    	 
+    	$result = $this->getParametragesTable()->supprimerActe($id_acte);
+    	 
+    	$this->getResponse ()->setMetadata ( 'Content-Type', 'application/html' );
+    	return $this->getResponse ()->setContent ( Json::encode ( $result ) );
+    }
 }

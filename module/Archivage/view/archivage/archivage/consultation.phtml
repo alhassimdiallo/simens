@@ -125,6 +125,7 @@ function getservices(cle)
 $(function() {
 	$( "#tabsAntecedents" ).tabs();
 	$( "#tabs" ).tabs();
+	$( "#tabsInstrumental" ).tabs();
 
 });
 AntecedentScript();
@@ -219,9 +220,28 @@ width: 190px; /* la largeur du champ input*/
 #etat_civil
 {
 	color: green;
+	width: 70%;
 }
 
-#contenu{ visibility: hidden }
+
+#etat_civil td 
+{
+	vertical-align: top;
+}
+
+#etat_civil td p
+{
+	margin-right: 15px;
+	max-height: 45px;
+	max-width: 95%;
+	overflow: auto;
+}
+
+#etat_civil tr{
+	width: 70%;
+}
+
+#contenu{ visibility: hidden; }
 
 </style>
 
@@ -266,15 +286,15 @@ echo $this->form()->openTag($form); ?>
         </p>
          <table id="etat_civil">
              <tr>
-			   	<td style='width:160px; font-family: police1;font-size: 12px;'>
+			   	<td style='width:27%; font-family: police1;font-size: 12px;'>
 			   		<div id="aa"><a style="text-decoration: underline;">Pr&eacute;nom</a><br><p style='font-weight: bold;font-size: 17px;'><?php echo $this->lesdetails['PRENOM'];?></p></div>
 			   	</td>
 
-			   	<td style='width:160px; font-family: police1;font-size: 12px;'>
+			   	<td style='width:35%; font-family: police1;font-size: 12px;'>
 			   		<div id="aa"><a style="text-decoration: underline;">Lieu de naissance</a><br><p style='font-weight: bold;font-size: 17px;'><?php echo $this->lesdetails['LIEU_NAISSANCE'];?></p></div>
 			   	</td>
 
-			    <td style='width:160px; font-family: police1;font-size: 12px;'>
+			    <td style='width:38%; font-family: police1;font-size: 12px;'>
 			   		<div id="aa"><a style="text-decoration: underline;">T&eacute;l&eacute;phone</a><br><p style='font-weight: bold;font-size: 17px;'><?php echo $this->lesdetails['TELEPHONE'];?></p></div>
 			   	</td>
 
@@ -315,12 +335,12 @@ echo $this->form()->openTag($form); ?>
 			   		<div id="aa"><a style="text-decoration: underline;">Date de naissance</a><br><p style='font-weight: bold;font-size: 19px;'><?php echo $Control->convertDate($this->lesdetails['DATE_NAISSANCE']);?></p></div>
 			   	</td>
 
-			    <td style='display:"block"; width: 195px; font-family: police1;font-size: 12px;'>
+			    <td style='font-family: police1;font-size: 12px;'>
 			   		<div id="aa"><a style="text-decoration: underline;">Adresse</a><br><p style='font-weight: bold;font-size: 19px;'><?php echo $this->lesdetails['ADRESSE'];?></p></div>
 
 			   	</td>
 			   	
-			   	<td style='display:"block"; width: 300px; font-family: police1;font-size: 12px; text-align: right;'>
+			   	<td style='font-family: police1;font-size: 12px; text-align: right;'>
 			   	  
 			   	</td>
 			  </tr>
@@ -348,7 +368,7 @@ echo $this->form()->openTag($form); ?>
    <!-- ************** Accordeon NOUVELLES CONSTANTES ******************-->
 
    <!--*2*-->
-     <div style='font-family: police2;font-size: 17px; font-weight: bold;'>Motifs d'admission et Constantes</div>
+     <div id='motifsAdmissionConstanteClick' style='font-family: police2;font-size: 17px; font-weight: bold;'>Motifs d'admission et Constantes</div>
         <div style=' max-height: 470px;'>
 
 
@@ -436,7 +456,7 @@ echo $this->form()->openTag($form); ?>
           <!--**************** sous accordeon LES CONSTANTES ************************-->
           <!--**************** sous accordeon LES CONSTANTES ************************-->
            <!-- **2** -->
-              <div style='font-family: police2;font-size: 17px; font-weight: bold;'> Constantes </div>
+              <div id='constantesClick' style='font-family: police2;font-size: 17px; font-weight: bold;'> Constantes </div>
                 <div style="max-height: 400px;">
                  <table  id="respond" style="width: 100%;">
 
@@ -470,13 +490,25 @@ echo $this->form()->openTag($form); ?>
 
                     <tr style="height: 115px;">
                         <td rowspan="2" colspan="2" style="vertical-align: top;" >
-                        <div class="comment-form-author"> <label> <img style="cursor: pointer; position: absolute; padding-right: 120px; margin-left: -5px;" id="depliantBandelette" src='<?php echo $this->basePath().'/img/light/plus.png'?>' title="deplier"/> <pouss style='margin-left: 20px;'>Bandelette urinaire</pouss> </label> </div>
-                        <div id="BUcheckbox" style="background: #ffffff; width: 95%; height: 117px; border: 0px solid #eeeeee;">
+                        <div class="comment-form-author"> <label> <img style="cursor: pointer; position: absolute; padding-right: 120px; margin-left: -5px;" id="depliantBandelette" src='<?php echo $this->basePath().'/img/light/plus.png'?>' /> <pouss style='margin-left: 20px;'>Bandelette urinaire</pouss> </label> </div>
+                        <div id="BUcheckbox" style="background: #ffffff; width: 100%; height: 117px; border: 0px solid #eeeeee;">
                         
-                           <div style="float: left;"><label style="width: 125px; text-align: right;"> Albumine :  </label><?php echo $this->formRow($form->get('albumine'));?></div><div id="labelAlbumine"  style="float: left;"> <div id="fleche"  style="float: left;"> <label style="width: 15px;text-align: center;"> » </label></div> <div id="ChoixPlus"  style="float: left;"><label style="width: 15px;text-align: center;"> 3+ </label></div><div id="labelCroixAlbumine"  style="float: left;"><?php echo $this->formRow($form->get('croixalbumine'));?></div></div> <br>
-                           <div style="float: left;"><label style="width: 125px; text-align: right;"> Sucre :  </label><?php echo $this->formRow($form->get('sucre'));?></div><div id="labelSucre"  style="float: left;"> <div id="fleche2"  style="float: left;"> <label style="width: 15px;text-align: center;"> » </label></div> <div id="ChoixPlus2"  style="float: left;"><label style="width: 15px;text-align: center;"> 3+ </label></div><div id="labelCroixSucre"  style="float: left;"><?php echo $this->formRow($form->get('croixsucre'));?></div></div> <br>
-                           <div style="float: left;"><label style="width: 125px; text-align: right;"> Corps cétoniques :  </label><?php echo $this->formRow($form->get('corpscetonique'));?></div><div id="labelCorpscetonique"  style="float: left;"> <div id="fleche3"  style="float: left;"><label style="width: 15px;text-align: center;"> » </label></div> <div id="ChoixPlus3"  style="float: left;"><label style="width: 15px;text-align: center;"> 3+ </label></div><div id="labelCroixCorpscetonique"  style="float: left;"><?php echo $this->formRow($form->get('croixcorpscetonique'));?></div></div>
-                        
+                          <table style="width: 100%;">
+                          
+                            <tr style="width: 100%;">
+                              <td style="width: 100%; "> <div style="float: left;"><label style="width: 125px; text-align: right;"> Albumine :  </label><?php echo $this->formRow($form->get('albumine'));?></div><div id="labelAlbumine"  style="float: left;"> <div id="fleche"  style="float: left;"> <label style="width: 15px;text-align: center;"> » </label></div> <div id="ChoixPlus"  style="float: left;"><label style="width: 15px;text-align: center;"> 3+ </label></div><div id="labelCroixAlbumine"  style="float: left;"><?php echo $this->formRow($form->get('croixalbumine'));?></div></div> <br> </td>
+                            </tr>  
+                            
+                            <tr style="width: 100%;">  
+                              <td style="width: 100%; "> <div style="float: left;"><label style="width: 125px; text-align: right;"> Sucre :  </label><?php echo $this->formRow($form->get('sucre'));?></div><div id="labelSucre"  style="float: left;"> <div id="fleche2"  style="float: left;"> <label style="width: 15px;text-align: center;"> » </label></div> <div id="ChoixPlus2"  style="float: left;"><label style="width: 15px;text-align: center;"> 3+ </label></div><div id="labelCroixSucre"  style="float: left;"><?php echo $this->formRow($form->get('croixsucre'));?></div></div> <br> </td>
+                            </tr>
+                          
+                            <tr style="width: 100%;">
+                              <td style="width: 100%; "> <div style="float: left;"><label style="width: 125px; text-align: right;"> Corps cétoniques :  </label><?php echo $this->formRow($form->get('corpscetonique'));?></div><div id="labelCorpscetonique"  style="float: left;"> <div id="fleche3"  style="float: left;"><label style="width: 15px;text-align: center;"> » </label></div> <div id="ChoixPlus3"  style="float: left;"><label style="width: 15px;text-align: center;"> 3+ </label></div><div id="labelCroixCorpscetonique"  style="float: left;"><?php echo $this->formRow($form->get('croixcorpscetonique'));?></div></div> </td>
+                            </tr>
+                          
+                          </table>
+                          
                         </div>
                         
                         </td>
@@ -1349,7 +1381,7 @@ echo $this->form()->openTag($form); ?>
                             <table id="respondeee" class="imageRadio" style="width: 100%;">
                                    <tr class="form-examen-morphologique" style="width: 100%;">
                                        <th style="width: 40%; vertical-align: top;"> <?php echo $this->formRow($form->get('radio'));?></th>
-                                       <th style="width: 25%; vertical-align: top; padding-top: 50px;"> <img src="<?php echo $this->basePath().'/images_icons/right_64.png';?>" /></th>
+                                       <th style="width: 25%; vertical-align: top; padding-top: 50px; padding-left: 80px;"> <img src="<?php echo $this->basePath().'/images_icons/right_64.png';?>" /></th>
                                        <th style="width: 34%; padding-bottom:15px; margin-right: 40px;"> 
                                            <!-- PIKACHOOSE -->
                                            <!-- PIKACHOOSE -->
@@ -1381,7 +1413,7 @@ echo $this->form()->openTag($form); ?>
                             <table id="respondeee" class="imageEchographie" style="width: 100%;">
                                    <tr class="form-examen-morphologique" style="width: 100%;">
                                        <th style="width: 40%; vertical-align: top;"> <?php echo $this->formRow($form->get('ecographie'));?></th>
-                                       <th style="width: 25%; vertical-align: top; padding-top: 50px;"> <img src="<?php echo $this->basePath().'/images_icons/right_64.png';?>" /></th>
+                                       <th style="width: 25%; vertical-align: top; padding-top: 50px; padding-top: 80px;"> <img src="<?php echo $this->basePath().'/images_icons/right_64.png';?>" /></th>
                                        <th style="width: 34%; padding-bottom:15px; margin-right: 40px;"> 
                                            <!-- PIKACHOOSE -->
                                            <!-- PIKACHOOSE -->
@@ -1413,7 +1445,7 @@ echo $this->form()->openTag($form); ?>
                             <table id="respondeee" class="imageIRM" style="width: 100%;">
                                    <tr class="form-examen-morphologique" style="width: 100%;">
                                        <th style="width: 40%; vertical-align: top;"> <?php echo $this->formRow($form->get('irm'));?></th>
-                                       <th style="width: 25%; vertical-align: top; padding-top: 50px;"> <img src="<?php echo $this->basePath().'/images_icons/right_64.png';?>" /></th>
+                                       <th style="width: 25%; vertical-align: top; padding-top: 50px; padding-left: 80px;"> <img src="<?php echo $this->basePath().'/images_icons/right_64.png';?>" /></th>
                                        <th style="width: 34%; padding-bottom:15px; margin-right: 40px;"> 
                                            <!-- PIKACHOOSE -->
                                            <!-- PIKACHOOSE -->
@@ -1442,27 +1474,103 @@ echo $this->form()->openTag($form); ?>
                                  <!-- SCANNER SCANNER SCANNER  -->
                                  <!-- SCANNER SCANNER SCANNER  -->
                                  <!-- SCANNER SCANNER SCANNER  -->
+                 <?php
+                   echo $this->headLink()->appendStylesheet($this->basePath().'/js/plugins/jPlayer-2.9.2/dist/skin/blue.monday/css/jplayer.blue.monday.min.css');
+                   echo $this->headScript()->appendFile($this->basePath().'/js/plugins/jPlayer-2.9.2/dist/jplayer/jquery.jplayer.min.js');
+                   echo $this->headScript()->appendFile($this->basePath().'/js/plugins/jPlayer-2.9.2/dist/add-on/jplayer.playlist.min.js');
+                   echo $this->headScript()->appendFile($this->basePath().'/js/archivage/jsAjouterSuppimerVideos.js');
+                 ?>
                             <table id="respondeee" class="imageScanner" style="width: 100%;">
                                    <tr class="form-examen-morphologique" style="width: 100%;">
+                                       
                                        <th style="width: 40%; vertical-align: top;"> <?php echo $this->formRow($form->get('scanner'));?></th>
-                                       <th style="width: 25%; vertical-align: top; padding-top: 50px;"> <img src="<?php echo $this->basePath().'/images_icons/right_64.png';?>" /></th>
+                                       <th style="width: 25%; vertical-align: top; padding-top: 50px; padding-left: 80px;"> <img src="<?php echo $this->basePath().'/images_icons/right_64.png';?>" /></th>
                                        <th style="width: 34%; padding-bottom:15px; margin-right: 40px;"> 
-                                           <!-- PIKACHOOSE -->
-                                           <!-- PIKACHOOSE -->
-                                           <div id="pika7">
-                                             <div id="pika8">
-                                                <!-- EMPLACEMENT DES IMAGES -->
-                                                <!-- EMPLACEMENT DES IMAGES -->
-                                                <!-- EMPLACEMENT DES IMAGES -->
-                                             </div>
-                                           </div>
-                                           <div id="AjoutImageScanner" style="float: right; position: relative; bottom: 42px; right: 5px;">
-                                                  <input type='file' name="fichierScanner" />
-			                                      <!-- RECUPERER L'IMAGE -->
-			                                      <input type='hidden' id="fichierScanner_tmp" name="fichierScanner_tmp" />
-			                                      <!-- FICHIER TAMPON POUR RECUPERER L'IMAGE DANS LE CONTROLLER -->
-                                           </div>
+                                         <!-- POUR LE MENU VIDEO ET IMAGE -->
+                                         <!-- POUR LE MENU VIDEO ET IMAGE -->
+                                         <!-- POUR LE MENU VIDEO ET IMAGE -->
+                                         <div id="divPourMenuImagesVideos" style="height: 150px;">
+                                          <table style='width: 100%; margin-bottom: 25px; margin-top: 25px;'>
+                                            <tr style='width: 100%; '>
+                                               <td style='width: 50%;'>
+                                                 <img id="IconeImagesMenu" style="cursor:pointer; top:20px; float: right;" src="<?php echo $this->basePath().'/images_icons/icone_image_96X96.png';?>" />
+                                               </td>
+                                               <td style='width: 50%;'>
+                                                 <img id="IconeVideosMenu" style="cursor:pointer; top:20px; float: right;" src="<?php echo $this->basePath().'/images_icons/icone_video_96X96.png';?>" />
+                                               </td>
+                                            </tr>
+                                            <tr style='width: 100%; '>
+                                               <td style='width: 50%;'>
+                                                 <span style="top:5px; float: right; margin-right: 25px; font-family: Times new roman; color: green;" > Images</span>
+                                               </td>
+                                               <td style='width: 50%;'>
+                                                 <span style="top:5px; float: right; margin-right: 25px; font-family: Times new roman; color: green;" > Vid&eacute;os</span>
+                                               </td>
+                                            </tr>
+                                          </table>
+                                         </div>
+                                         
+                                         <!-- POUR LES VIDEOS -->
+                                         <!-- POUR LES VIDEOS -->
+                                         <!-- POUR LES VIDEOS -->
+                                         <div id="divVideoScannerPourMenu">
+                                          <table style='width: 100%;'>
+                                            <tr style='width: 100%;'>
+                                               <td>
+                                                   <table style='width: 100%;'>
+                                                       <tr style='width: 100%;'>
+                                                           <td style='width: 10%; vertical-align:top;'>
+                                                               <div style='width: 17px;'> <img id="RetourDeVideosVersMenu" style="cursor:pointer; width: 16px; height:16px;" src="<?php echo $this->basePath().'/images_icons/left_16.png';?>" /> </div>
+                                                           </td>
+                                                           <td style='width: 90%;'>
+                                                               <div id='AfficherLecteurVideoScanner' style='margin-left: 1px; margin-right: 0px; margin-bottom: 15px;'>
+                                                                  Emplacement de la video pour le scanner
+                                                               </div>
+                                                           </td>
+                                                       </tr>
+                                                   </table> 
+                                               </td>
+                                            </tr>
+                                          </table>
+                                         </div>
+                                         
+                                         <!-- POUR LES IMAGES -->
+                                         <!-- POUR LES IMAGES -->
+                                         <!-- POUR LES IMAGES -->
+                                         <div id="divImageScannerPourMenu">
+                                           
+                                           <table style='width: 100%;'>
+                                                 <tr style='width: 100%;'>
+                                                    <td style='width: 1%; vertical-align:top;'>
+                                                        <div style='width: 16px; position: absolute;'> <img id="RetourDeImagesVersMenu" style="cursor:pointer; width: 16px; height:16px;" src="<?php echo $this->basePath().'/images_icons/left_16.png';?>" /> </div>                                                       
+                                                    </td>
+                                                   
+                                                    
+                                                    <td style='width: 99%;'>
+                                                       <!-- PIKACHOOSE -->
+                                                       <!-- PIKACHOOSE -->
+                                                       <div id="pika7">
+                                                          <div id="pika8">
+                                                             <!-- EMPLACEMENT DES IMAGES -->
+                                                             <!-- EMPLACEMENT DES IMAGES -->
+                                                             <!-- EMPLACEMENT DES IMAGES -->
+                                                          </div>
+                                                       </div>
+                                                       <div id="AjoutImageScanner" style="float: right; position: relative; bottom: 42px; right: 5px;">
+                                                          <input type='file' name="fichierScanner" />
+			                                              <!-- RECUPERER L'IMAGE -->
+			                                              <input type='hidden' id="fichierScanner_tmp" name="fichierScanner_tmp" />
+			                                              <!-- FICHIER TAMPON POUR RECUPERER L'IMAGE DANS LE CONTROLLER -->
+                                                       </div>
+                                                    </td>
+                                                 </tr>
+                                           </table>
+                                           
+                                         </div>
+                                         
                                        </th>
+                                       
+                                       
                                    </tr>
                                    
                                    <tr style="width: 100%;">
@@ -1478,7 +1586,7 @@ echo $this->form()->openTag($form); ?>
                             <table id="respondeee" class="imageFibroscopie" style="width: 100%;">
                                    <tr class="form-examen-morphologique" style="width: 100%;">
                                        <th style="width: 40%; vertical-align: top;"> <?php echo $this->formRow($form->get('fibrocospie'));?></th>
-                                       <th style="width: 25%; vertical-align: top; padding-top: 50px;"> <img src="<?php echo $this->basePath().'/images_icons/right_64.png';?>" /></th>
+                                       <th style="width: 25%; vertical-align: top; padding-top: 50px; padding-left: 80px;"> <img src="<?php echo $this->basePath().'/images_icons/right_64.png';?>" /></th>
                                        <th style="width: 34%; padding-bottom:15px; margin-right: 40px;"> 
                                            <!-- PIKACHOOSE -->
                                            <!-- PIKACHOOSE -->
@@ -1746,9 +1854,16 @@ echo $this->form()->openTag($form); ?>
                         <!-- ************** Traitement Chirurgical **************** -->
                             <!-- **2** -->
                             <div style='font-family: police2;font-size: 17px; font-weight: bold;'> Chirurgical</div>
-                                  <div >
+                                  <div style="max-height: 370px;">
 
-                                   <div style=" padding-bottom:0px; margin-bottom: 5px; border-bottom: 2px solid green; margin-left: 0px;"></div>
+                                  <div id="tabs" >
+                                     <ul>
+                                        <li><a href="#tabs-1">Demande de visite pr&eacute;-anesth&eacute;sique</a></li>
+                                        <li id='CompteRenduTabs'><a href="#tabs-2">Compte rendu op&eacute;ratoire</a></li>
+                                     </ul>
+                                   
+                                     <div id="tabs-1"> 
+                                     <div style=" padding-bottom:0px; margin-bottom: 5px; border-bottom: 2px solid green; margin-left: 0px;"></div>
                                        <!-- LE PDF POUR IMPRESSION-->
                                        <div class="rendezvous">
                                            <hass><input type="submit" alt="Constantes" title="Imprimer" name="traitement_chirurgical" id="chirurgical1"></hass>
@@ -1757,9 +1872,9 @@ echo $this->form()->openTag($form); ?>
                                        <div class="annulertransfert">
                                            <hass><input type="submit" alt="Constantes" title="Annuler" name="annuler_traitement_chirurgical" id="annuler_traitement_chirurgical"></hass>
                                        </div>
-                                   <div style=" padding-bottom:40px; margin-bottom: 10px; border-bottom: 1px dashed green; margin-left: 0px; margin-right: 0px;"></div>
+                                     <div style=" padding-bottom:40px; margin-bottom: 10px; border-bottom: 1px dashed green; margin-left: 0px; margin-right: 0px;"></div>
 
-                                   <table id="chirurgical" style="width: 100%;">
+                                     <table id="chirurgical" style="width: 100%;">
                                         <tr class="form-chirurgical" style="width: 100%;">
                                             <th style="width: 33%;"> <?php echo $this->formRow($form->get('diagnostic_traitement_chirurgical'));?> </th>
                                             <th style="width: 33%;"> <?php echo $this->formRow($form->get('observation'));?> </th>
@@ -1778,18 +1893,64 @@ echo $this->form()->openTag($form); ?>
                                             </th>
                                            
                                         </tr>
-                                    </table>
+                                      </table>
 
-                                  </div>
-
+                                    </div>
+                      
+                    <div id="tabs-2" style="min-height: 100px;"> 
+                       <table id="transfert" style="width: 100%; ">   
+                        <tr style="width:100%;">
+                          <td style="width: 55%; vertical-align:top;"> 
+                          <!-- span style="color: red; font-size: 12px; font-family: Time new romans; padding-bottom: 0px;"> * La taille du fichier ne doit pas d&eacute;passer 8Mo </span-->
+                              <div id="AfficherLecteur" style='margin-right: 40px; vertical-align:top;'>
+                                 <!-- ****** EMPLACEMENT DU LECTEUR AUDIO (MP3)********* --> 
+                              </div>
+                          </td>
+                          <td class="form-transfert" style="width: 45%; vertical-align:top;"> 
+                             <?php echo $this->formRow($form->get('note_compte_rendu_operatoire'));?> 
+                             <table style="width: 97%;">
+                             <tr style="width: 100%;">
+                                            <td style="width: 100%; padding-right:30px;">
+                                                <div style='margin-top:10px; float:right; '> 
+                                                     <button id='bouton_compte_rendu_chirurgical_valider'>Valider</button>  
+                                                </div >
+                                                <div style='margin-top:10px; float:right; '> 
+                                                     <button id='bouton_compte_rendu_chirurgical_modifier'>Modifier</button>  
+                                                </div>
+                                            </td>
+                              </tr>
+                              </table>
+                          </td>
+                          
+                        </tr>
+                       </table>
+                     </div>
+                       
+                       </div>
+                          
+                    <script type="text/javascript">
+                     <?php echo $this->headScript()->appendFile($this->basePath().'/js/archivage/jsAjouterSuppimerMp3.js');?>
+                    </script>          
+                    </div>
 
 
                         <!-- ************** Traitement Instrumental **************** -->
                            <!-- **3** -->
-                            <div style='font-family: police2;font-size: 17px; font-weight: bold;'> Instrumental</div>
-                                <div>
+                             <div style='font-family: police2;font-size: 17px; font-weight: bold;'> Instrumental</div>
+                                 
+                                 <div style="max-height: 370px;">
 
-                                  <div style=" padding-bottom:0px; margin-bottom: 5px; border-bottom: 2px solid green; margin-left: 0px;"></div>
+                                 <div id="tabsInstrumental">
+                                 
+                                    <ul>
+                                       <li><a href="#tabsInstrumental-1">Traitement</a></li>
+                                       <li id='CompteRenduInstrumentalTabs'><a href="#tabsInstrumental-2">Compte rendu op&eacute;ratoire</a></li>
+                                    </ul>
+ 
+                                    <div id="tabsInstrumental-1"> 
+                                       <!-- ******* -->
+                                       <!-- ******* -->
+                                       <div style=" padding-bottom:0px; margin-bottom: 5px; border-bottom: 2px solid green; margin-left: 0px;"></div>
                                        <!-- LE PDF POUR IMPRESSION-->
                                        <div class="rendezvous">
                                            <hass><input type="submit" alt="Constantes" title="Imprimer" name="traitement_instrumental" id="instrumental1"></hass>
@@ -1798,35 +1959,75 @@ echo $this->form()->openTag($form); ?>
                                        <div class="annulertransfert">
                                            <hass><input type="submit" alt="Constantes" title="Annuler" name="annuler_traitement_instrumental" id="annuler_traitement_instrumental"></hass>
                                        </div>
-                                   <div style=" padding-bottom:40px; margin-bottom: 10px; border-bottom: 1px dashed green; margin-left: 0px; margin-right: 0px;"></div>
+                                       <div style=" padding-bottom:40px; margin-bottom: 10px; border-bottom: 1px dashed green; margin-left: 0px; margin-right: 0px;"></div>
 
-                                   <table id="Traitementinstrumental" style="width: 100%;">
-                                        <tr class="form-instrumental" style="width: 90%;">
+                                       <table id="Traitementinstrumental" style="width: 100%;">
+                                         <tr class="form-instrumental" style="width: 90%;">
                                             <th style="width: 95%;"> <?php echo $this->formRow($form->get('endoscopieInterventionnelle'));?> </th>
-                                        </tr>
-                                        <tr class="form-instrumental" style="width: 90%;">
-                                            <th style="width: 95%;">  <?php echo $this->formRow($form->get('radiologieInterventionnelle'));?>  </th>
-                                        </tr>
-                                        <tr class="form-instrumental" style="width: 90%;">
+                                         </tr>
+                                         <tr class="form-instrumental" style="width: 90%;">
+                                            <th style="width: 95%;"> <?php echo $this->formRow($form->get('radiologieInterventionnelle'));?> </th>
+                                         </tr>
+                                         <tr class="form-instrumental" style="width: 90%;">
                                             <th style="width: 95%;"> <?php echo $this->formRow($form->get('cardiologieInterventionnelle'));?> </th>
-                                        </tr>
-                                        <tr class="form-instrumental" style="width: 90%;">
+                                         </tr>
+                                         <tr class="form-instrumental" style="width: 90%;">
                                             <th style="width: 95%;"> <?php echo $this->formRow($form->get('autresIntervention'));?> </th>
-                                        </tr>
-                                        <tr style="width: 90%; height: 50px;">
+                                         </tr>
+                                         <!-- tr style="width: 90%;">
                                             <th style="width: 100%; padding-right:30px;">
-                                                <div style='margin-top: 10px; float:right; '> 
+                                                <div style='margin-top:10px; float:right; '> 
                                                      <button id='bouton_instrumental_valider'>Valider</button>  
                                                 </div >
-                                                <div style='margin-top: 10px; float:right; '> 
+                                                <div style='margin-top:10px; float:right; '> 
                                                      <button id='bouton_instrumental_modifier'>Modifier</button>  
                                                 </div>
                                             </th>
-                                           
-                                        </tr>
-                                    </table>
+                                          </tr-->
+                                       </table>
+                                       <!-- ******* -->
+                                       <!-- ******* -->
+                                    </div>
 
+                                    <div id="tabsInstrumental-2"> 
+                                      <!-- ******* -->
+                                      <!-- ******* -->
+                                      <input type='hidden' id='temoinAudio'>
+                                      <table id="transfert" style="width: 100%; ">   
+                                        <tr style="width:100%;">
+                                          <td style="width: 55%; vertical-align:top;"> 
+                                            <div id="AfficherLecteurInstrumental" style='margin-right: 40px;'>
+                                                <!-- ****** EMPLACEMENT DU LECTEUR AUDIO (MP3)********* --> 
+                                            </div>
+                                          </td>
+                                          <td class="form-transfert" style="width: 45%; vertical-align:top;"> 
+                                              <?php echo $this->formRow($form->get('note_compte_rendu_operatoire_instrumental'));?> 
+                                              <table style="width: 97%;">
+                                                <tr style="width: 100%;">
+                                                  <td style="width: 100%; padding-right:30px;">
+                                                      <div style='margin-top:10px; float:right; '> 
+                                                        <button id='bouton_compte_rendu_instrumental_valider'>Valider</button>  
+                                                      </div >
+                                                      <div style='margin-top:10px; float:right; '> 
+                                                         <button id='bouton_compte_rendu_instrumental_modifier'>Modifier</button>  
+                                                      </div>
+                                                  </td>
+                                                </tr>
+                                              </table>
+                                          </td>
+                                        </tr>
+                                      </table>
+                                      <!-- ******* -->
+                                      <!-- ******* -->
+                                    </div>
+                                    
+                                    
+                                    
                                  </div>
+                                  
+                            
+                              </div>
+                            
                             
 
              </div>
@@ -1980,19 +2181,19 @@ echo $this->form()->openTag($form); ?>
 
         </div>
 </div>
+<input type="hidden" id="temoinInterfaceSoumis" value="1">
 
-
-                     <table>
+                     <table style="width: 100%; margin-top: 20px;">
                        <tr>
-                         <td style="background-color:#eeeeee;">
-                             <div> <button name="terminer2" id="terminer2" style=" margin-left:400px; margin-top: 20px; font-family: police2;font-size: 18px; font-weight: bold;"> Terminer </button> </div>
-                         </td>
-                         <td style="background-color:#eeeeee;">
-                             <div> <button id="annulerConsultation" style=" margin-right:340px; margin-top: 20px; font-family: police2;font-size: 18px; font-weight: bold;"> Annuler </button> </div>
+                         <td style="background-color: #eeeeee; height: 40px;width: 100%; ">
+                             <p style="text-align: center;"> 
+                                <button id="annulerConsultation" style="font-family: police2;font-size: 18px; font-weight: bold;"> Annuler </button>
+                                <button name="terminer2" id="terminer2" style="font-family: police2;font-size: 18px; font-weight: bold;"> Terminer </button> 
+                             </p>
                          </td>
                        </tr>
                      </table>
-
+                     
                      <!-- POP UP pour Confirmation Annulation -->
                             <div id="confirmation2" title="Confirmation de l'annulation" style="display:none;">
                               <p style="font-size: 16px;">

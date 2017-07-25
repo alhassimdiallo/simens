@@ -1,14 +1,29 @@
 <!-- MES STYLES --> 
 <?php echo $this->headLink()->appendStylesheet($this->basepath().'/css/admin/styleListeUtilisateurs.css');?>
 <!-- MES JS -->
-<?php 
-echo $this->headScript()->appendFile($this->basepath().'/js/admin/jsListeUtilisateurs.js');?>
+<?php echo $this->headScript()->appendFile($this->basepath().'/js/admin/jsListeUtilisateurs.js');?>
 
+<script type="text/javascript">
+$(window).load(function () {
+	$('#wait').toggle(false);
+	$('#contenuInterface').fadeIn().css({'visibility':'visible'});
+});
+</script>
+
+<style>
+#contenuInterface{ visibility: hidden };
+</style>
 
 <div id="titre" style='font-family: police2; text-decoration: none; color: green; font-size: 20px; font-weight: bold; padding-left:20px;'>
 	<iS style='font-size: 25px;'>&curren;</iS>
 	LISTE DES UTILISATEURS
 </div>
+
+
+<div id="wait" style="color: gray; font-size: 20px; text-align: center; margin-top: 80px;" > <span> Chargement ... </span> </div>
+
+<div id="contenuInterface"> 
+
 <div id="contenu"> 
         <div style="margin-right: 20px; float:right; font-size: 15px; color: gray; margin-top:5px;"><a style="text-decoration: none; cursor:pointer;" href="javascript:ajouterUtilisateur()" ><img src='../images_icons/right_16.png' title="suivant" /><i style="font-family: Times New Roman; font-size: 15px; color: green;"> nouvel utilisateur</i></a></div>
             <table id="utilisateurs" class="table table-bordered tab_list_mini" >
@@ -99,8 +114,14 @@ echo $this->headScript()->appendFile($this->basepath().'/js/admin/jsListeUtilisa
 			   <div style="width:100%; background: #cccccc; height:2px; margin-top: 5px; margin-bottom: 15px;"></div>
 			 </div>
              <div class="comment-form-patient" ><label style='top: 5px;'> Role </label></div> 
-             <div id="LesChoixRadio" style="border-top-right-radius: 15px; width: 85%; height: 100%; background: #f5f5f5; padding-left: 10px;"> 
+             
+             <div style='width: 90%;'>
+               <div id="LesChoixRadio" style="float: left; border-top-right-radius: 15px; width: 40%; height: 100%; background: #f5f5f5; padding-left: 10px;"> 
                   <?php echo $this->formradio($form->get('role'));?>
+               </div>
+               <div id="LesChoixRadioPoly" style="float: left; border-top-right-radius: 15px; width: 50%; height: 100%; background: #f5f5f5; padding-left: 10px;"> 
+                  <?php echo $this->formradio($form->get('rolepolyclinique'));?>
+               </div>
              </div>
          </td> 
       </tr>
@@ -200,7 +221,7 @@ echo $this->headScript()->appendFile($this->basepath().'/js/admin/jsListeUtilisa
       </div>
 </div>
 
-
+</div>
 
 <script type="text/javascript">
 $("#vue_patient").toggle(false);
@@ -260,6 +281,10 @@ $('#confirmerpassword').blur(function(){
 
     var boutons = $('#LesChoixRadio input[name=role]');
 	$(boutons).click(function(){
+		boutonsPoly.attr('checked', false).attr('required', false);
+		
+		$('#role').attr('required', true);
+
 		if(boutons[0].checked){
 			$('#fonction').val('Administrateur');
 		}else
@@ -295,4 +320,36 @@ $('#confirmerpassword').blur(function(){
 												}
 	});
 
+
+	var boutonsPoly = $('#LesChoixRadioPoly input[name=rolepolyclinique]');
+	$(boutonsPoly).click(function(){
+		boutons.attr('checked', false).attr('required', false);
+		
+		$('#rolepolyclinique').attr('required', true);
+
+		if(boutonsPoly[0].checked){
+			$('#fonction').val('Cardiologue');
+		}else
+			if(boutonsPoly[1].checked){
+				$('#fonction').val('Gynécologue');
+			}else
+				if(boutonsPoly[2].checked){
+					$('#fonction').val('Pédiatre');
+				}else
+					if(boutonsPoly[3].checked){
+						$('#fonction').val('Psychiatre');
+					}else
+						if(boutonsPoly[4].checked){
+							$('#fonction').val('Pneumologue');
+						}else
+							if(boutonsPoly[5].checked){
+								$('#fonction').val('ORL');
+							}else
+								if(boutonsPoly[6].checked){
+									$('#fonction').val('Kinésitérapeute');
+								}else
+									if(boutonsPoly[7].checked){
+										$('#fonction').val('Sage femme');
+									}
+	});
 </script>

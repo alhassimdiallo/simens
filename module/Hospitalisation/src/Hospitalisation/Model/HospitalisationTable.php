@@ -604,4 +604,60 @@ class HospitalisationTable {
 	
 		return $output;
 	}
+	
+	
+	//GESTION DES FICHIERS VIDEOS
+	//GESTION DES FICHIERS VIDEOS
+	//GESTION DES FICHIERS VIDEOS
+	public function insererVideo($titre , $nom, $format, $id_cons){
+		$db = $this->tableGateway->getAdapter();
+		$sql = new Sql($db);
+		$sQuery = $sql->insert()
+		->into('fichier_video')
+		->columns(array('titre', 'nom', 'format', 'id_cons'))
+		->values(array('titre' => $titre , 'nom' => $nom, 'format' => $format, 'id_cons'=>$id_cons));
+	
+		$stat = $sql->prepareStatementForSqlObject($sQuery);
+		return $stat->execute();
+	}
+	
+	public function getVideos($id_cons){
+		$db = $this->tableGateway->getAdapter();
+		$sql = new Sql($db);
+		$sQuery = $sql->select()
+		->from(array('f' => 'fichier_video'))->columns(array('*'))
+		->where(array('id_cons' => $id_cons))
+		->order('id DESC');
+	
+		$stat = $sql->prepareStatementForSqlObject($sQuery);
+		$result = $stat->execute();
+		return $result;
+	}
+	
+	public function getVideoWithId($id){
+		$db = $this->tableGateway->getAdapter();
+		$sql = new Sql($db);
+		$sQuery = $sql->select()
+		->from(array('f' => 'fichier_video'))->columns(array('*'))
+		->where(array('id' => $id));
+	
+		$stat = $sql->prepareStatementForSqlObject($sQuery);
+		$result = $stat->execute()->current();
+		return $result;
+	}
+	
+	public function supprimerVideo($id){
+	
+		$laVideo = $this->getVideoWithId($id);
+		$result = unlink('C:\wamp\www\simens\public\videos\\'.$laVideo['nom']);
+			
+		$db = $this->tableGateway->getAdapter();
+		$sql = new Sql($db);
+		$sQuery = $sql->delete()->from('fichier_video')->where(array('id' => $id));
+	
+		$stat = $sql->prepareStatementForSqlObject($sQuery);
+		$stat->execute();
+			
+		return $result;
+	}
 }

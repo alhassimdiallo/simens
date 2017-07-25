@@ -264,7 +264,7 @@
     function depliantPlus2() {
     	$('#titre_info_hospitalisation').click(function(){
     		$("#titre_info_hospitalisation").replaceWith(
-    			"<span id='titre_info_hospitalisation' style='margin-left:-10px; cursor:pointer;'>" +
+    			"<span id='titre_info_hospitalisation' style='margin-left:-5px; cursor:pointer;'>" +
     			"<img src='"+tabUrl[0]+"public/img/light/plus.png' /> Infos sur l'hospitalisation "+
     		    "</span>");
     		animationPliantDepliant2();
@@ -278,7 +278,7 @@
     function animationPliantDepliant2() {
     	$('#titre_info_hospitalisation').click(function(){
     		$("#titre_info_hospitalisation").replaceWith(
-    			"<span id='titre_info_hospitalisation' style='margin-left:-10px; cursor:pointer;'>" +
+    			"<span id='titre_info_hospitalisation' style='margin-left:-5px; cursor:pointer;'>" +
     			"<img src='"+tabUrl[0]+"public/img/light/minus.png' /> Infos sur l'hospitalisation"+
     		    "</span>");
     		depliantPlus2();
@@ -293,7 +293,7 @@
     function depliantPlus3() {
     	$('#titre_info_liste').click(function(){
     		$("#titre_info_liste").replaceWith(
-    			"<span id='titre_info_liste' style='margin-left:-10px; cursor:pointer;'>" +
+    			"<span id='titre_info_liste' style='margin-left:-5px; cursor:pointer;'>" +
     			"<img src='"+tabUrl[0]+"public/img/light/minus.png' /> Liste des soins "+
     		    "</span>");
     		animationPliantDepliant3();
@@ -307,7 +307,7 @@
     function animationPliantDepliant3() {
     	$('#titre_info_liste').click(function(){
     		$("#titre_info_liste").replaceWith(
-    			"<span id='titre_info_liste' style='margin-left:-10px; cursor:pointer;'>" +
+    			"<span id='titre_info_liste' style='margin-left:-5px; cursor:pointer;'>" +
     			"<img src='"+tabUrl[0]+"public/img/light/plus.png' /> Liste des soins "+
     		    "</span>");
     		depliantPlus3();
@@ -322,7 +322,7 @@
     function depliantPlus4() {
     	$('#titre_info_demande').click(function(){
     		$("#titre_info_demande").replaceWith(
-    			"<span id='titre_info_demande' style='margin-left:-10px; cursor:pointer;'>" +
+    			"<span id='titre_info_demande' style='margin-left:-5px; cursor:pointer;'>" +
     			"<img src='"+tabUrl[0]+"public/img/light/plus.png' /> D&eacute;tails des infos sur la demande "+
     		    "</span>");
     		animationPliantDepliant4();
@@ -336,7 +336,7 @@
     function animationPliantDepliant4() {
     	$('#titre_info_demande').click(function(){
     		$("#titre_info_demande").replaceWith(
-    			"<span id='titre_info_demande' style='margin-left:-10px; cursor:pointer;'>" +
+    			"<span id='titre_info_demande' style='margin-left:-5px; cursor:pointer;'>" +
     			"<img src='"+tabUrl[0]+"public/img/light/minus.png' /> D&eacute;tails des infos sur la demande "+
     		    "</span>");
     		depliantPlus4();
@@ -386,7 +386,7 @@
     	    		    		data:({'id_cons':id_cons}),
     	    		    		success: function(data) {    
     	    		    			var result = jQuery.parseJSON(data);
-    	    		    			$("#info_liste").fadeOut(function(){$("#info_liste").html(result).fadeIn("fast"); });
+    	    		    			$("#info_liste_table_bio").fadeOut(function(){$("#info_liste_table_bio").html(result).fadeIn("fast"); });
     	    		    			
     	    		    			$('#technique_utilise').val('');
     	    		    			$('#resultat').val('');
@@ -464,7 +464,7 @@
     	    		    		data:({'id_cons':id_cons}),
     	    		    		success: function(data) {    
     	    		    			var result = jQuery.parseJSON(data);
-    	    		    			$("#info_liste").fadeOut(function(){$("#info_liste").html(result).fadeIn("fast"); });
+    	    		    			$("#info_liste_table_bio").fadeOut(function(){$("#info_liste_table_bio").html(result).fadeIn("fast"); });
     	    		    			
     	    		    			$('#technique_utilise').val('');
     	    		    			$('#resultat').val('');
@@ -599,7 +599,7 @@
     		    		data:({'idDemande':idDemande, 'id_cons':id_cons}),
     		    		success: function(data) {    
     		    			var result = jQuery.parseJSON(data);
-    		    			$("#info_liste").fadeOut(function(){$("#info_liste").html(result).fadeIn("fast"); });
+    		    			$("#info_liste_table_bio").fadeOut(function(){$("#info_liste_table_bio").html(result).fadeIn("fast"); });
     		    			
     		    		},
     		            
@@ -681,7 +681,7 @@
     	    		    		data:({'id_cons':id_cons}),
     	    		    		success: function(data) {    
     	    		    			var result = jQuery.parseJSON(data);
-    	    		    			$("#info_liste").fadeOut(function(){$("#info_liste").html(result).fadeIn("fast"); });
+    	    		    			$("#info_liste_table_bio").fadeOut(function(){$("#info_liste_table_bio").html(result).fadeIn("fast"); });
     	    		    			
     	    		    			$('#technique_utilise').val('');
     	    		    			$('#resultat').val('');
@@ -751,7 +751,7 @@
     		    		data:({'idDemande':idDemande, 'id_cons':id_cons}),
     		    		success: function(data) {    
     		    			var result = jQuery.parseJSON(data);
-    		    			$("#info_liste").fadeOut(function(){$("#info_liste").html(result).fadeIn("fast"); });
+    		    			$("#info_liste_table_bio").fadeOut(function(){$("#info_liste_table_bio").html(result).fadeIn("fast"); });
     		    			
     		    		},
     		            
@@ -810,7 +810,7 @@
     	    		    		data:({'id_cons':id_cons}),
     	    		    		success: function(data) {    
     	    		    			var result = jQuery.parseJSON(data);
-    	    		    			$("#info_liste").fadeOut(function(){$("#info_liste").html(result).fadeIn("fast"); });
+    	    		    			$("#info_liste_table_bio").fadeOut(function(){$("#info_liste_table_bio").html(result).fadeIn("fast"); });
     	    		    			
     	    		    			$('#technique_utilise').val('');
     	    		    			$('#resultat').val('');

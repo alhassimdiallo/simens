@@ -43,7 +43,7 @@ $(function() {
 	    		var img = new Image();
                  
         		img.onload = function() {
-				   var width  = 100;
+				   var width  = 105;
 				   var height = 105;
 				
 				   var canvas = $('<canvas></canvas>').attr({ width: width, height: height });
@@ -211,6 +211,7 @@ $(function() {
     					weekHeader: 'Sm',
     					dateFormat: 'dd/mm/yy',
     					firstDay: 1,
+    					maxDate: 0,
     					isRTL: false,
     					showMonthAfterYear: false,
     					yearRange: '1900:2050',

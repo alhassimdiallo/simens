@@ -711,12 +711,12 @@ class HospitalisationController extends AbstractActionController {
  				}
  			
  				$html .="<script>
- 							  if(".$listeDate['date']." != ".$aujourdhui."){
+ 							  if('".$listeDate['date']."' != '".$aujourdhui."'){
                             	   $('#".$listeDate['date']."').toggle(false);
-                        	  } else {
+                        	  } else if('".$listeDate['date']."' == '".$aujourdhui."'){
                             	   j = ".$i."; //la position de la date d aujourdhui dans le tableau
  				                }
- 			
+ 				
  							 </script>";
  				$html .="</table>";
  				$i++;
@@ -1865,7 +1865,7 @@ class HospitalisationController extends AbstractActionController {
 		$html = "";
 		$this->getDateHelper();
 			
-		$html .="<table class='table table-bordered tab_list_mini'  style='margin-top:10px; margin-bottom:20px; margin-left:195px; width:80%;' id='listeDesExamens'>";
+		$html .="<table class='table table-bordered tab_list_mini'  style='margin-top:10px; margin-bottom:20px; width:98%;' id='listeDesExamens'>";
 			
 		$html .="<thead style='width: 100%;'>
 				  <tr style='height:40px; width:100%; cursor:pointer; font-family: Times New Roman; font-weight: bold;'>
@@ -1909,8 +1909,13 @@ class HospitalisationController extends AbstractActionController {
 				$resultat = $this->getResultatExamenTable()->getResultatExamen($Liste['idDemande']);
 	
 				if($resultat->envoyer == 1) {
-					$html .="<a>
- 					    	<img style='margin-right: 16%; color: white; opacity: 0.09;' src='../images_icons/pencil_16.png'/>
+					//POUR DESACTIVER LA MODIFICATION
+					//$html .="<a>
+    				//	    	<img style='margin-right: 16%; color: white; opacity: 0.09;' src='../images_icons/pencil_16.png'/>
+    				//	     </a>";
+
+					$html .="<a href='javascript:modifierExamenBio(".$Liste['idDemande'].")'>
+ 					    	<img class='modifier".$Liste['idDemande']."' style='margin-right: 16%;' src='../images_icons/11modif.png'  title='modifier r&eacute;sultat'/>
  					     </a>";
 	
 					if($Liste['responsable'] == 1) { /*Envoyer par le medecin*/
@@ -2014,10 +2019,6 @@ class HospitalisationController extends AbstractActionController {
 		$html .="</table>";
 	
 		$html .="<style>
-				  #listeDataTable{
-	                margin-left: 185px;
-                  }
-	
 				  div .dataTables_paginate
                   {
 				    margin-right: 20px;
@@ -2050,7 +2051,7 @@ class HospitalisationController extends AbstractActionController {
 		$unPatient = $this->getPatientTable()->getInfoPatient($id_personne);
 		$photo = $this->getPatientTable()->getPhoto($id_personne);
 
-		$demande = $this->getDemandeTable()->getDemandeWithIdcons($id_cons);
+		$demande = $this->getDemandeTable()->getDemandeWithIdcons($id_cons, $examensBio);
 		
 		$date = $this->dateHelper->convertDate( $unPatient['DATE_NAISSANCE'] );
 	
@@ -2088,21 +2089,36 @@ class HospitalisationController extends AbstractActionController {
 		$html .= "</div>";
 		
 		$html .= "<div id='titre_info_deces'>Informations sur la demande d'examen </div>
-		          <div id='barre'></div>";
+		          <div id='barre'></div>
+				
+				  <div style='width: 100%;'>
+		          <table style='width:100%;'>
+				  <tr style='width:100%;'>
+				  <td style='width: 18%;'> </td>
+				  <td style='width: 80%;'>";
+		
 		foreach ($demande as $donnees) {
-			$html .= "<table style='margin-top:10px; margin-left: 195px; width: 80%;'>";
+			$html .= "<table style='margin-top:10px; width: 95%;'>";
 			$html .= "<tr style='width: 80%;'>";
 			$html .= "<td style='width: 25%; height: 50px; vertical-align: top;'><a style='text-decoration:underline; font-size:12px;'>Consultation:</a><br><p style='font-weight:bold; font-size:17px;'>" . $id_cons . "</p></td>";
-			$html .= "<td style='width: 25%; height: 50px; vertical-align: top;'><a style='text-decoration:underline; font-size:12px;'>Date de la demande:</a><br><p style=' font-weight:bold; font-size:17px;'>" .$this->dateHelper->convertDateTime($donnees['Datedemande']). "</p></td>";
+			$html .= "<td style='width: 25%; height: 50px; vertical-align: top;'><a style='text-decoration:underline; font-size:12px;'>Date de la demande:</a><br><p style=' font-weight:bold; font-size:17px;'>" .$this->dateHelper->convertDateTime($donnees['dateDemande']). "</p></td>";
 			$html .= "<td style='width: 30%; height: 50px; vertical-align: top;'><a style='text-decoration:underline; font-size:12px;'>M&eacute;decin demandeur:</a><br><p style=' font-weight:bold; font-size:17px;'>" . $donnees['PrenomMedecin'] ." ".$donnees['NomMedecin'] . "</p></td>";
 			$html .= "</tr>";
 			$html .= "</table>";
 		}
-
-		$html .= "<div id='titre_info_deces'>Liste des examens demand&eacute;s </div>
+		$html .="</td>
+				 </tr>
+				 </table>
+				 </div>";
+		
+		$html .= "<div id='titre_info_deces'>Liste des examens demand&eacute;s</div>
 		          <div id='barre'></div>
 				
-				 <div id='info_liste'>";
+				  <div id='info_liste' style='width: 100%;'>
+		          <table style='width:100%;'>
+				  <tr style='width:100%;'>
+				  <td style='width: 18%;'> </td>
+				  <td id='info_liste_table_bio' style='width: 80%;'>";
 		if($examensBio == 1){
 			$html .= $this->listeExamensBiologiquesAction($id_cons);
 		}
@@ -2110,7 +2126,10 @@ class HospitalisationController extends AbstractActionController {
 		   {
 		   	$html .= $this->listeExamensAction($id_cons);
 		   }
-		$html .="</div>";
+		$html .= "</td>
+				  </tr>
+				  </table>
+				  </div>";
 		
 		if($terminer == 0) {
 			$html .="<div style='width: 100%; height: 100px;'>
@@ -2222,9 +2241,9 @@ class HospitalisationController extends AbstractActionController {
 		
 		$demande = $this->getResultatExamenTable()->getResultatExamen($idDemande);
 		$html ="<script>
-				   $('#technique_utilise').val('".$demande->techniqueUtiliser."');
-				   $('#resultat').val('".$demande->noteResultat."');
-				   $('#conclusion').val('".$demande->conclusion."');
+				   $('#technique_utilise').val('".str_replace("'", "\'", $demande->techniqueUtiliser)."');
+				   $('#resultat').val('".str_replace("'", "\'", $demande->noteResultat)."');
+				   $('#conclusion').val('".str_replace("'", "\'", $demande->conclusion)."');
 				   $('#typeExamen_tmp').val(".$demandeDem->idExamen.");
 				</script>";
 		
@@ -2349,7 +2368,7 @@ class HospitalisationController extends AbstractActionController {
 		$html = "";
 		$this->getDateHelper();
 			
-		$html .="<table class='table table-bordered tab_list_mini'  style='margin-top:10px; margin-bottom:20px; margin-left:195px; width:80%;' id='listeDesExamens'>";
+		$html .="<table class='table table-bordered tab_list_mini'  style='margin-top:10px; margin-bottom:20px; width:98%;' id='listeDesExamens'>";
 			
 		$html .="<thead style='width: 100%;'>
 				  <tr style='height:40px; width:100%; cursor:pointer; font-family: Times New Roman; font-weight: bold;'>
@@ -2507,10 +2526,6 @@ class HospitalisationController extends AbstractActionController {
 		$html .="</table>";
 	
 		$html .="<style>
-				  #listeDataTable{
-	                margin-left: 185px;
-                  }
-	
 				  div .dataTables_paginate
                   {
 				    margin-right: 20px;
@@ -2537,13 +2552,13 @@ class HospitalisationController extends AbstractActionController {
 		$id_personne = $this->params()->fromPost('id_personne',0);
 		$id_cons = $this->params()->fromPost('id_cons',0);
 		$terminer = $this->params()->fromPost('terminer',0);
-		$examensBio = $this->params()->fromPost('examensBio',0);
+		$typeExamens = $this->params()->fromPost('examensMorpho',0);
 		$idListe = $this->params()->fromPost('id',0); //POUR SAVOIR S'IL S'AGIT DE LA LISTE 'RECHERCHE' ou 'EN-COURS'
 		
 		$unPatient = $this->getPatientTable()->getInfoPatient($id_personne);
 		$photo = $this->getPatientTable()->getPhoto($id_personne);
 		
-		$demande = $this->getDemandeTable()->getDemandeWithIdcons($id_cons);
+		$demande = $this->getDemandeTable()->getDemandeWithIdcons($id_cons, $typeExamens);
 		
 		$date = $this->dateHelper->convertDate( $unPatient['DATE_NAISSANCE'] );
 	
@@ -2581,29 +2596,48 @@ class HospitalisationController extends AbstractActionController {
 		$html .= "</div>";
 		
 		$html .= "<div id='titre_info_deces'>Informations sur la demande d'examen </div>
-		          <div id='barre'></div>";
+		          <div id='barre'></div>
+				
+		          <div style='width: 100%;'>
+		          <table style='width:100%;'>
+				  <tr style='width:100%;'>
+				  <td style='width: 18%;'> </td>
+				  <td style='width: 80%;'>";
 		foreach ($demande as $donnees) {
-			$html .= "<table style='margin-top:10px; margin-left: 195px; width: 80%;'>";
+			$html .= "<table style='margin-top:10px; width: 95%;'>";
 			$html .= "<tr style='width: 80%;'>";
 			$html .= "<td style='width: 25%; height: 50px; vertical-align: top;'><a style='text-decoration:underline; font-size:12px;'>Consultation:</a><br><p style='font-weight:bold; font-size:17px;'>" . $id_cons . "</p></td>";
-			$html .= "<td style='width: 25%; height: 50px; vertical-align: top;'><a style='text-decoration:underline; font-size:12px;'>Date de la demande:</a><br><p style=' font-weight:bold; font-size:17px;'>" .$this->dateHelper->convertDateTime($donnees['Datedemande']). "</p></td>";
+			$html .= "<td style='width: 25%; height: 50px; vertical-align: top;'><a style='text-decoration:underline; font-size:12px;'>Date de la demande:</a><br><p style=' font-weight:bold; font-size:17px;'>" .$this->dateHelper->convertDateTime($donnees['dateDemande']). "</p></td>";
 			$html .= "<td style='width: 30%; height: 50px; vertical-align: top;'><a style='text-decoration:underline; font-size:12px;'>M&eacute;decin demandeur:</a><br><p style=' font-weight:bold; font-size:17px;'>" . $donnees['PrenomMedecin'] ." ".$donnees['NomMedecin'] . "</p></td>";
 			$html .= "</tr>";
-			$html .= "</table>";
+			$html .= "</table>
+					
+				  </td>
+				  </tr>
+				  </table>
+				  </div>";
+			
 		}
 		
 		$html .= "<div id='titre_info_deces'>Liste des examens demand&eacute;s </div>
 		          <div id='barre'></div>
 		
-				 <div id='info_liste'>";
-		if($examensBio == 1){
+				 <div id='info_liste' style='width: 100%;'>
+		         <table style='width:100%;'>
+				 <tr style='width:100%;'>
+				 <td style='width: 18%;'> </td>
+				 <td id='info_liste_table' style='width: 80%;'>";
+		if($typeExamens == 1){
 			$html .= $this->listeExamensBiologiquesAction($id_cons);
 		}
 		else /* POUR LES EXAMENS MORPHOLOGIQUES (Radiologie ... )*/
 		{
 			$html .= $this->listeExamensAction($id_cons, $idListe);
 		}
-		$html .="</div>";
+		$html .="</td>
+				 </tr>
+				 </table>
+				 </div>";
 		
 		if($terminer == 0) {
 			$html .="<div style='width: 100%; height: 100px;'>
@@ -3522,4 +3556,195 @@ class HospitalisationController extends AbstractActionController {
 		return $this->getResponse ()->setContent ( Json::encode ( $html ) );
 	}
 	
+	
+	
+	public function lecteurVideoAction($ListeDesVideos, $AjoutVid){
+	
+		$html ='<script>
+				 var tab = [];
+		        </script>';
+		$i = 0;
+		foreach ($ListeDesVideos as $Liste) {
+				
+			if($Liste['format'] == "video/mp4" || $Liste['format'] == "video/m4v") {
+				$html .='<script>
+        		 tab['.$i++.'] = {
+	                     "title":"'. $Liste['titre'] .' <span class=\'supprimerVideoIns'.$i.'\' >  </span>",
+		                 "m4v":"/simens/public/videos/'. $Liste['nom'] .'",
+		         };
+	
+		         setTimeout(function() {
+	                $(function () {
+		              $(".supprimerVideoIns'.$i.'").click(function () { return false; });
+		              $(".supprimerVideoIns'.$i.'").dblclick(function () { supprimerVideo('.$Liste['id'].'); return false; });
+	                });
+                 }, 1000);
+        		 </script>';
+			}
+			else
+			if($Liste['format'] == "video/webm") {
+				$html .='<script>
+        		 tab['.$i++.'] = {
+	                     "title":"'. $Liste['titre'] .'<span class=\'supprimerVideoIns'.$i.'\' >  </span>",
+		                 "webmv":"/simens/public/videos/'. $Liste['nom'] .'",
+		         };
+		  
+		         setTimeout(function() {
+	                $(function () {
+		              $(".supprimerVideoIns'.$i.'").click(function () { return false; });
+		              $(".supprimerVideoIns'.$i.'").dblclick(function () { supprimerVideo('.$Liste['id'].'); return false; });
+	                });
+                 }, 1000);
+        		 </script>';
+			}
+		}
+	
+		$html .='<script>
+				 $(document).ready(function(){
+	
+	               new jPlayerPlaylist({
+		             jPlayer: "#jquery_jplayer_1",
+		             cssSelectorAncestor: "#jp_container_1"
+	               },
+				      tab
+				    ,{
+		               swfPath: "../../dist/jplayer",
+		               supplied: "webmv, ogv, m4v",
+		               useStateClassSkin: true,
+		               autoBlur: false,
+		               smoothPlayBar: true,
+		               keyEnabled: true
+	               });
+	
+                 });
+	
+				scriptAjoutVideo();
+		        </script>';
+			
+		$html .='
+	
+		<form id="my_form_video" method="post" action="/simens/public/consultation/ajouter-video" enctype="multipart/form-data">
+		<div id="jp_container_1" class="jp-video jp-video-270p" role="application" aria-label="media player" style="margin: auto;">
+	    <div class="jp-type-playlist">
+		<div id="jquery_jplayer_1" class="jp-jplayer"></div>
+		<div class="jp-gui">
+			<div class="jp-video-play">
+				<button class="jp-video-play-icon" role="button" tabindex="0">play</button>
+			</div>
+			<div class="jp-interface">
+				<div class="jp-progress">
+					<div class="jp-seek-bar">
+						<div class="jp-play-bar"></div>
+					</div>
+				</div>
+				<div class="jp-current-time" role="timer" aria-label="time">&nbsp;</div>
+				<div class="jp-duration" role="timer" aria-label="duration">&nbsp;</div>
+				<div class="jp-controls-holder">
+					<div class="jp-controls">
+						<button class="jp-previous" role="button" tabindex="0">previous</button>
+						<button class="jp-play" role="button" tabindex="0">play</button>
+						<button class="jp-next" role="button" tabindex="0">next</button>
+						<button class="jp-stop" role="button" tabindex="0">stop</button>
+					</div>
+					<div class="jp-volume-controls">
+						<button class="jp-mute" role="button" tabindex="0">mute</button>
+						<button class="jp-volume-max" role="button" tabindex="0">max volume</button>
+						<div class="jp-volume-bar">
+							<div class="jp-volume-bar-value"></div>
+						</div>
+					</div>
+					<div class="jp-toggles">
+						<button class="jp-full-screen" role="button" tabindex="0">full screen</button>
+					</div>';
+	
+		if($AjoutVid == 1){
+		   $html .='<div class="jp-toggles2" id="jp-toggles-video" >
+				       <div class="jp-ajouter-video" id="fichier-video-lecteur">
+				          <input type="file" name="fichier-video" id="fichier-video">
+				       </div>
+					</div>';
+		}
+		
+		$html .='</div>
+				 <div class="jp-details">
+					<div class="jp-title" aria-label="title">&nbsp;</div>
+				 </div>
+			</div>
+		</div>
+		<div class="jp-playlist">
+			<ul>
+				<li>&nbsp;</li>
+			</ul>
+		</div>
+	    </div>
+        </div>
+		</form>';
+		
+		
+		return $html;
+	}
+	
+	public function afficherVideoAction(){
+		$id_cons = $this->params()->fromPost('id_cons', 0);
+		$ajout_video = $this->params()->fromPost('ajoutVid', 0);
+		$listeDesVideos = $this->getHospitalisationTable()->getVideos($id_cons);
+		$html = $this->lecteurVideoAction($listeDesVideos, $ajout_video);
+	
+		$this->getResponse ()->getHeaders ()->addHeaderLine ( 'Content-Type', 'application/html; charset=utf-8' );
+		return $this->getResponse ()->setContent ( Json::encode ( $html ) );
+	}
+	
+	public function ajouterVideoAction(){
+	
+		$type = $_FILES['fichier-video']['type'];
+		$nom_file = "";
+		$tmp = $_FILES['fichier-video']['tmp_name'];
+	
+		$date = new \DateTime();
+		$aujourdhui = $date->format('H-i-s_d-m-y');
+			
+		/**
+		 * 'video/mp4' pour chrome
+		 * 'video/x-m4v pour firefox
+		*/
+			
+		if($type == 'video/webm' || $type == 'video/mp4' || $type == 'video/x-m4v'){
+			if($type == 'video/webm'){
+				$nom_file ="v_scan_".$aujourdhui.".webm";
+			}
+			else
+			if($type == 'video/mp4'){
+				$nom_file ="v_scan_".$aujourdhui.".mp4";
+			}
+			else
+			if($type == 'video/x-m4v'){
+				$nom_file ="v_scan_".$aujourdhui.".m4v";
+				$type = 'video/m4v';
+			}
+			$result = move_uploaded_file($tmp, 'C:\wamp\www\simens\public\videos\\'.$nom_file);
+		}
+			
+		$html = array($nom_file, $type);
+		$this->getResponse ()->getHeaders ()->addHeaderLine ( 'Content-Type', 'application/html; charset=utf-8' );
+		return $this->getResponse ()->setContent ( Json::encode ($html) );
+	
+	}
+	
+	public function insererBdVideoAction(){
+		$id_cons = $this->params()->fromPost('id_cons', 0);
+		$nom_file = $this->params()->fromPost('nom_file', 0);
+		$type_file = $this->params()->fromPost('type_file', 0);
+		$ajout_video =  $this->params()->fromPost('ajoutVid', 0);
+	
+		$html = 0;
+		if($type_file == 'video/webm' || $type_file == 'video/mp4' || $type_file == 'video/m4v'){
+			$this->getHospitalisationTable ()->insererVideo($nom_file, $nom_file, $type_file, $id_cons);
+			$ListeDesVideos = $this->getHospitalisationTable ()->getVideos($id_cons);
+			$html = $this->lecteurVideoAction($ListeDesVideos, $ajout_video);
+		}
+	
+	
+		$this->getResponse ()->getHeaders ()->addHeaderLine ( 'Content-Type', 'application/html; charset=utf-8' );
+		return $this->getResponse ()->setContent ( Json::encode ($html) );
+	}
 }

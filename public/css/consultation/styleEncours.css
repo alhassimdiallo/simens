@@ -127,7 +127,7 @@ width: 100%; /* la largeur du champ input*/
   padding-bottom:20px; /*Pour s�parer le contenu de la bordure du bas du bloc*/
   magin-bottom:15px; /*Pour s�parer la bordure du prochain �l�ment*/
   border-bottom: 3px solid #cccccc;/*Pour faire un trait gris horizontal*/
-  margin-left: 195px;
+  margin-left: 18%;
   margin-top: -15px;
 }
 
@@ -385,7 +385,7 @@ box-shadow: 0pt 0pt 12px rgba(0, 0, 0, 0.1);
     font-size: 18px;
     color: green;
     margin-top: 10px;
-    margin-left: 198px;
+    margin-left: 18%;
 }
 
 #barre_separateur {
@@ -393,7 +393,7 @@ box-shadow: 0pt 0pt 12px rgba(0, 0, 0, 0.1);
     height: 2px;
     border-bottom: 2px solid #ccc;
     margin-top: 2px;
-    margin-left: 170px;
+    margin-left: 18%;
 }
 
 #titre_info_admis{
@@ -409,7 +409,7 @@ box-shadow: 0pt 0pt 12px rgba(0, 0, 0, 0.1);
     height: 2px;
     border-bottom: 2px solid #ccc;
     margin-top: 3px;
-    margin-left: 195px;
+    margin-left: 18%;
 }
 
 a{
@@ -434,7 +434,7 @@ p{
     font-size: 18px;
     color: green;
     margin-top: 180px;
-    margin-left: 195px;
+    margin-left: 18%;
 }
 
 #modifier_donnees_deces {
@@ -472,19 +472,19 @@ p{
               display: inline;float:left;border:transparent; margin-bottom: 10px;
          } 
 .vider_formulaire {
-	          background: url("/simens_derniereversion/public/images_icons/annuler1.PNG") no-repeat right top;
+	          background: url("/simens/public/images_icons/annuler1.PNG") no-repeat right top;
                
          }
 .modifer_donnees {
-	          background: url("/simens_derniereversion/public/images_icons/modifier.png") no-repeat right top;
+	          background: url("/simens/public/images_icons/modifier.png") no-repeat right top;
                
          }
 .supprimer_photo {
-	          background: url("/simens_derniereversion/public/images_icons/mod.png") no-repeat right top;
+	          background: url("/simens/public/images_icons/mod.png") no-repeat right top;
                
          }
 .ajouter_photo {
-	          background: url("/simens_derniereversion/public/images_icons/ajouterphoto.png") no-repeat right top;
+	          background: url("/simens/public/images_icons/ajouterphoto.png") no-repeat right top;
                
          }
 .vider_formulaire input, .modifer_donnees input, .ajouter_photo input, .supprimer_photo input{
@@ -509,7 +509,7 @@ p{
 {/* le label*/
 line-height: 1.5em;
 
-background-color: #eeeeee;
+background-color: #eeeeee; 
 
 background-image: none;
 
@@ -522,8 +522,6 @@ background-position: 0% 0%;
 background-clip: border-box;
 
 background-origin: padding-box;
-
-/*border-top-left-radius: 15px; */
 
 border-top-right-radius: 15px;
 

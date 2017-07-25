@@ -10,12 +10,12 @@
 <script type="text/javascript">
 $(window).load(function () {
 	$('#wait').toggle(false);
-	$('#contenuSoins').fadeIn().css({'visibility':'visible'});
+	$('#contenuSoins, #toutLeContenu').fadeIn().css({'visibility':'visible'});
 });
 </script>
 
 <style>
-#contenuSoins{ visibility: hidden };
+#contenuSoins, #toutLeContenu{ visibility: hidden };
 </style>
 
 <div id="titre" style='font-family: police2; text-decoration: none; color: green; font-size: 20px; font-weight: bold; padding-left:20px;'>
@@ -23,6 +23,8 @@ $(window).load(function () {
 	LISTE DES SOINS
 </div>
 <div id="wait" style="color: gray; font-size: 20px; text-align: center; margin-top: 80px;" > <span> Chargement ... </span> </div>
+
+<div id="toutLeContenu">
 <div id="contenu"> 
             <div style="margin-right: 10px; float:right; font-size: 15px; margin-top:5px; font-family: Times New Roman; font-size: 14px; color: green;"> <i style='cursor:pointer;' id='afficherListeSoins2'> Soins </i> | <i style='cursor:pointer;' id='afficherListePatients2'> Patients </i> </div>
             <table id="patient" class="table table-bordered tab_list_mini" >
@@ -71,6 +73,8 @@ $(window).load(function () {
 </div>
 
 <div id="vue_detail_hospi_patient">
+
+</div>
 
 </div>
 

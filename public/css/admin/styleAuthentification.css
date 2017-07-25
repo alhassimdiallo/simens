@@ -24,20 +24,21 @@ a{text-decoration:none;}
 .vertical-base{	vertical-align:baseline;}/* vertical align baseline */
 .vertical-top{	vertical-align:top;}/* vertical align top */
 nav.vertical ul li{	display:block;}/* vertical menu */
-nav.horizontal ul li{	display: inline-block;}/* horizontal menu */
+nav.horizontal ul li{ display: inline-block; }/* horizontal menu */
 img{max-width:100%;}
 /*end reset*/
-/****-----start-body----****/
+/****-----start-body----****/       /**#1f262d**/
 body{
-	background-color: #1f262d; /* url(/simens/public/images/bg.jpg)  no-repeat center fixed; */
+	background: url(/simens/public/img/ugb_sanar3.jpg)  no-repeat center fixed; 
+	background-color: white;
 	-webkit-background-size: cover;
 	-moz-background-size: cover;
 	-o-background-size: cover;
  	background-size: cover;
  	position:relative;
  	font-family: 'Open Sans', sans-serif;
-
 }
+
 .login-form {
 	background: white;
 	width:32%;

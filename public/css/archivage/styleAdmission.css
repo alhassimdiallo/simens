@@ -178,14 +178,14 @@ tr:hover
     font-family: Times  New Roman;
     font-size: 18px;
     color: green;
-    margin-top: 180px;
-    margin-left: 195px;
+    margin-top: 210px;
+    margin-left: 18%;
 }
 
 #barre_separateur {
     border-bottom: 2px solid #ccc;
     margin-top: 3px;
-    margin-left: 195px;
+    margin-left: 18%;
 }
 
 #barre_vertical{
@@ -306,7 +306,7 @@ border-left-color-ltr-source: physical;
 
 border-left-color-rtl-source: physical;
 
-box-shadow: 0pt 0pt 12px rgba(0, 0, 0, 0.1);
+box-shadow: 0pt 0pt 12px rgba(0, 0, 0, 0.3);
 
 }
 

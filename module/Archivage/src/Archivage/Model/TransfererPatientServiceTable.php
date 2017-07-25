@@ -14,6 +14,7 @@ class TransfererPatientServiceTable{
 		$select = $sql->select('hopital');
 		$stat = $sql->prepareStatementForSqlObject($select);
 		$result = $stat->execute();
+		$options = array();
 		foreach ($result as $data) {
 			$options[$data['ID_HOPITAL']] = $data['NOM_HOPITAL'];
 		}
@@ -28,6 +29,7 @@ class TransfererPatientServiceTable{
 		$select->join(array('s'=>'service'), 's.ID_SERVICE = hs.ID_SERVICE' , array('*'));
 		$stat = $sql->prepareStatementForSqlObject($select);
 		$result = $stat->execute();
+		$options = array();
 		foreach ($result as $data) {
 			$options[$data['ID_SERVICE']] = $data['NOM'];
 		}
@@ -37,14 +39,14 @@ class TransfererPatientServiceTable{
 		$adapter = $this->tableGateway->getAdapter ();
 		$sql = new Sql ( $adapter );
 		$select = $sql->select ();
+		$select->from( array( 'tps' => 'transferer_patient_service' ));
 		$select->columns( array(
 				'IdService' => 'ID_SERVICE',
-				'IdPersonne' => 'ID_PERSONNE',
+				'IdPersonne' => 'ID_MEDECIN',
 				'Date' => 'DATE',
 				'MotifTransfert' => 'MOTIF_TRANSFERT',
 				'IdCons' => 'ID_CONS',
 		));
-		$select->from( array( 'tps' => 'transferer_patient_service' ));
 		$select->join( array( 
 				's' => 'service'
 		), 's.ID_SERVICE = tps.ID_SERVICE' , array (
@@ -52,15 +54,12 @@ class TransfererPatientServiceTable{
 				'DomaineService' => 'DOMAINE'
 		) );
 		$select->join( array( 
-				'p' => 'patient'
-		), 'p.ID_PERSONNE = tps.ID_PERSONNE' , array('*'));
-		$select->join( array(
-				'c' => 'consultation'
-		), 'c.ID_CONS = tps.ID_CONS' , array('*'));
-		$select->where ( array( 'tps.ID_CONS' => $idcons));
+				'p' => 'personne'
+		), 'p.ID_PERSONNE = tps.ID_MEDECIN' , array('NomMedecin' => 'NOM' , 'PrenomMedecin' => 'PRENOM' , ));
+		$select->where ( array('tps.ID_CONS' => $idcons) );
 		
 		$stat = $sql->prepareStatementForSqlObject ( $select );
-		$result = $stat->execute ();
+		$result = $stat->execute ()->current();
 		
 		return $result;
 	}

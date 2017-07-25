@@ -46,7 +46,7 @@ $(function() {
 	    		var img = new Image();
                  
         		img.onload = function() {
-				   var width  = 100;
+				   var width  = 105;
 				   var height = 105;
 				
 				   var canvas = $('<canvas></canvas>').attr({ width: width, height: height });
@@ -203,7 +203,7 @@ $(function() {
     					currentText: 'Courant',
     					monthNames: ['Janvier','Fevrier','Mars','Avril','Mai','Juin',
     					'Juillet','Aout','Septembre','Octobre','Novembre','Decembre'],
-    					monthNamesShort: ['Jan','Fev','Mar','Avr','Mai','Jun',
+    					monthNamesShort: ['Jan','Fev','Mar','Avr','Mai','Juin',
     					'Jul','Aout','Sep','Oct','Nov','Dec'],
     					dayNames: ['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'],
     					dayNamesShort: ['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'],
@@ -217,8 +217,57 @@ $(function() {
     					showAnim : 'bounce',
     					changeMonth: true,
     					changeYear: true,
-    					yearSuffix: ''
+    					yearSuffix: '',
+    					maxDate: 0
     			}
     	);
-    
+  		
+
+  		function lesMois(n)
+  		{
+  			switch(n) {
+  			  case 1: return "January";
+  			  case 2: return "February";
+  			  case 3: return "March";
+  			  case 4: return "April";
+  			  case 5: return "May";
+  			  case 6: return "June";
+  			  case 7: return "July";
+  			  case 8: return "August";
+  			  case 9: return "September";
+  			  case 10: return "October";
+  			  case 11: return "November";
+  			  case 12: return "December";
+  			}
+  		}
+  		
+  		function age(birthday)
+  		{
+  			birthday = new Date(birthday);
+  			return parseInt( new Number((new Date().getTime() - birthday.getTime()) / 31536000000));
+  		}
+
+  		$('#DATE_NAISSANCE').change(function(){
+
+  			var date = $('#DATE_NAISSANCE').val(); 
+  			var mois = parseInt(date[3]+''+date[4]);
+  			var moisEnLettre = lesMois(mois);
+  		    var birthday = date[0]+date[1]+' '+moisEnLettre+' '+date[6]+date[7]+date[8]+date[9];
+  		    var Age = age(birthday);
+ 
+  		    if( date && !isNaN(Age)){
+  		    	$('#AGE').val(Age).attr('readonly', true).css('background','#efefef');
+  		    }else{
+  		    	$('#AGE, #DATE_NAISSANCE').val('').attr('readonly', false).css('background','#ffffff');
+  		    }
+
+  		});
+  		
+  		function miseAJourAge(date){
+  			var mois = parseInt(date[3]+''+date[4]);
+  			var moisEnLettre = lesMois(mois);
+  		    var birthday = date[0]+date[1]+' '+moisEnLettre+' '+date[6]+date[7]+date[8]+date[9];
+  		    var Age = age(birthday);
+  		}
+  		
 });

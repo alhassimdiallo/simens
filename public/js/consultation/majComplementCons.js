@@ -782,9 +782,9 @@ function RecupererImageFibroscopie(){
 function cacherExamenMorphoSansImages(){
 }
 var ind = 0;
-function affichageExamenMorphoSansImages(element){ //alert(element);
+function affichageExamenMorphoSansImages(element){
 $(function(){
-	setTimeout(function() { 
+	setTimeout(function() {
 		
 		if(ind == 0){
 			$('.imageRadio').toggle(false);

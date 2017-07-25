@@ -35,13 +35,13 @@ class TypepersonnelTable {
 		$adapter = $this->tableGateway->getAdapter ();
 		$sql = new Sql ( $adapter );
 		$select = $sql->select ();
-		$select->from(array('type_pers'=>'type_personnel'));
-		$select->columns(array ('id_type', 'nom_type','design'));
-		$select->order('id_type ASC');
+		$select->from(array('type_pers'=>'type_employe'));
+		$select->columns(array ('id', 'nom'));
+		$select->order('id ASC');
 		$stmt = $sql->prepareStatementForSqlObject($select);
 		$result = $stmt->execute();
 		foreach ($result as $data) {
-			$options[$data['design']] = $data['nom_type'];
+			$options[$data['nom']] = $data['nom'];
 		}
 		return $options;
 	}

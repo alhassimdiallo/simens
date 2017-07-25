@@ -483,14 +483,24 @@ class ArchivageController extends AbstractActionController {
 		$formData = $this->getRequest ()->getPost ();
 		$form->setData ( $formData );
 	
-		// instancier Consultation
-		$this->getConsultationTable ()->addConsultation ( $form, $IdDuService, $id_medecin );
-		$this->getConsultationTable ()->addConsultationEffective($id_cons);
+		//var_dump($this->params()->fromPost('temoinInterfaceSoumis')); exit();
+
+		if($this->params()->fromPost('temoinInterfaceSoumis') == 1) {
+			// instancier Consultation
+			$this->getConsultationTable ()->addConsultation ( $form, $IdDuService, $id_medecin );
+			$this->getConsultationTable ()->addConsultationEffective($id_cons);
+		}else if($this->params()->fromPost('temoinInterfaceSoumis') == 2) {
+			//mettre a jour la consultation
+			$this->getConsultationTable ()->updateConsultation ( $form );
+		}
+		
 		
 		// mettre a jour les motifs d'admission
 		$this->getMotifAdmissionTable ()->deleteMotifAdmission ( $id_cons );
 		$this->getMotifAdmissionTable ()->addMotifAdmission ( $form );
 	
+		
+		
 		//Recuperer les donnees sur les bandelettes urinaires
 		//Recuperer les donnees sur les bandelettes urinaires
 		$bandelettes = array(
@@ -506,7 +516,6 @@ class ArchivageController extends AbstractActionController {
 		//mettre a jour les bandelettes urinaires
 		$this->getConsultationTable ()->deleteBandelette($id_cons);
 		$this->getConsultationTable ()->addBandelette($bandelettes);
-	
 	
 		//POUR LES EXAMENS PHYSIQUES
 		//POUR LES EXAMENS PHYSIQUES
@@ -807,7 +816,20 @@ class ArchivageController extends AbstractActionController {
  		// POUR LES ANTECEDENTS OU TERRAIN PARTICULIER
  		// POUR LES ANTECEDENTS OU TERRAIN PARTICULIER
  		$listeConsultation = $this->getConsultationTable ()->getConsultationPatientSaufActu($id_pat, $id);
- 			
+ 		
+ 		//Recuperer les informations sur le surveillant de service pour les consultations qui diffèrent des consultations prises lors des archives 
+ 		$tabInfoSurv = array();
+ 		foreach ($listeConsultation as $listeCons){
+ 			if($listeCons['ID_SURVEILLANT']){
+ 				$tabInfoSurv [$listeCons['ID_CONS']] = $this->getConsultationTable ()->getInfosSurveillant($listeCons['ID_SURVEILLANT'])['PRENOM'].' '.$this->getConsultationTable ()->getInfosSurveillant($listeCons['ID_SURVEILLANT'])['NOM'];
+ 			}else{
+ 				$tabInfoSurv [$listeCons['ID_CONS']] = '_________'; 
+ 			}
+ 		}
+ 		//var_dump($tabInfoSurv); exit();
+ 		
+ 		$listeConsultation = $this->getConsultationTable ()->getConsultationPatientSaufActu($id_pat, $id);
+ 		
  		//*** Liste des Hospitalisations
  		$listeHospitalisation = $this->getDemandeHospitalisationTable()->getDemandeHospitalisationWithIdPatient($id_pat);
  			
@@ -822,27 +844,62 @@ class ArchivageController extends AbstractActionController {
  		$listeDemandesBiologiquesEffectuerEnvoyer = $this->demandeExamensTable()->getDemandeExamensBiologiquesEffectuesEnvoyer($id);
  		$listeDemandesBiologiquesEffectuer = $this->demandeExamensTable()->getDemandeExamensBiologiquesEffectues($id);
  			
+ 		$tableauResultatsExamensBio = array(
+ 				'temoinGSan' => 0,
+ 				'temoinHSan' => 0,
+ 				'temoinBHep' => 0,
+ 				'temoinBRen' => 0,
+ 				'temoinBHem' => 0,
+ 				'temoinBInf' => 0,
+ 		);
+ 		
  		foreach ($listeDemandesBiologiquesEffectuerEnvoyer as $listeExamenBioEffectues){
- 			if($listeExamenBioEffectues['idExamen'] == 1){
- 				$data['groupe_sanguin'] =  $listeExamenBioEffectues['noteResultat'];
- 			}
- 			if($listeExamenBioEffectues['idExamen'] == 2){
- 				$data['hemogramme_sanguin'] =  $listeExamenBioEffectues['noteResultat'];
- 			}
- 			if($listeExamenBioEffectues['idExamen'] == 3){
- 				$data['bilan_hepatique'] =  $listeExamenBioEffectues['noteResultat'];
- 			}
- 			if($listeExamenBioEffectues['idExamen'] == 4){
- 				$data['bilan_renal'] =  $listeExamenBioEffectues['noteResultat'];
- 			}
- 			if($listeExamenBioEffectues['idExamen'] == 5){
- 				$data['bilan_hemolyse'] =  $listeExamenBioEffectues['noteResultat'];
- 			}
- 			if($listeExamenBioEffectues['idExamen'] == 6){
- 				$data['bilan_inflammatoire'] =  $listeExamenBioEffectues['noteResultat'];
- 			}
- 		}
+			if($listeExamenBioEffectues['idExamen'] == 1){ 
+				$data['groupe_sanguin'] =  $listeExamenBioEffectues['noteResultat'];
+				$tableauResultatsExamensBio['groupe_sanguin_infoInfirmier'] = $this->getConsultationTable()->getInfosSurveillant( $listeExamenBioEffectues['id_personne'] );
+				$tableauResultatsExamensBio['groupe_sanguin_date_enregistrement'] = $this->controlDate->convertDateTime($listeExamenBioEffectues['date_enregistrement']);
+				$tableauResultatsExamensBio['groupe_sanguin_conclusion'] = $listeExamenBioEffectues['conclusion'];
+				$tableauResultatsExamensBio['temoinGSan'] = 1;
+			}
+			if($listeExamenBioEffectues['idExamen'] == 2){ 
+				$data['hemogramme_sanguin'] =  $listeExamenBioEffectues['noteResultat'];
+				$tableauResultatsExamensBio['hemogramme_sanguin_infoInfirmier'] = $this->getConsultationTable()->getInfosSurveillant( $listeExamenBioEffectues['id_personne'] );
+				$tableauResultatsExamensBio['hemogramme_sanguin_date_enregistrement'] = $this->controlDate->convertDateTime($listeExamenBioEffectues['date_enregistrement']);
+				$tableauResultatsExamensBio['hemogramme_sanguin_conclusion'] = $listeExamenBioEffectues['conclusion'];
+				$tableauResultatsExamensBio['temoinHSan'] = 1;
+			}
+			if($listeExamenBioEffectues['idExamen'] == 3){ 
+				$data['bilan_hepatique'] =  $listeExamenBioEffectues['noteResultat'];
+				$tableauResultatsExamensBio['bilan_hepatique_infoInfirmier'] = $this->getConsultationTable()->getInfosSurveillant( $listeExamenBioEffectues['id_personne'] );
+				$tableauResultatsExamensBio['bilan_hepatique_date_enregistrement'] = $this->controlDate->convertDateTime($listeExamenBioEffectues['date_enregistrement']);
+				$tableauResultatsExamensBio['bilan_hepatique_conclusion'] = $listeExamenBioEffectues['conclusion'];
+				$tableauResultatsExamensBio['temoinBHep'] = 1;
+			}
+			if($listeExamenBioEffectues['idExamen'] == 4){ 
+				$data['bilan_renal'] =  $listeExamenBioEffectues['noteResultat'];
+				$tableauResultatsExamensBio['bilan_renal_infoInfirmier'] = $this->getConsultationTable()->getInfosSurveillant( $listeExamenBioEffectues['id_personne'] );
+				$tableauResultatsExamensBio['bilan_renal_date_enregistrement'] = $this->controlDate->convertDateTime($listeExamenBioEffectues['date_enregistrement']);
+				$tableauResultatsExamensBio['bilan_renal_conclusion'] = $listeExamenBioEffectues['conclusion'];
+				$tableauResultatsExamensBio['temoinBRen'] = 1;
+			}
+			if($listeExamenBioEffectues['idExamen'] == 5){ 
+				$data['bilan_hemolyse'] =  $listeExamenBioEffectues['noteResultat'];
+				$tableauResultatsExamensBio['bilan_hemolyse_infoInfirmier'] = $this->getConsultationTable()->getInfosSurveillant( $listeExamenBioEffectues['id_personne'] );
+				$tableauResultatsExamensBio['bilan_hemolyse_date_enregistrement'] = $this->controlDate->convertDateTime($listeExamenBioEffectues['date_enregistrement']);
+				$tableauResultatsExamensBio['bilan_hemolyse_conclusion'] = $listeExamenBioEffectues['conclusion'];
+				$tableauResultatsExamensBio['temoinBHem'] = 1;
+			}
+			if($listeExamenBioEffectues['idExamen'] == 6){
+				$data['bilan_inflammatoire'] =  $listeExamenBioEffectues['noteResultat'];
+				$tableauResultatsExamensBio['bilan_inflammatoire_infoInfirmier'] = $this->getConsultationTable()->getInfosSurveillant( $listeExamenBioEffectues['id_personne'] );
+				$tableauResultatsExamensBio['bilan_inflammatoire_date_enregistrement'] = $this->controlDate->convertDateTime($listeExamenBioEffectues['date_enregistrement']);
+				$tableauResultatsExamensBio['bilan_inflammatoire_conclusion'] = $listeExamenBioEffectues['conclusion'];
+				$tableauResultatsExamensBio['temoinBInf'] = 1;
+			}
+		}
  			
+ 		//var_dump($data); exit();
+ 		
  		////RESULTATS DES EXAMENS MORPHOLOGIQUE
  		$examen_morphologique = $this->getNotesExamensMorphologiquesTable()->getNotesExamensMorphologiques($id);
  			
@@ -986,7 +1043,7 @@ class ArchivageController extends AbstractActionController {
  			$data['motif_hospitalisation'] = $donneesHospi->motif_demande_hospi;
  			$data['date_fin_hospitalisation_prevue'] = $this->controlDate->convertDate($donneesHospi->date_fin_prevue_hospi);
  		}
-
+ 		
  		$form->populateValues ( array_merge($data,$bandelettes,$donneesAntecedentsPersonnels,$donneesAntecedentsFamiliaux) );
  		return array(
  				'id_cons' => $id,
@@ -1016,6 +1073,8 @@ class ArchivageController extends AbstractActionController {
  				'listeDemandesMorphoEff' => $listeDemandesMorphologiquesEffectuer->count(),
  				'resultatVpa' => $resultatVpa,
  				'listeHospitalisation' => $listeHospitalisation,
+ 				'tabInfoSurv' => $tabInfoSurv,
+ 				'tableauResultatsExamensBio' => $tableauResultatsExamensBio,
  		);
 
  	}
@@ -1663,14 +1722,15 @@ class ArchivageController extends AbstractActionController {
 			$code_demande = $this->params()->fromPost('code_demande',0);
 			
 			$result = $this->getDemandeHospitalisationTable()->getDemandehospitalisationWithIdDemHospi($code_demande);
-			if($result) {$date_debut = $result->date_demande_hospi; } else {$result = null;}
+			if($result) {$date_debut = $result->date_demande_hospi; } else {$date_debut = null;}
 	
 			$id_hosp = $this->getHospitalisationTable()->saveHospitalisation($code_demande, $date_debut);
 			$this->getHospitalisationlitTable()->saveHospitalisationlit($id_hosp, $id_lit);
 	
 			$this->getDemandeHospitalisationTable()->validerDemandeHospitalisation($code_demande);
 	
-			$this->getLitTable()->updateLit($id_lit);
+			//Le lit ne doit pas être occuper puisqu'on ne fait que archiver
+			//$this->getLitTable()->updateLit($id_lit);
 	
 			return $this->redirect()->toRoute('archivage' , array('action' => 'liste-demande-hospitalisation'));
 		}
@@ -1776,24 +1836,30 @@ class ArchivageController extends AbstractActionController {
 			
 		$html .= "</div>";
 		
-		$html .= "<div id='titre_info_deces'>D&eacute;tails des infos sur la demande </div>
+		$html .= "<div id='titre_info_deces'> 
+				     <span id='titre_info_demande41' style='margin-left:-5px; cursor:pointer;'>
+				        <img src='../img/light/plus.png' /> D&eacute;tails des infos sur la demande
+				     </span>
+				  </div>
 		          <div id='barre'></div>";
 		
-		$html .= "<table style='margin-top:10px; margin-left: 195px; width: 80%;'>";
+		$html .= "<div id='info_demande41'>";
+		$html .= "<table style='margin-top:10px; margin-left: 18%; width: 80%;'>";
 		$html .= "<tr style='width: 95%;'>";
 		$html .= "<td style='width: 25%; height: 50px; vertical-align: top;'><a style='text-decoration:underline; font-size:12px;'>Consultation:</a><br><p style='font-weight:bold; font-size:17px;'>" . $id_cons . "</p></td>";
-		$html .= "<td style='width: 25%; height: 50px; vertical-align: top;'><a style='text-decoration:underline; font-size:12px;'>Date de la demande:</a><br><p style=' font-weight:bold; font-size:17px;'>" . $this->controlDate->convertDateTime($demande['date_demande_hospi']) . "</p></td>";
+		$html .= "<td style='width: 25%; height: 50px; vertical-align: top;'><a style='text-decoration:underline; font-size:12px;'>Date d'enregistrement:</a><br><p style=' font-weight:bold; font-size:17px;'>" . $this->controlDate->convertDateTime($demande['date_demande_hospi']) . "</p></td>";
 		$html .= "<td style='width: 20%; height: 50px; vertical-align: top;'><a style='text-decoration:underline; font-size:12px;'>Date fin pr&eacute;vue:</a><br><p style=' font-weight:bold; font-size:17px;'>" . $this->controlDate->convertDate($demande['date_fin_prevue_hospi']) . "</p></td>";
 		$html .= "<td style='width: 30%; height: 50px; vertical-align: top;'><a style='text-decoration:underline; font-size:12px;'>M&eacute;decin demandeur:</a><br><p style=' font-weight:bold; font-size:17px;'>" .$demande['PrenomMedecin'].' '.$demande['NomMedecin']. "</p></td>";
 		$html .= "</tr>";
 		$html .= "</table>";
 		
-		$html .="<table style='margin-top:0px; margin-left:195px; width: 70%;'>";
+		$html .="<table style='margin-top:0px; margin-left:18%; width: 70%;'>";
 		$html .="<tr style='width: 70%'>";
 		$html .="<td style='padding-top: 10px; padding-bottom: 0px; padding-right: 30px; width: 20%; '><a style='text-decoration:underline; font-size:13px;'>Motif de la demande:</a><br><p id='circonstance_deces' style='background:#f8faf8; font-weight:bold; font-size:17px;'>". $demande['motif_demande_hospi'] ."</p></td>";
 		$html .="<td style='padding-top: 10px; padding-bottom: 0px; padding-right: 30px; width: 20%; '><a style='text-decoration:underline; font-size:13px;'>Note:</a><br><p id='circonstance_deces' style='background:#f8faf8; font-weight:bold; font-size:17px;'> </p></td>";
 		$html .="</tr>";
 		$html .="</table>";
+		$html .= "</div>";
 		
 		/***
 		 * UTILISER UNIQUEMENT DANS LA VUE DE LA LISTE DES PATIENTS EN COURS D'HOSPITALISATION
@@ -1806,18 +1872,24 @@ class ArchivageController extends AbstractActionController {
 			$salle = $this->getSalleTable()->getSalle($lit->id_salle);
 			$batiment = $this->getBatimentTable()->getBatiment($salle->id_batiment);
 				
-			$html .= "<div id='titre_info_deces'>Infos sur l'hospitalisation </div>
-		          <div id='barre'></div>";
-			$html .= "<table style='margin-top:10px; margin-left: 195px; width: 80%;'>";
-			$html .= "<tr style='width: 80%;'>";
+			$html .= "<div id='titre_info_deces'>
+					   <span id='titre_info_hospitalisation21' style='margin-left:-5px; cursor:pointer;'>
+				          <img src='../img/light/plus.png' /> Infos sur l'hospitalisation
+				       </span>
+					  </div>
+		              
+					  <div id='barre'></div>";
 			
-			$html .= "<td style='width: 25%; height: 50px; vertical-align: top;'><a style='text-decoration:underline; font-size:12px;'>Date d&eacute;but:</a><br><p style='font-weight:bold; font-size:17px;'>" . $this->controlDate->convertDateTime($hospitalisation->date_debut) . "</p></td>";
+			$html .= "<div id='info_hospitalisation21'>";
+			$html .= "<table style='margin-top:10px; margin-left: 18%; width: 80%;'>";
+			$html .= "<tr style='width: 80%;'>";
+			$html .= "<td style='width: 25%; height: 50px; vertical-align: top;'><a style='text-decoration:underline; font-size:12px;'>Date d&eacute;but:</a><br><p style='font-weight:bold; font-size:17px;'>" . $this->controlDate->convertDate($demande['Datedemandehospi']) . "</p></td>";
 			$html .= "<td style='width: 25%; height: 50px; vertical-align: top;'><a style='text-decoration:underline; font-size:12px;'>Batiment:</a><br><p style=' font-weight:bold; font-size:17px;'>".$batiment->intitule."</p></td>";
 			$html .= "<td style='width: 20%; height: 50px; vertical-align: top;'><a style='text-decoration:underline; font-size:12px;'>Salle:</a><br><p style=' font-weight:bold; font-size:17px;'>".$salle->numero_salle."</p></td>";
 			$html .= "<td style='width: 30%; height: 50px; vertical-align: top;'><a style='text-decoration:underline; font-size:12px;'>Lit:</a><br><p style=' font-weight:bold; font-size:17px;'>".$lit->intitule."</p></td>";
-				
 			$html .= "</tr>";
 			$html .= "</table>";
+			$html .= "</div>";
 		}
 		
 		if($terminer == 0) {
@@ -1825,7 +1897,7 @@ class ArchivageController extends AbstractActionController {
 	    		     <div style='margin-left:40px; color: white; opacity: 1; width:95px; height:40px; padding-right:15px; float:left;'>
                         <img  src='".$this->path."/images_icons/fleur1.jpg' />
                      </div>";
-			$html .="<div class='block' id='thoughtbot' style='vertical-align: bottom; padding-left:60%; margin-bottom: 40px; padding-top: 35px; font-size: 18px; font-weight: bold;'><button type='submit' id='terminer'>Terminer</button></div>
+			$html .="<div class='block' id='thoughtbot' style='vertical-align: bottom; padding-left:60%; margin-bottom: 40px; padding-top: 35px; font-size: 18px; font-weight: bold;'><button type='submit' id='terminerVisualisationHosp'>Terminer</button></div>
                      </div>";
 		}
 		/***
@@ -1834,7 +1906,7 @@ class ArchivageController extends AbstractActionController {
 		else if($terminer == 111) {
 			$html .="<div style='width: 100%; height: 270px;'>";
 				
-			$html .= "<div id='titre_info_deces'>Info lib&eacute;ration du patient </div>
+			$html .= "<div id='titre_info_deces' >Infos sur la lib&eacute;ration du patient </div>
 		              <div id='barre'></div>";
 				
 			$chemin = $this->getServiceLocator()->get('Request')->getBasePath();
@@ -1846,9 +1918,11 @@ class ArchivageController extends AbstractActionController {
 			$formTextArea = new FormTextarea();
 			$formHidden = new FormHidden();
 				
-			$html .="<form  method='post' action='".$chemin."/archivage/liberer-patient'>";
+			$html .="<form id='Formulaire_Liberer_Patient'  method='post' action='".$chemin."/archivage/liberer-patient'>";
 			$html .=$formHidden($formLiberation->get('id_demande_hospi'));
-			$html .="<div style='width: 80%; margin-left: 195px;'>";
+			$html .=$formHidden($formLiberation->get('temoin_transfert'));
+			$html .=$formHidden($formLiberation->get('id_cons'));
+			$html .="<div style='width: 80%; margin-left: 18%;'>";
 			$html .="<table id='form_patient' style='width: 100%; '>
 					 <tr class='comment-form-patient' style='width: 100%'>
 					   <td id='note_soin'  style='width: 45%; '>". $formRow($formLiberation->get('resumer_medical')).$formTextArea($formLiberation->get('resumer_medical'))."</td>
@@ -1863,11 +1937,10 @@ class ArchivageController extends AbstractActionController {
                      </div>";
 				
 			$html .="<div style='width: 10%; padding-left: 30%; float:left;'>";
-			$html .="<div class='block' id='thoughtbot' style=' float:left; width: 30%; vertical-align: bottom;  margin-bottom: 40px; padding-top: 35px; font-size: 18px; font-weight: bold;'><button type='submit' id='liberer'>Lib&eacute;rer</button></div>
-                     </div>";
-			$html .="<div class='block' id='thoughtbot' style=' float:left; width: 30%; vertical-align: bottom;  margin-bottom: 40px; padding-top: 35px; font-size: 18px; font-weight: bold;'><button id='terminerLiberer'>Annuler</button></div>
-                     </div>";
-			$html .="</div>";
+			$html .="<div class='block' id='thoughtbot' style=' float:left; width: 30%; vertical-align: bottom;  margin-bottom: 40px; padding-top: 35px; font-size: 18px; font-weight: bold;'><button id='terminerLiberer'>Annuler</button></div>";
+            $html .="</div>";
+			
+            $html .="<div class='block' id='thoughtbot' style=' float:left; width: 30%; vertical-align: bottom;  margin-bottom: 40px; padding-top: 35px; font-size: 18px; font-weight: bold;'><button type='submit' id='liberer'>Lib&eacute;rer</button></div>";
 			$html .="</form>";
 		
 			$html .="<script>
@@ -1875,7 +1948,8 @@ class ArchivageController extends AbstractActionController {
 	                   $('#resumer_medical').val('');
 	                   $('#motif_sorti').val('');
 		              }
-					  $('#resumer_medical, #motif_sorti').css({'font-weight':'bold','color':'#065d10','font-family': 'Times  New Roman','font-size':'16px'});
+					  //$('#resumer_medical, #motif_sorti').css({'font-weight':'bold','color':'#065d10','font-family': 'Times  New Roman','font-size':'16px'});
+					  $('#resumer_medical, #motif_sorti').css({'font-size':'17px'});
 					</script>
 					";
 		}
@@ -1883,6 +1957,208 @@ class ArchivageController extends AbstractActionController {
 		
 		$html .="<script>
 				  listepatient();
+				  initAnimationVue();
+				  animationPliantDepliant21();
+		          animationPliantDepliant41();
+				  
+				  var clickUneSeuleFois = 0;
+				  $('#prescriptionOrdonnance').click(function(){ 
+			        $( '#confirmationDeLaLiberation' ).dialog( 'close' ); 
+			        PrescriptionOrdonnancePopup();
+			        $('#PrescriptionOrdonnancePopupInterface').dialog('open');
+			        if(clickUneSeuleFois == 0){ 
+				       $('#ajouter_medicament').trigger('click'); 
+				       $('#impressionPdf').toggle(false); 
+				       $('#id_personneForOrdonnance').val(".$id_personne.");
+				       $('#id_consForOrdonnance').val('".$id_cons."');
+				       		
+				       clickUneSeuleFois = 1;
+	                }
+			        return false;
+		          });
+				
+				 </script>";
+		
+		$this->getResponse ()->getHeaders ()->addHeaderLine ( 'Content-Type', 'application/html; charset=utf-8' );
+		return $this->getResponse ()->setContent ( Json::encode ( $html ) );
+	}
+	
+	public function informationPatientAction() {
+		$this->getDateHelper();
+		$id_personne = $this->params()->fromPost('id_personne',0);
+		$id_cons = $this->params()->fromPost('id_cons',0);
+		$encours = $this->params()->fromPost('encours',0);
+		$terminer = $this->params()->fromPost('terminer',0);
+		$id_demande_hospi = $this->params()->fromPost('id_demande_hospi',0);
+		
+		$unPatient = $this->getPatientTable()->getInfoPatient($id_personne);
+		$photo = $this->getPatientTable()->getPhoto($id_personne);
+		
+		$demande = $this->getDemandeHospitalisationTable()->getDemandeHospitalisationWithIdcons($id_cons);
+		
+		$date = $this->controlDate->convertDate( $unPatient['DATE_NAISSANCE'] );
+		
+		$html  = "<div style='width:100%;'>";
+			
+		$html .= "<div style='width: 18%; height: 180px; float:left;'>";
+		$html .= "<div id='photo' style='float:left; margin-left:40px; margin-top:10px; margin-right:30px;'> <img style='width:105px; height:105px;' src='".$this->getPath()."/img/photos_patients/" . $photo . "' ></div>";
+		$html .= "</div>";
+			
+		$html .= "<div style='width: 65%; height: 200px; float:left;'>";
+		$html .= "<table style='margin-top:10px; float:left; width: 100%;'>";
+		$html .= "<tr style='width: 100%;'>";
+		
+		$html .= "<td style='width: 20%; height: 50px;'><a style='text-decoration:underline; font-size:12px;'>Nom:</a><br><p style='font-weight:bold; font-size:17px;'>" . $unPatient['NOM'] . "</p></td>";
+		$html .= "<td style='width: 30%; height: 50px;'><a style='text-decoration:underline; font-size:12px;'>Lieu de naissance:</a><br><p style=' font-weight:bold; font-size:17px;'>" . $unPatient['LIEU_NAISSANCE'] . "</p></td>";
+		$html .= "<td style='width: 20%; height: 50px;'><a style='text-decoration:underline; font-size:12px;'>Nationalit&eacute; actuelle:</a><br><p style=' font-weight:bold; font-size:17px;'>" . $unPatient['NATIONALITE_ACTUELLE'] . "</p></td>";
+		$html .= "<td style='width: 30%; height: 50px;'></td>";
+		
+		$html .= "</tr><tr style='width: 100%;'>";
+		$html .= "<td style='width: 20%; height: 50px;'><a style='text-decoration:underline; font-size:12px;'>Pr&eacute;nom:</a><br><p style=' font-weight:bold; font-size:17px;'>" . $unPatient['PRENOM'] . "</p></td>";
+		$html .= "<td style='width: 30%; height: 50px;'><a style='text-decoration:underline; font-size:12px;'>T&eacute;l&eacute;phone:</a><br><p style=' font-weight:bold; font-size:17px;'>" . $unPatient['TELEPHONE'] . "</p></td>";
+		$html .= "<td style='width: 20%; height: 50px;'><a style='text-decoration:underline; font-size:12px;'>Nationalit&eacute; d'origine:</a><br><p style=' font-weight:bold; font-size:17px;'>" . $unPatient['NATIONALITE_ORIGINE']. "</p></td>";
+		$html .= "<td style='width: 30%; height: 50px;'><a style='text-decoration:underline; font-size:12px;'>Email:</a><br><p style='font-weight:bold; font-size:17px;'>" . $unPatient['EMAIL'] . "</p></td>";
+		
+		$html .= "</tr><tr style='width: 100%;'>";
+		$html .= "<td style='width: 20%; height: 50px; vertical-align: top;'><a style='text-decoration:underline; font-size:12px;'>Date de naissance:</a><br><p style=' font-weight:bold; font-size:17px;'>" . $date . "</p></td>";
+		$html .= "<td style='width: 30%; height: 50px; vertical-align: top;'><a style='text-decoration:underline; font-size:12px;'>Adresse:</a><br><p style=' font-weight:bold; font-size:17px;'>" . $unPatient['ADRESSE'] . "</p></td>";
+		$html .= "<td style='width: 20%; height: 50px; vertical-align: top;'><a style='text-decoration:underline; font-size:12px;'>Profession:</a><br><p style=' font-weight:bold; font-size:17px;'>" .  $unPatient['PROFESSION'] . "</p></td>";
+		
+		$html .= "<td style='width: 30%; height: 50px;'></td>";
+		$html .= "</tr>";
+		$html .= "</table>";
+		$html .="</div>";
+			
+		$html .= "<div style='width: 17%; height: 200px; float:left;'>";
+		$html .= "<div id='' style='color: white; opacity: 0.09; float:left; margin-right:20px; margin-left:25px; margin-top:5px;'> <img style='width:105px; height:105px;' src='".$this->getPath()."/img/photos_patients/" . $photo . "'></div>";
+		$html .= "</div>";
+			
+		$html .= "</div>";
+		
+		$html .= "<div id='titre_info_deces'>
+				     <span id='titre_info_demande41' style='margin-left:-5px; cursor:pointer;'>
+				        <img src='../img/light/plus.png' /> D&eacute;tails des infos sur la demande
+				     </span>
+				  </div>
+		          <div id='barre'></div>";
+		
+		$html .= "<div id='info_demande41'>";
+		$html .= "<table style='margin-top:10px; margin-left: 18%; width: 80%;'>";
+		$html .= "<tr style='width: 95%;'>";
+		$html .= "<td style='width: 25%; height: 50px; vertical-align: top;'><a style='text-decoration:underline; font-size:12px;'>Consultation:</a><br><p style='font-weight:bold; font-size:17px;'>" . $id_cons . "</p></td>";
+		$html .= "<td style='width: 25%; height: 50px; vertical-align: top;'><a style='text-decoration:underline; font-size:12px;'>Date de la demande:</a><br><p style=' font-weight:bold; font-size:17px;'>" . $this->controlDate->convertDateTime($demande['date_demande_hospi']) . "</p></td>";
+		$html .= "<td style='width: 20%; height: 50px; vertical-align: top;'><a style='text-decoration:underline; font-size:12px;'>Date fin pr&eacute;vue:</a><br><p style=' font-weight:bold; font-size:17px;'>" . $this->controlDate->convertDate($demande['date_fin_prevue_hospi']) . "</p></td>";
+		$html .= "<td style='width: 30%; height: 50px; vertical-align: top;'><a style='text-decoration:underline; font-size:12px;'>M&eacute;decin demandeur:</a><br><p style=' font-weight:bold; font-size:17px;'>" .$demande['PrenomMedecin'].' '.$demande['NomMedecin']. "</p></td>";
+		$html .= "</tr>";
+		$html .= "</table>";
+		
+		$html .="<table style='margin-top:0px; margin-left:18%; width: 70%;'>";
+		$html .="<tr style='width: 70%'>";
+		$html .="<td style='padding-top: 10px; padding-bottom: 0px; padding-right: 30px; width: 20%; '><a style='text-decoration:underline; font-size:13px;'>Motif de la demande:</a><br><p id='circonstance_deces' style='background:#f8faf8; font-weight:bold; font-size:17px;'>". $demande['motif_demande_hospi'] ."</p></td>";
+		$html .="<td style='padding-top: 10px; padding-bottom: 0px; padding-right: 30px; width: 20%; '><a style='text-decoration:underline; font-size:13px;'>Note:</a><br><p id='circonstance_deces' style='background:#f8faf8; font-weight:bold; font-size:17px;'> </p></td>";
+		$html .="</tr>";
+		$html .="</table>";
+		$html .= "</div>";
+		
+		/***
+		 * UTILISER UNIQUEMENT DANS LA VUE DE LA LISTE DES PATIENTS EN COURS D'HOSPITALISATION
+		*/
+		if($encours == 111) {
+			$this->getDateHelper();
+			$hospitalisation = $this->getHospitalisationTable()->getHospitalisationWithCodedh($id_demande_hospi);
+			$lit_hospitalisation = $this->getHospitalisationlitTable()->getHospitalisationlit($hospitalisation->id_hosp);
+			$lit = $this->getLitTable()->getLit($lit_hospitalisation->id_materiel);
+			$salle = $this->getSalleTable()->getSalle($lit->id_salle);
+			$batiment = $this->getBatimentTable()->getBatiment($salle->id_batiment);
+		
+			$html .= "<div id='titre_info_deces'>
+					   <span id='titre_info_hospitalisation21' style='margin-left:-5px; cursor:pointer;'>
+				          <img src='../img/light/plus.png' /> Infos sur l'hospitalisation
+				       </span>
+					  </div>
+		
+					  <div id='barre'></div>";
+				
+			$html .= "<div id='info_hospitalisation21'>";
+			$html .= "<table style='margin-top:10px; margin-left: 18%; width: 80%;'>";
+			$html .= "<tr style='width: 80%;'>";
+			$html .= "<td style='width: 25%; height: 50px; vertical-align: top;'><a style='text-decoration:underline; font-size:12px;'>Date d&eacute;but:</a><br><p style='font-weight:bold; font-size:17px;'>" . $this->controlDate->convertDateTime($hospitalisation->date_debut) . "</p></td>";
+			$html .= "<td style='width: 25%; height: 50px; vertical-align: top;'><a style='text-decoration:underline; font-size:12px;'>Batiment:</a><br><p style=' font-weight:bold; font-size:17px;'>".$batiment->intitule."</p></td>";
+			$html .= "<td style='width: 20%; height: 50px; vertical-align: top;'><a style='text-decoration:underline; font-size:12px;'>Salle:</a><br><p style=' font-weight:bold; font-size:17px;'>".$salle->numero_salle."</p></td>";
+			$html .= "<td style='width: 30%; height: 50px; vertical-align: top;'><a style='text-decoration:underline; font-size:12px;'>Lit:</a><br><p style=' font-weight:bold; font-size:17px;'>".$lit->intitule."</p></td>";
+			$html .= "</tr>";
+			$html .= "</table>";
+			$html .= "</div>";
+		}
+		
+		if($terminer == 0) {
+			$html .="<div style='width: 100%; height: 100px;'>
+	    		     <div style='margin-left:40px; color: white; opacity: 1; width:95px; height:40px; padding-right:15px; float:left;'>
+                        <img  src='".$this->path."/images_icons/fleur1.jpg' />
+                     </div>";
+			$html .="<div class='block' id='thoughtbot' style='vertical-align: bottom; padding-left:60%; margin-bottom: 40px; padding-top: 35px; font-size: 18px; font-weight: bold;'><button type='submit' id='terminerVisualisationHosp'>Terminer</button></div>
+                     </div>";
+		}
+		/***
+		 * UTILISER UNIQUEMENT DANS LA PAGE POUR LA LIBERATION DU PATIENT EN COURS D'HOSPITALISATION
+		*/
+		else if($terminer == 111) {
+			$html .="<div style='width: 100%; height: 270px;'>";
+		
+			$html .= "<div id='titre_info_deces' >Infos sur la lib&eacute;ration du patient </div>
+		              <div id='barre'></div>";
+		
+			$chemin = $this->getServiceLocator()->get('Request')->getBasePath();
+			$formLiberation = new LibererPatientForm();
+			$data = array('id_demande_hospi' => $id_demande_hospi);
+			$formLiberation->populateValues($data);
+		
+			$formRow = new FormRow();
+			$formTextArea = new FormTextarea();
+			$formHidden = new FormHidden();
+		
+			$html .="<form id='Formulaire_Liberer_Patient'  method='post' action='".$chemin."/archivage/liberer-patient'>";
+			$html .=$formHidden($formLiberation->get('id_demande_hospi'));
+			$html .=$formHidden($formLiberation->get('temoin_transfert'));
+			$html .=$formHidden($formLiberation->get('id_cons'));
+			$html .="<div style='width: 80%; margin-left: 18%;'>";
+			$html .="<table id='form_patient' style='width: 100%; '>
+					 <tr class='comment-form-patient' style='width: 100%'>
+					   <td id='note_soin'  style='width: 45%; '>". $formRow($formLiberation->get('resumer_medical')).$formTextArea($formLiberation->get('resumer_medical'))."</td>
+					   <td id='note_soin'  style='width: 45%; '>". $formRow($formLiberation->get('motif_sorti')).$formTextArea($formLiberation->get('motif_sorti'))."</td>
+					   <td  style='width: 10%;'><a href='javascript:vider_liberation()'><img id='test' style=' margin-left: 25%;' src='../images_icons/118.png' title='vider tout'></a></td>
+					 </tr>
+					 </table>";
+			$html .="</div>";
+		
+			$html .="<div style=' margin-left:40px; color: white; opacity: 1; width:95px; height:40px; padding-right:15px; float:left;'>
+                        <img  src='".$this->path."/images_icons/fleur1.jpg' />
+                     </div>";
+		
+			$html .="<div style='width: 10%; padding-left: 30%; float:left;'>";
+			$html .="<div class='block' id='thoughtbot' style=' float:left; width: 30%; vertical-align: bottom;  margin-bottom: 40px; padding-top: 35px; font-size: 18px; font-weight: bold;'><button id='terminerLiberer'>Annuler</button></div>";
+			$html .="</div>";
+				
+			$html .="<div class='block' id='thoughtbot' style=' float:left; width: 30%; vertical-align: bottom;  margin-bottom: 40px; padding-top: 35px; font-size: 18px; font-weight: bold;'><button type='submit' id='liberer'>Lib&eacute;rer</button></div>";
+			$html .="</form>";
+		
+			$html .="<script>
+					  function vider_liberation(){
+	                   $('#resumer_medical').val('');
+	                   $('#motif_sorti').val('');
+		              }
+					  //$('#resumer_medical, #motif_sorti').css({'font-weight':'bold','color':'#065d10','font-family': 'Times  New Roman','font-size':'16px'});
+					  $('#resumer_medical, #motif_sorti').css({'font-size':'17px'});
+					</script>
+					";
+		}
+		$html .="</div>";
+		
+		$html .="<script>
+				  listepatient();
+				  initAnimationVue();
+				  animationPliantDepliant21();
+		          animationPliantDepliant41();
 				 </script>";
 		
 		$this->getResponse ()->getHeaders ()->addHeaderLine ( 'Content-Type', 'application/html; charset=utf-8' );
@@ -1895,19 +2171,6 @@ class ArchivageController extends AbstractActionController {
 		$motif_sorti = $this->params()->fromPost('motif_sorti', 0);
 	
 		$this->getHospitalisationTable()->libererPatient($id_demande_hospi, $resumer_medical, $motif_sorti);
-	
-		/**
-		 * LIBERATION DU LIT
-		*/
-		$ligne_hosp = $this->getHospitalisationTable()->getHospitalisationWithCodedh($id_demande_hospi);
-		if($ligne_hosp){
-			$id_hosp = $ligne_hosp->id_hosp;
-			$ligne_lit_hosp = $this->getHospitalisationlitTable()->getHospitalisationlit($id_hosp);
-			if($ligne_lit_hosp){
-				$id_materiel = $ligne_lit_hosp->id_materiel;
-				$this->getLitTable()->libererLit($id_materiel);
-			}
-		}
 	
 		return $this->redirect()->toRoute('archivage', array('action' =>'administrer-soin'));
 	}
@@ -1979,7 +2242,6 @@ class ArchivageController extends AbstractActionController {
 		$formSoin = new SoinForm();
 	
 		$hopital = $this->getTransfererPatientServiceTable ()->fetchHopital ();
-		
 		$formSoin->get ( 'hopital_accueil' )->setValueOptions ( $hopital );
 		//RECUPERATION DE L'HOPITAL DU SERVICE
 		$transfertPatientHopital = $this->getTransfererPatientServiceTable ()->getHopitalPatientTransfert($IdDuService);
@@ -1989,8 +2251,11 @@ class ArchivageController extends AbstractActionController {
 		//LISTE DES SERVICES DE L'HOPITAL
 		$formSoin->get ( 'service_accueil' )->setValueOptions ($serviceHopital);
 	
+		$date = new \DateTime();
+		$aujourdhui = $date->format('dmy');
 		$data = array (
 				'hopital_accueil' => $idHopital,
+				'date_cons' => $aujourdhui,
 		);
 	
 		$formSoin->populateValues($data);
@@ -2007,10 +2272,19 @@ class ArchivageController extends AbstractActionController {
 	
 		$listeMedicament = $this->getConsommableTable()->listeDeTousLesMedicaments();
 	
+		$listeMedicamentOrd = $this->getConsommableTable()->listeDeTousLesMedicaments();
+		$listeFormeOrd = $this->getConsommableTable()->formesMedicaments();
+		$listetypeQuantiteMedicamentOrd = $this->getConsommableTable()->typeQuantiteMedicaments();
+		
 		return array(
 				'form' => $formSoin,
 				'liste_med' => $listeMedicament,
+		
+				'liste_medOrdonnance' => $listeMedicamentOrd,
+				'listeFormeOrdonnance' => $listeFormeOrd,
+				'listetypeQuantiteMedicamentOrdonnance'  => $listetypeQuantiteMedicamentOrd,
 		);
+
 	}
 	
 	public function listeSoinsPrescritsAction() {
@@ -2022,7 +2296,7 @@ class ArchivageController extends AbstractActionController {
 				  </span>
 		        <div id='barre_admis'></div>";
 		$html .="<div id='Liste_soins_deja_prescrit'>";
-		$html .= $this->raffraichirListeSoinsPrescrit($id_hosp);
+		$html .= $this->raffraichirListeSoins($id_hosp);
 		$html .="</div>";
 	
 		$html .="<script>
@@ -2039,6 +2313,15 @@ class ArchivageController extends AbstractActionController {
 		$liste_soins = $this->getSoinHospitalisationTable()->getAllSoinhospitalisation($id_hosp);
 		$html = "";
 		$this->getDateHelper();
+		
+		$today = new \DateTime();
+		$aujourdhui = $today->format('Y-m-d');
+		
+		$html .="<div style='margin-right: 10px; float:right; font-family: Times New Roman; font-size: 15px; color: green;'>
+				   <i style='cursor:pointer;' id='afficherTerminer'> Termin&eacute; </i> |
+				   <i style='cursor:pointer;' id='afficherEncours'> Encours </i> |
+				   <i style='cursor:pointer;' id='afficherAvenir'> A venir </i>
+				</div>";
 			
 		$html .="<table class='table table-bordered tab_list_mini'  style='margin-top:10px; margin-bottom:20px; width:100%;' id='listeSoin'>";
 			
@@ -2046,8 +2329,8 @@ class ArchivageController extends AbstractActionController {
 				  <tr style='height:40px; width:100%; cursor:pointer;'>
 					<th style='width: 23%;'>M&eacute;dicament</th>
 					<th style='width: 21%;'>Voie d'administration</th>
-					<th style='width: 19%;'>Date recommand&eacute;e</th>
-					<th style='width: 19%;'>Heure suivante</th>
+					<th style='width: 21%;'>Dosage <span style='font-weight: normal;'>X</span> Fr&eacute;quence</th>
+					<th style='width: 17%;'>Heure suivante</th>
 				    <th style='width: 12%;'>Options</th>
 				    <th style='width: 6%;'>Etat</th>
 				  </tr>
@@ -2058,28 +2341,107 @@ class ArchivageController extends AbstractActionController {
 		rsort($liste_soins);
 		foreach ($liste_soins as $cle => $Liste){
 			//Récupération de l'heure suivante pour l'application du soin par l'infirmier
-			$heureSuivante = $this->getSoinHospitalisationTable()->getHeureSuivante($Liste['id_sh']);
-	
+			$heureSuivante = $this->getSoinHospitalisationTable()->getHeureSuivantePourAujourdhui($Liste['id_sh']);
+			$heurePrecedente = $this->getSoinHospitalisationTable()->getHeurePrecedentePourAujourdhui($Liste['id_sh']);
+				
+			$temoin = 0;
+			$idHeure = null;
 			$heureSuiv = null;
-			if($heureSuivante){
-				$heureSuiv = "<span style='color: red; font-weight: bold; font-size: 20px;'>".$heureSuivante['heure']."</span>";
+			if($heureSuivante || $heurePrecedente){
+				$heurePrecedenteH = substr($heurePrecedente['heure'], 0, 2);
+				
+				$heureActuelleH = $today->format('H');
+				$heureSuivanteH = substr($heureSuivante['heure'], 0, 2);
+				
+				if($heureSuivanteH-$heureActuelleH == 1){
+					$heureActuelleM = $today->format('i');
+					$heureSuivanteM = 59;
+					$diff = $heureSuivanteM - $heureActuelleM;
+					
+					if($diff <= 10){
+						$heureSuiv = "<khass id='alertHeureApplicationSoinUrgent".$Liste['id_sh']."' style='color: orange; font-weight: bold; font-size: 20px;'>".$heureSuivante['heure']."
+								      </khass>";
+						              $play = true;
+					}else if ($diff <= 30) {
+						$heureSuiv = "<khass id='alertHeureApplicationSoin".$Liste['id_sh']."' style='color: orange; font-weight: bold; font-size: 20px;'>".$heureSuivante['heure']."</khass>";
+					}else {
+						$heureSuiv = "<khass style='color: orange; font-weight: bold; font-size: 20px;'>".$heureSuivante['heure']."</khass>";
+					}
+					
+				}else 
+				    if ($heurePrecedenteH == $heureActuelleH){
+				    	$heureActuelleM = $today->format('i');
+				    	if($heureActuelleM <= 30){
+				    		$heureSuiv ="<khass id='alertHeureApplicationSoinUrgent2".$Liste['id_sh']."' style='color: red; font-weight: bold; font-size: 20px;'>".$heurePrecedente['heure']."
+								         </khass>
+								         <audio id='audioPlayer' src='../images_icons/alarme.mp3' ></audio>";
+				    		$temoin = 1;
+				    		$play = true;
+				    	}else {
+				    		if($heureSuivante['heure']){
+				    			$heureSuiv = "<khass style='color: orange; font-weight: bold; font-size: 20px;'>".$heureSuivante['heure']."</khass>";
+				    		}				    	}
+				    }
+					else {
+						if($heureSuivante['heure']){
+							$heureSuiv = "<khass style='color: orange; font-weight: bold; font-size: 20px;'>".$heureSuivante['heure']."</khass>";
+						}
+					}
 			}
-				
-				
+			
+			
 			$html .="<tr style='width: 100%;' id='".$Liste['id_sh']."'>";
 			$html .="<td style='width: 23%;'><div id='inform' style='float:left; font-weight:bold; font-size:17px;'>".$Liste['medicament']."</div></td>";
 			$html .="<td style='width: 21%;'><div id='inform' style='float:left; font-weight:bold; font-size:17px;'>".$Liste['voie_administration']."</div></td>";
-			$html .="<td style='width: 19%;'><div id='inform' style='float:left; font-weight:bold; font-size:17px;'>".$this->controlDate->convertDate($Liste['date_application_recommandee'])."</div></td>";
+			$html .="<td style='width: 21%;'><div id='inform' style='float:left; font-weight:bold; font-size:17px;'>".$Liste['dosage']." <span style='font-weight: normal; font-family: arial; color: green; font-size: 13px;'>X</span> ".$Liste['frequence']."</div></td>";
 	
 			if($heureSuiv == null){
-				$html .="<td style='width: 18%;'><div id='inform' style='float:left; font-weight:bold; font-size:17px;'>Termin&eacute; </div></td>";
+				$JourSuivant = $this->getSoinHospitalisationTable()->getDateApresDateDonnee($Liste['id_sh'], $aujourdhui);
+				$HeuresPourAujourdhui = $this->getSoinHospitalisationTable()->getHeuresPourAujourdhui($Liste['id_sh']);
+				if($JourSuivant && $HeuresPourAujourdhui){
+					$html .="<td style='width: 17%;'>
+							   <div id='inform' style='float:left; font-size:16px;'>
+							     ".$this->controlDate->convertDate($JourSuivant['date'])." - ".$JourSuivant['heure']."
+							     <khassSpan style='font-size: 10px;' > soin_encours </khassSpan>
+							   </div>
+							   
+							 </td>";
+				}elseif($JourSuivant && !$HeuresPourAujourdhui){
+					$html .="<td style='width: 17%;'>
+							   <div id='inform' style='float:left; font-size:16px;'>
+							     ".$this->controlDate->convertDate($JourSuivant['date'])." - ".$JourSuivant['heure']."
+							     <khassSpan style='font-size: 10px;' > soin_avenir </khassSpan>
+							   </div>
+							 </td>";
+				}elseif(!$JourSuivant && $HeuresPourAujourdhui){
+					$html .="<td style='width: 17%;'>
+							   <div id='inform' style='float:left; font-size:17px;'>
+							      Termin&eacute;
+							      <khassSpan style='font-size: 10px;' > soin_encours </khassSpan>
+							   </div>
+							   
+							</td>";
+				}elseif(!$JourSuivant && !$HeuresPourAujourdhui){
+					$html .="<td style='width: 17%;'>
+							   <div id='inform' style='float:left; font-size:17px;'>
+							      Termin&eacute;
+							      <khassSpan style='font-size: 10px;' > soin_terminer </khassSpan>
+							   </div>
+							</td>";
+				}
+
 			}else{
-				$html .="<td id='clignoterHeure".$Liste['id_sh']."' style='width: 18%;'><div id='inform' style='float:left; font-weight:bold; font-size:17px;'>".$heureSuiv."</div></td>";
+				$html .="<td style='width: 17%;'>
+						   <div id='inform' style='float:left; font-weight:bold; font-size:17px;'>
+						     ".$heureSuiv."
+						     <khassSpan style='font-size: 10px;' > soin_encours </khassSpan>
+						   </div>
+						 </td>";
 			}
-				
+			
 			if($Liste['appliquer'] == 0) {
 				$html .="<td style='width: 12%;'> <a href='javascript:vuesoin(".$Liste['id_sh'].") '>
-					       <img class='visualiser".$Liste['id_sh']."' style='display: inline;' src='../images_icons/voird.png' alt='Constantes' title='d&eacute;tails' />
+					       <img class='visualiser".$Liste['id_sh']."' style='display: inline;' src='../images_icons/voird.png'  title='d&eacute;tails' />
 					  </a>&nbsp";
 	
 				//Si au moin pour une heure un soin a ete applique impossible de Supprimer le soin
@@ -2092,37 +2454,36 @@ class ArchivageController extends AbstractActionController {
 				             </td>";
 				} else {
 					$html .="<a href='javascript:modifiersoin(".$Liste['id_sh'].",".$Liste['id_hosp'].")'>
-					    	  <img class='modifier".$Liste['id_sh']."'  src='../images_icons/modifier.png' alt='Constantes' title='modifier'/>
+					    	  <img class='modifier".$Liste['id_sh']."'  src='../images_icons/modifier.png' title='modifier'/>
 					         </a>&nbsp;";
 					$html .="<a href='javascript:supprimersoin(".$Liste['id_sh'].",".$Liste['id_hosp'].")'>
-					    	  <img class='supprimer".$Liste['id_sh']."'  src='../images_icons/sup.png' alt='Constantes' title='annuler' />
+					    	  <img class='supprimer".$Liste['id_sh']."'  src='../images_icons/sup.png' title='annuler' />
 					         </a>
 				             </td>";
 				}
-				 
-	
+				
 					
 				$html .="<td style='width: 6%;'>
-					       <img class='etat_oui".$Liste['id_sh']."' style='margin-left: 20%;' src='../images_icons/non.png' alt='Constantes' title='soin non encore appliqu&eacute;' />
+					       <img class='etat_oui".$Liste['id_sh']."' style='margin-left: 20%;' src='../images_icons/non.png' title='pas totalement appliqu&eacute;' />
 					     &nbsp;
 				         </td>";
 			}else {
 	
 				$html .="<td style='width: 12%;'> <a href='javascript:vuesoinApp(".$Liste['id_sh'].") '>
-					       <img class='visualiser".$Liste['id_sh']."' style='display: inline;' src='../images_icons/voird.png' alt='Constantes' title='d&eacute;tails' />
+					       <img class='visualiser".$Liste['id_sh']."' style='display: inline;' src='../images_icons/voird.png' title='d&eacute;tails' />
 					  </a>&nbsp";
-	
+				
 				$html .="<a>
-					    	<img class='modifier".$Liste['id_sh']."' style='color: white; opacity: 0.15;' src='../images_icons/modifier.png' alt='Constantes'/>
+					    	<img class='modifier".$Liste['id_sh']."' style='color: white; opacity: 0.15;' src='../images_icons/modifier.png' />
 					     </a>&nbsp;
 	
 				         <a >
-					    	<img class='supprimer".$Liste['id_sh']."' style='color: white; opacity: 0.15;' src='../images_icons/sup.png' alt='Constantes'/>
+					    	<img class='supprimer".$Liste['id_sh']."' style='color: white; opacity: 0.15;' src='../images_icons/sup.png' />
 					     </a>
 				         </td>";
 					
 				$html .="<td style='width: 6%;'>
-					       <img class='etat_non".$Liste['id_sh']."' style='margin-left: 20%;' src='../images_icons/oui.png' alt='Constantes' title='soin d&eacute;ja appliqu&eacute;' />
+					       <img class='etat_non".$Liste['id_sh']."' style='margin-left: 20%;' src='../images_icons/oui.png' title='totalement appliqu&eacute;' />
 					     &nbsp;
 				         </td>";
 	
@@ -2184,21 +2545,36 @@ class ArchivageController extends AbstractActionController {
 	                    var tooltips = $( '.etat_non".$Liste['id_sh']."' ).tooltip();
 	                    tooltips.tooltip( 'close' );
 	                  });
+	                    		
+	                  function FaireClignoterPourAlerteUrgent".$Liste['id_sh']." (){
+                          $('#alertHeureApplicationSoinUrgent".$Liste['id_sh']."').fadeOut(250).fadeIn(200);
+                      }
+                      $(function(){
+                          setInterval('FaireClignoterPourAlerteUrgent".$Liste['id_sh']." ()',500);
+                      });
+
+                          		
+                      function FaireClignoterPourAlerteUrgent2".$Liste['id_sh']." (){
+                          $('#alertHeureApplicationSoinUrgent2".$Liste['id_sh']."').fadeOut(100).fadeIn(50);
+                      }
+                      $(function(){
+                          setInterval('FaireClignoterPourAlerteUrgent2".$Liste['id_sh']." ()',500);
+                      });
+                          		
+                          		
+                      function FaireClignoterPourAlerte".$Liste['id_sh']." (){
+                          $('#alertHeureApplicationSoin".$Liste['id_sh']."').fadeOut(900).fadeIn(800);
+                      }
+                      $(function(){
+                          setInterval('FaireClignoterPourAlerte".$Liste['id_sh']." ()',4200);
+                      });
+                          		
 			        </script>";
-				
 		}
 		$html .="</tbody>";
 		$html .="</table>";
 	
 		$html .="<style>
-				  #listeDataTable{
-	                /*margin-left: 185px;*/
-                  }
-	
-				  div .dataTables_paginate
-                  {
-				    /*margin-right: 20px;*/
-                  }
 	
 				  #listeSoin tbody tr{
 				    background: #fbfbfb;
@@ -2208,7 +2584,7 @@ class ArchivageController extends AbstractActionController {
 				    background: #fefefe;
 				  }
 				 </style>";
-		$html .="<script> listepatient (); listeDesSoins(); </script>";
+		$html .="<script> $('#listeSoin khassSpan').toggle(false); listepatient (); listeDesSoins(); </script>";
 	
 		return $html;
 	
@@ -2225,7 +2601,9 @@ class ArchivageController extends AbstractActionController {
 	}
 	
 	public function listePatientSuiviAjaxAction() {
-		$output = $this->getDemandeHospitalisationTable()->getListePatientSuiviHospitalisation();
+		$user = $this->layout()->user;
+		$IdDuService = $user['IdService'];
+		$output = $this->getDemandeHospitalisationTable()->getListePatientSuiviHospitalisation($IdDuService);
 		return $this->getResponse ()->setContent ( Json::encode ( $output, array (
 				'enableJsonExprFinder' => true
 		) ) );
@@ -2281,14 +2659,14 @@ class ArchivageController extends AbstractActionController {
 		$html .= "</div>";
 	
 		$html .= "<div id='titre_info_deces'>
-				     <span id='titre_info_demande' style='margin-left: -10px; cursor:pointer;'>
+				     <span id='titre_info_demande41' style='margin-left:-5px; cursor:pointer;'>
 				        <img src='".$chemin."/img/light/plus.png' /> D&eacute;tails des infos sur la demande
 				     </span>
 				  </div>
 		          <div id='barre'></div>";
 	
-		$html .= "<div id='info_demande'>";
-		$html .= "<table style='margin-top:10px; margin-left: 195px; width: 80%;'>";
+		$html .= "<div id='info_demande41'>";
+		$html .= "<table style='margin-top:10px; margin-left: 18%; width: 80%;'>";
 		$html .= "<tr style='width: 80%;'>";
 		$html .= "<td style='width: 25%; height: 50px; vertical-align: top;'><a style='text-decoration:underline; font-size:12px;'>Consultation:</a><br><p style='font-weight:bold; font-size:17px;'>" . $id_cons . "</p></td>";
 		$html .= "<td style='width: 25%; height: 50px; vertical-align: top;'><a style='text-decoration:underline; font-size:12px;'>Date de la demande:</a><br><p style=' font-weight:bold; font-size:17px;'>" . $this->controlDate->convertDateTime($demande['Datedemandehospi']) . "</p></td>";
@@ -2297,7 +2675,7 @@ class ArchivageController extends AbstractActionController {
 		$html .= "</tr>";
 		$html .= "</table>";
 	
-		$html .="<table style='margin-top:0px; margin-left:195px; width: 70%;'>";
+		$html .="<table style='margin-top:0px; margin-left:18%; width: 70%;'>";
 		$html .="<tr style='width: 70%'>";
 		$html .="<td style='padding-top: 10px; padding-bottom: 0px; padding-right: 30px; width: 20%; '><a style='text-decoration:underline; font-size:13px;'>Motif de la demande:</a><br><p id='circonstance_deces' style='background:#f8faf8; font-weight:bold; font-size:17px;'>". $demande['motif_demande_hospi'] ."</p></td>";
 		$html .="<td style='padding-top: 10px; padding-bottom: 0px; padding-right: 30px; width: 20%; '><a style='text-decoration:underline; font-size:13px;'>Note:</a><br><p id='circonstance_deces' style='background:#f8faf8; font-weight:bold; font-size:17px;'> </p></td>";
@@ -2317,14 +2695,14 @@ class ArchivageController extends AbstractActionController {
 			$batiment = $this->getBatimentTable()->getBatiment($salle->id_batiment);
 	
 			$html .= "<div id='titre_info_deces'>
-					   <span id='titre_info_hospitalisation' style='margin-left:-10px; cursor:pointer;'>
+					   <span id='titre_info_hospitalisation21' style='margin-left:-5px; cursor:pointer;'>
 				          <img src='".$chemin."/img/light/plus.png' /> Infos sur l'hospitalisation
 				       </span>
 					  </div>
 		              <div id='barre'></div>";
 	
-			$html .= "<div id='info_hospitalisation'>";
-			$html .= "<table style='margin-top:10px; margin-left: 195px; width: 80%;'>";
+			$html .= "<div id='info_hospitalisation21'>";
+			$html .= "<table style='margin-top:10px; margin-left: 18%; width: 80%;'>";
 			$html .= "<tr style='width: 80%;'>";
 			$html .= "<td style='width: 25%; height: 50px; vertical-align: top;'><a style='text-decoration:underline; font-size:12px;'>Date d&eacute;but:</a><br><p style='font-weight:bold; font-size:17px;'>" . $this->controlDate->convertDateTime($hospitalisation->date_debut) . "</p></td>";
 			$html .= "<td style='width: 25%; height: 50px; vertical-align: top;'><a style='text-decoration:underline; font-size:12px;'>Batiment:</a><br><p style=' font-weight:bold; font-size:17px;'>".$batiment->intitule."</p></td>";
@@ -2336,7 +2714,7 @@ class ArchivageController extends AbstractActionController {
 		}
 	
 		$html .= "<div id='titre_info_deces'>
-				    <span id='titre_info_liste' style='margin-left:-10px; cursor:pointer;'>
+				    <span id='titre_info_liste' style='margin-left:-5px; cursor:pointer;'>
 				      <img src='".$chemin."/img/light/minus.png' /> Liste des soins
 				    </span>
 				  </div>
@@ -2358,10 +2736,10 @@ class ArchivageController extends AbstractActionController {
 	
 		$html .="<script>
 				  listepatient();
-				  initAnimation();
-				  animationPliantDepliant2();
+				  initAnimationVue();
+				  animationPliantDepliant21();
 				  animationPliantDepliant3();
-		          animationPliantDepliant4();
+		          animationPliantDepliant41();
 				 </script>";
 	
 		$this->getResponse ()->getHeaders ()->addHeaderLine ( 'Content-Type', 'application/html; charset=utf-8' );
@@ -2369,19 +2747,22 @@ class ArchivageController extends AbstractActionController {
 	}
 	
 	public function listeSoinsAAppliquer($id_hosp){
-		$this->getDateHelper();
 		$liste_soins = $this->getSoinHospitalisationTable()->getAllSoinhospitalisation($id_hosp);
 		$html = "";
 		$this->getDateHelper();
 			
-		$html .="<table class='table table-bordered tab_list_mini'  style='margin-top:10px; margin-bottom:20px; margin-left:195px; width:80%;' id='listeSoin'>";
+		$today = new \DateTime();
+		$aujourdhui = $today->format('Y-m-d');
+		
+		$html .="<div id='listeDeTousLesSoinsDuPatient'>
+				 <table class='table table-bordered tab_list_mini'  style='margin-top:10px; margin-bottom:20px; margin-left:18%; width:80%;' id='listeSoin'>";
 			
 		$html .="<thead style='width: 100%;'>
 				  <tr style='height:40px; width:100%; cursor:pointer; '>
 					<th style='width: 24%;'>M<minus>&eacute;dicament</minus></th>
 					<th style='width: 21%;'>V<minus>oie d'administration</minus></th>
-					<th style='width: 21%;'>D<minus>ate recommand&eacute;e </minus></th>
-					<th style='width: 18%;'>H<minus>eure suivante </minus></th>
+					<th style='width: 22%;'>D<minus>osage </minus>  <text style='font-weight: normal; font-family: arial; color: green; font-size: 15px;'> X </text> F<minus>r&eacute;quence </minus></th>
+					<th style='width: 17%;'>H<minus>eure suivante </minus></th>
 				    <th style='width: 10%;'>O<minus>ptions</minus></th>
 				    <th style='width: 6%;'>E<minus>tat</minus></th>
 				  </tr>
@@ -2389,64 +2770,62 @@ class ArchivageController extends AbstractActionController {
 			
 		$html .="<tbody style='width: 100%;'>";
 	
+		$play = false;
 		sort($liste_soins);
-		foreach ($liste_soins as $cle => $Liste){
-			//Récupération de l'heure suivante pour l'application du soin
-			$heureSuivante = $this->getSoinHospitalisationTable()->getHeureSuivante($Liste['id_sh']);
-				
-			$idHeure = null;
-			$heureSuiv = null;
-			if($heureSuivante){
-				$idHeure = $heureSuivante['id_heure'];
-				$heureSuiv = "<span style='color: red; font-weight: bold; font-size: 20px;'>".$heureSuivante['heure']."</span>";
-	
-				$heureSuivPopup = $heureSuivante['heure'];
-			}
-				
-			$html .="<tr style='width: 100%;' id='".$Liste['id_sh']."'>";
-			$html .="<td style='width: 24%;'><div id='inform' style='float:left; font-weight:bold; font-size:17px;'>".$Liste['medicament']."</div></td>";
+ 		foreach ($liste_soins as $cle => $Liste){
+ 			//Récupération de l'heure suivante pour l'application du soin
+ 			$heureSuivante = $this->getConsultationTable()->getHeureSuivante($Liste['id_sh']);
+			
+ 			$idHeure = 0;
+ 			$heureSuiv = 'Termin&eacute;';
+ 			if($heureSuivante){
+ 				$idHeure = $heureSuivante['id_heure'];
+ 				$heureSuiv = "<khass style='color: orange; font-weight: bold; font-size: 20px;'>".$heureSuivante['heure']."</khass>";
+ 			}
+ 			
+ 			$html .="<tr style='width: 100%;' id='".$Liste['id_sh']."'>";
+ 			$html .="<td style='width: 24%;'><div id='inform' style='float:left; font-weight:bold; font-size:17px;'>".$Liste['medicament']."</div></td>";
 			$html .="<td style='width: 21%;'><div id='inform' style='float:left; font-weight:bold; font-size:17px;'>".$Liste['voie_administration']."</div></td>";
-			$html .="<td style='width: 21%;'><div id='inform' style='float:left; font-weight:bold; font-size:17px;'>".$this->controlDate->convertDate($Liste['date_application_recommandee'])."</div></td>";
-			if($heureSuiv == null){
-				$html .="<td style='width: 18%;'><div id='inform' style='float:left; font-weight:bold; font-size:17px;'>Termin&eacute; </div></td>";
-			}else{
-				$html .="<td style='width: 18%;'><div id='inform' style='float:left; font-weight:bold; font-size:17px;'>".$heureSuiv."</div></td>";
-			}
-	
-			if($Liste['appliquer'] == 0) {
-				$html .="<td style='width: 10%;'> <a href='javascript:vuesoin(".$Liste['id_sh'].") '>
-					       <img class='visualiser".$Liste['id_sh']."' style='display: inline;' src='../images_icons/voird.png'  title='d&eacute;tails' />
+			$html .="<td style='width: 22%;'><div id='inform' style='float:left; font-weight:bold; font-size:17px;'>".$Liste['dosage']." <text style='font-weight: normal; font-family: arial; color: green; font-size: 13px;'> X </text> ".$Liste['frequence']."</div></td>";
+
+				
+			$html .="<td style='width: 17%;'>
+					   <div id='inform' style='float:left; font-weight:bold; font-size:17px;'>
+					     ".$heureSuiv."
+					   </div>
+					 </td>";
+			$html .="<td style='width: 10%;'> <a href='javascript:vuesoin(".$Liste['id_sh'].") '>
+				       <img class='visualiser".$Liste['id_sh']."' style='display: inline;' src='../images_icons/voird.png' title='d&eacute;tails' />
 					  </a>&nbsp";
-	
+			
+			if($heureSuiv != 'Termin&eacute;'){
 				$html .="<a href='javascript:appliquerSoin(".$Liste['id_sh'].",".$Liste['id_hosp'].",".$idHeure.")'>
-					    	<img class='modifier".$Liste['id_sh']."'  src='../img/dark/blu-ray.png'  title='appliquer le soin'/>
+					    	<img class='modifier".$Liste['id_sh']."'  src='../img/dark/blu-ray.png' title='appliquer le soin'/>
 					     </a>&nbsp;
-	
+				
 				         </td>";
-					
+			} else {
+				$html .="<a style='color: white; opacity: 0.09;'>
+					    	<img src='../img/dark/blu-ray.png' />
+					     </a>&nbsp;
+				
+				         </td>";
+			}
+			
+			if($Liste['appliquer'] == 0) {
 				$html .="<td style='width: 6%;'>
-					       <img class='etat_oui".$Liste['id_sh']."' style='margin-left: 20%;' src='../images_icons/non.png' title='soin non encore appliqu&eacute;' />
+					       <img class='etat_oui".$Liste['id_sh']."' style='margin-left: 20%;' src='/simens/public/images_icons/non.png' title='pas totalement appliqu&eacute;' />
 					     &nbsp;
 				         </td>";
 			}else {
-				$html .="<td style='width: 10%;'> <a href='javascript:vuesoinApp(".$Liste['id_sh'].") '>
-					       <img class='visualiser".$Liste['id_sh']."' style='display: inline;' src='../images_icons/voird.png' title='d&eacute;tails' />
-					  </a>&nbsp";
-	
-				$html .="<a>
-					    	<img class='modifier".$Liste['id_sh']."' style='color: white; opacity: 0.15;' src='../img/dark/blu-ray.png' title=''/>
-					     </a>&nbsp;
-	
-				         </td>";
-					
 				$html .="<td style='width: 6%;'>
-					       <img class='etat_non".$Liste['id_sh']."' style='margin-left: 20%;' src='../images_icons/oui.png' title='soin d&eacute;j&agrave; appliqu&eacute;' />
+					       <img class='etat_non".$Liste['id_sh']."' style='margin-left: 20%;' src='/simens/public/images_icons/oui.png' title='totalement appliqu&eacute;' />
 					     &nbsp;
 				         </td>";
 			}
-	
-			$html .="</tr>";
-	
+				
+ 			$html .="</tr>";
+				
 			$html .="<script>
 					  $('.visualiser".$Liste['id_sh']." ').mouseenter(function(){
 	                    var tooltips = $( '.visualiser".$Liste['id_sh']."' ).tooltip({show: {effect: 'slideDown', delay: 250}});
@@ -2478,7 +2857,7 @@ class ArchivageController extends AbstractActionController {
 	                    var tooltips = $( '.supprimer".$Liste['id_sh']."' ).tooltip();
 	                    tooltips.tooltip( 'close' );
 	                  });
-	
+	           
 	                  /*************************/
 	                  /*************************/
 	                  /*************************/
@@ -2501,193 +2880,443 @@ class ArchivageController extends AbstractActionController {
 	                    var tooltips = $( '.etat_non".$Liste['id_sh']."' ).tooltip();
 	                    tooltips.tooltip( 'close' );
 	                  });
+	                  var intervalAlerte; 
+	                  function FaireClignoterPourAlerte".$Liste['id_sh']." (){
+                          $('#alertHeureApplicationSoinUrgent".$Liste['id_sh']."').fadeOut(250).fadeIn(200);
+                      }
+
+                      $(function(){
+                          intervalAlerte = setInterval('FaireClignoterPourAlerte".$Liste['id_sh']." ()',500);
+                      });
+                          		
+
+                      var intervalAlerteUrgent2;     		
+                      function FaireClignoterPourAlerteUrgent2".$Liste['id_sh']." (){
+                          $('#alertHeureApplicationSoinUrgent2".$Liste['id_sh']."').fadeOut(200).fadeIn(50);
+                      }
+                      $(function(){
+                          intervalAlerteUrgent2 = setInterval('FaireClignoterPourAlerteUrgent2".$Liste['id_sh']." ()',500);
+                      });
 			        </script>";
-		}
+ 		}
+ 		
 		$html .="</tbody>";
-		$html .="</table>";
+		$html .="</table></div>";
 	
 		$html .="<style>
-				  #listeDataTable{
-	                margin-left: 185px;
+				  #listeDeTousLesSoinsDuPatient .listeDataTable{
+	                margin-left: 215px;
                   }
 	
-				  div .dataTables_paginate
-                  {
+				  #listeDeTousLesSoinsDuPatient div .dataTables_paginate{
 				    margin-right: 20px;
                   }
-	
+				
 				  #listeSoin tbody tr{
 				    background: #fbfbfb;
 				  }
-	
+				
 				  #listeSoin tbody tr:hover{
 				    background: #fefefe;
 				  }
-	
+				  
 				 </style>";
-	
-		$html .="<script>
-				  listepatient(); listeDesSoins();
-				 </script>";
+
+		
+ 		$html .="<script>
+ 				  $('#listeSoin span').toggle(false);
+ 				  listepatient(); 
+ 				  listeDesSoins(); 
+ 				  $('#id_hosp').val(".$id_hosp.");
+ 				 </script>";
+		
 	
 		return $html;
 	}
 	
+	public function getLesHeuresDuSoin($id_sh, $date){
 	
-	public function vueSoinAppliquerAction() {
+		$heure = $this->getSoinHospitalisationTable()->getHeuresPourUneDate($id_sh, $date);
+			
+		$heureSuivante = $this->getSoinHospitalisationTable()->getHeureSuivantePourUneDate($id_sh, $date);
+			
+		$dateTime = new \DateTime();
+		$aujoudhui = $dateTime->format('Y-m-d');
 	
-		$this->getDateHelper();
-		$id_sh = $this->params()->fromPost('id_sh', 0);
-		$soinHosp = $this->getSoinHospitalisationTable()->getSoinhospitalisationWithId_sh($id_sh);
-		$heure = $this->getSoinHospitalisationTable()->getHeures($id_sh);
-	
-		$heureSuivante = $this->getSoinHospitalisationTable()->getHeureSuivante($id_sh);
+		if($date < $aujoudhui){
+			$heureSuivante = null;
+		}
 	
 		$lesHeures = "";
-		if($heure){
+			
+		//S'il y'a une heure suivante et bien-sur des heures pour appliquer des soins
+		if($heure && $heureSuivante){
 			for ($i = 0; $i<count($heure); $i++){
+				$appliquer = $this->getSoinHospitalisationTable()->getHeureAppliqueePourUneDate($id_sh, $heure[$i], $date)['applique'];
+					
 				if($i == count($heure)-1) {
 					if($heureSuivante['heure'] == $heure[$i]){
-						$lesHeures.= '<span id="clignoterHeure" style="font-weight: bold; color: red;">'.$heure[$i].'</span>';
+						$lesHeures.= '<span id="clignoterHeure" style="font-weight: bold; color: orange;">'.$heure[$i].'</span>';
 					}else{
-						$lesHeures.= $heure[$i];
+							
+						if($heure[$i] < $heureSuivante['heure'] &&  $appliquer == 0){
+							$lesHeures.= '<span style="font-weight: bold; color: red;">'.$heure[$i].'</span> ';
+						} else if ($heure[$i] > $heureSuivante['heure']){
+							$lesHeures.= '<span style="color: #ccc;">'.$heure[$i].'</span>';
+						} else {
+							$lesHeures.= $heure[$i];
+						}
+							
 					}
 				} else {
 					if($heureSuivante['heure'] == $heure[$i]){
-						$lesHeures.= '<span id="clignoterHeure" style="font-weight: bold; color: red;">'.$heure[$i].'</span>  -  ';
+						$lesHeures.= '<span id="clignoterHeure" style="font-weight: bold; color: orange;">'.$heure[$i].'</span>  -  ';
 					}else{
+							
+						if($heure[$i] < $heureSuivante['heure'] &&  $appliquer == 0){
+							$lesHeures.= '<span style="font-weight: bold; color: red;">'.$heure[$i].'</span>  -  ';
+						} else if ($heure[$i] > $heureSuivante['heure']){
+							$lesHeures.= '<span style="color: #ccc;">'.$heure[$i].' - </span>';
+						} else {
+							$lesHeures.= $heure[$i].' - ';
+						}
+							
+					}
+				}
+			}
+		}
+			
+		//S'il n'y a plus une heure suivante c'est a dire toutes les heures sont passées
+		if($heure && !$heureSuivante && $date == $aujoudhui){
+			for ($i = 0; $i<count($heure); $i++){
+				$appliquer = $this->getSoinHospitalisationTable()->getHeureAppliqueePourUneDate($id_sh, $heure[$i], $date)['applique'];
+					
+				if($i == count($heure)-1) {
+	
+					if($appliquer == 0){
+						$lesHeures.= '<span style="font-weight: bold; color: red;">'.$heure[$i].'</span> ';
+					} else {
+						$lesHeures.= $heure[$i];
+					}
+	
+				} else {
+	
+					if($appliquer == 0){
+						$lesHeures.= '<span style="font-weight: bold; color: red;">'.$heure[$i].'</span>  -  ';
+					} else {
 						$lesHeures.= $heure[$i].'  -  ';
 					}
+	
 				}
+					
 			}
 		}
 	
-		$html  ="<table style='width: 99%;'>";
-		$html .="<tr style='width: 99%;'>";
-		$html .="<td style='width: 33%; vertical-align:top;'><span id='labelHeureLABEL' style='font-weight:bold; font-size:15px; padding-left: 5px; color: #065d10; font-family: Times  New Roman;'>M&eacute;dicament</span><br><p id='zoneChampInfo' style='background:#f8faf8; font-size:17px; padding-left: 5px;'> ".$soinHosp->medicament." </p></td>";
-		$html .="<td style='width: 33%; vertical-align:top;'><span id='labelHeureLABEL' style='font-weight:bold; font-size:15px; padding-left: 5px; color: #065d10; font-family: Times  New Roman;'>Voie d'administration</span><br><p id='zoneChampInfo' style='background:#f8faf8; font-size:17px; padding-left: 5px;'> ".$soinHosp->voie_administration." </p></td>";
-		$html .="<td style='width: 33%; vertical-align:top;'><span id='labelHeureLABEL' style='font-weight:bold; font-size:15px; padding-left: 5px; color: #065d10; font-family: Times  New Roman;'>Date prescription</span><br><p id='zoneChampInfo' style='background:#f8faf8; font-size:17px; padding-left: 5px;'> ".$this->controlDate->convertDateTime($soinHosp->date_enregistrement)." </p></td>";
-		$html .="</tr>";
-	
-		$html .="<tr style='width: 99%;'>";
-		$html .="<td style='vertical-align:top;'><span id='labelHeureLABEL' style='font-weight:bold; font-size:15px; padding-left: 5px; color: #065d10; font-family: Times  New Roman;'>Date recommand&eacute;e</span><br><p id='zoneChampInfo' style='background:#f8faf8; font-size:17px; padding-left: 5px;'> ".$this->controlDate->convertDate($soinHosp->date_application_recommandee)." </p></td>";
-		$html .="<td colspan='2' style='width: 80%; vertical-align:top;'>
-				 <span id='labelHeureLABEL' style='font-weight:bold; font-size:15px; padding-left: 5px; color: #065d10; font-family: Times  New Roman;'>Heures recommand&eacute;es</span><br><p id='zoneChampInfo' style='background:#f8faf8; font-size:17px; padding-left: 5px;'> ".$lesHeures." </p>
-				 </td>";
-	
-		$html .="</table>";
-	
-		$html .="<table style='width: 99%;'>";
-		$html .="<tr style='width: 95%;'>";
-		$html .="<td style='width: 50%; padding-top: 10px; padding-right:25px;'><span id='labelHeureLABEL' style='font-weight:bold; font-size:16px; padding-left: 5px; color: #065d10; font-family: Times  New Roman;'>Motif</span><br><p id='circonstance_deces' style='background:#f8faf8; font-size:17px; padding-left: 10px;'> ".$soinHosp->motif." </p></td>";
-		$html .="<td style='width: 50%; padding-top: 10px;'><span id='labelHeureLABEL' style='font-weight:bold; font-size:16px; padding-left: 5px; color: #065d10; font-family: Times  New Roman;'>Note</span><br><p id='circonstance_deces' style='background:#f8faf8; font-size:17px; padding-left: 5px;'> ".$soinHosp->note." </p></td>";
-		$html .="<td style='width: 0%;'> </td>";
-		$html .= "</tr>";
-	
-	
-		if($soinHosp){
-			if($soinHosp->appliquer == 1) {
-	
-				$listeHeure = $this->getSoinHospitalisationTable()->getToutesHeures($id_sh);
+		//S'il n'y a plus une heure suivante c'est a dire toutes les heures sont passées
+		if($heure && !$heureSuivante && $date != $aujoudhui){
+			for ($i = 0; $i<count($heure); $i++){
+				$appliquer = $this->getSoinHospitalisationTable()->getHeureAppliqueePourUneDate($id_sh, $heure[$i], $date)['applique'];
 					
-				$html .="<tr style='width: 99%;'>
-					   <td colspan='2' style='width: 99%;'>
-					     <div id='titre_info_admis'>Informations sur l'application du soin</div><div id='barre_admis'></div>
+				if($i == count($heure)-1) {
+	
+					if($appliquer == 0){
+						$lesHeures.= '<span style="font-weight: bold; color: orange; text-decoration:underline;">'.$heure[$i].'</span> ';
+					} else {
+						$lesHeures.= $heure[$i];
+					}
+	
+				} else {
+	
+					if($appliquer == 0){
+						$lesHeures.= '<span style="font-weight: bold; color: orange; text-decoration:underline;">'.$heure[$i].'</span>  -  ';
+					} else {
+						$lesHeures.= $heure[$i].'  -  ';
+					}
+	
+				}
+					
+			}
+		}
+	
+		return $lesHeures;
+	}
+	
+	public function getHeuresAVenir($id_sh, $date){
+		$heure = $this->getSoinHospitalisationTable()->getHeuresPourUneDate($id_sh, $date);
+		$lesHeures ="";
+		for ($i = 0; $i<count($heure); $i++){
+			if($i == count($heure)-1) {
+				$lesHeures.= '<span style="color: #ccc;">'.$heure[$i].'</span>';
+			} else {
+				$lesHeures.= '<span style="color: #ccc;">'.$heure[$i].' - </span>';
+			}
+		}
+	
+		return $lesHeures;
+	}
+	
+	public function vueSoinAppliquerAction() {
+
+		$this->getDateHelper();
+		$id_sh = $this->params()->fromPost('id_sh', 0);
+		$soinHosp = $this->getSoinHospitalisationTable()->getSoinhospitalisationWithId_sh($id_sh);
+			
+		$today = new \DateTime();
+		$aujourdhui = $today->format('Y-m-d');
+		$hier = date("Y-m-d", strtotime('-1 day'));
+			
+		$lesHeures = $this->getLesHeuresDuSoin($id_sh, $aujourdhui);
+		$finDuSoin = date("Y-m-d", strtotime($soinHosp->date_debut_application.'+'.($soinHosp->duree-1).' day' ));
+		
+		$dateAvenir = null;
+		if(!$lesHeures){
+			$dateAvenir = $soinHosp->date_debut_application;
+			$lesHeures  = $this->getHeuresAVenir($id_sh, $soinHosp->date_debut_application);
+		}
+			
+		$html  ="<table style='width: 99%;'>";
+			
+		$html .="<tr style='width: 99%;'>
+					   <td colspan='3' style='width: 99%;'>
+					     <div id='titre_info_admis' style='margin-top: 0px;'>Prescription du soin : <i style='font-size: 15px;'>".$this->controlDate->convertDateTime($soinHosp->date_enregistrement)."</i></div><div id='barre_admis'></div>
 					   </td>
 					 </tr>";
-					
-				$html .="<table style='width: 99%; margin-top: 10px;'>";
-					
-				if($listeHeure){
-					foreach ($listeHeure as $listeH) {
-						//RECUPERATION DES INFORMATIONS DE L'INFIRMIER AYANT APPLIQUER LES DONNEES
-						$infosInfirmier = $this->getSoinHospitalisationTable()->getInfosInfirmiers($listeH['id_personne_infirmier']);
-						$PrenomInfirmier = " Prenom  ";
-						$NomInfirmier = " Nom ";
-						if($infosInfirmier){
-							$PrenomInfirmier = $infosInfirmier['PRENOM'];
-							$NomInfirmier = $infosInfirmier['NOM'];
+			
+		$html .="<tr style='width: 99%; '>";
+		$html .="<td style='width: 36%; padding-top: 15px; padding-right: 15px;'><span style='text-decoration:underline; font-weight:bold; font-size:15px; color: #065d10; font-family: Times  New Roman;'>M&eacute;dicament</span><br><p id='zoneChampInfo' style='background:#f8faf8; font-size:17px; padding-left: 5px;'> ".$soinHosp->medicament." </p></td>";
+		$html .="<td style='width: 33%; padding-top: 15px; padding-right: 15px;'><span style='text-decoration:underline; font-weight:bold; font-size:15px; color: #065d10; font-family: Times  New Roman;'>Voie d'administration</span><br><p id='zoneChampInfo' style='background:#f8faf8; font-size:17px; padding-left: 5px;'> ".$soinHosp->voie_administration." </p></td>";
+		$html .="<td style='width: 30%; padding-top: 15px;'><span style='text-decoration:underline; font-weight:bold; font-size:15px; color: #065d10; font-family: Times  New Roman;'>Dosage & Fr&eacute;quence</span><br><p id='zoneChampInfo' style='background:#f8faf8; font-size:17px; padding-left: 5px;'> ".$soinHosp->dosage." - ".$soinHosp->frequence."</p></td>";
+		$html .="</tr>";
+			
+		$html .="<tr style='width: 99%;'>";
+ 		$html .="<td style='vertical-align:top; padding-right: 15px; padding-top: 10px;'><span style='text-decoration:underline; font-weight:bold; font-size:15px; color: #065d10; font-family: Times  New Roman;'>Date de d&eacute;but & Dur&eacute;e & Fin</span><br><p id='zoneChampInfo' style='background:#f8faf8; font-size:17px; padding-left: 5px;'> ".$this->controlDate->convertDate($soinHosp->date_debut_application)." - ".$soinHosp->duree." jr(s) - ".$this->controlDate->convertDate($finDuSoin)."</p></td>";
+		$html .="<td colspan='2' style='width: 60%; vertical-align:top; padding-top: 10px;'>
+				 <span style='text-decoration:underline; font-weight:bold; font-size:15px; color: #065d10; font-family: Times  New Roman;'>Heures recommand&eacute;es</span><br><p id='zoneChampInfo' class='lesHeuresRecAppDuSoin'  style='background:#f8faf8; font-size:17px; padding-left: 5px;'> ".$lesHeures." </p>
+				 </td>
+				 </tr>";
+			
+		$html .="</table>";
+			
+		$html .="<table style='width: 99%;'>";
+		$html .="<tr style='width: 95%;'>";
+		$html .="<td style='width: 50%; padding-top: 10px; padding-right:25px;'><span style='text-decoration:underline; font-weight:bold; font-size:16px; color: #065d10; font-family: Times  New Roman;'>Motif</span><br><p id='label_Champ_NoteInformation' style='background:#f8faf8; font-size:17px; padding-left: 10px;'> ".$soinHosp->motif." </p></td>";
+		$html .="<td style='width: 50%; padding-top: 10px;'><span style='text-decoration:underline; font-weight:bold; font-size:16px; color: #065d10; font-family: Times  New Roman;'>Note</span><br><p id='label_Champ_NoteInformation' style='background:#f8faf8; font-size:17px; padding-left: 5px;'> ".$soinHosp->note." </p></td>";
+		$html .="<td style='width: 0%;'> </td>";
+		$html .= "</tr>";
+		
+			
+		$html .="<tr style='width: 99%;'>
+				    <td colspan='2' style='width: 99%;'>
+					  <div id='titre_info_admis'>
+ 				         Informations sur l'application du soin
+ 				         <span style='padding-left: 30px;'>
+ 				           <img class='transfert_gauche' style='height: 14px; width: 18px; cursor:pointer;' src='".$this->getPath()."/images_icons/transfert_gauche.png' >
+ 				           <img class='transfert_droite2' style='height: 14px; width: 18px;' src='".$this->getPath()."/images_icons/transfert_droite2.png' >
+ 				         </span>
+		
+ 				         <span class='laDateDesSoins' style='font-size: 15px; padding-left: 15px;'> Aujourd'hui - ".$this->controlDate->convertDate($aujourdhui)."</span>
+ 				      </div>
+ 				 
+ 				      <div id='barre_admis'></div>
+					</td>
+			     </tr>";
+			
+		if($soinHosp){
+			
+			//if($soinHosp->appliquer == 0) {
+		
+				$listeTouteDate = $this->getSoinHospitalisationTable()->getToutesDateDuSoin($id_sh);
+				$html .="<script> var j = 0; </script>";
+				$i = 0;
+				foreach ($listeTouteDate as $listeDate){
+		
+					$html .="<table id='".$listeDate['date']."' style='width: 99%; margin-top: 10px;'>";
+		
+					$listeHeure = $this->getSoinHospitalisationTable()->getToutesHeures($id_sh, $listeDate['date']);
+		
+					if($listeHeure){
+						foreach ($listeHeure as $listeH) {
+							if($listeH['applique'] == 1){
+		
+								//RECUPERATION DES INFORMATIONS DE L'INFIRMIER AYANT APPLIQUER LES DONNEES
+								$infosInfirmier = $this->getSoinHospitalisationTable()->getInfosInfirmiers($listeH['id_personne_infirmier']);
+								$PrenomInfirmier = " Prenom  ";
+								$NomInfirmier = " Nom ";
+								if($infosInfirmier){
+									$PrenomInfirmier = $infosInfirmier['PRENOM'];
+									$NomInfirmier = $infosInfirmier['NOM'];
+								}
+		
+								$html .="<tr style='width: 99%;'>";
+								$html .="<td style='width: 100%; vertical-align:top;'><span id='labelHeureLABEL' style='font-weight:bold; font-size:19px; padding-left: 5px; color: #065d10; font-family: Times  New Roman;'>".$listeH['heure']."</span>
+								        <div class='infoUtilisateur".$listeH['id_heure']."' style='float: right; padding-top: 10px; padding-right: 10px; cursor:pointer'> <img src='../images_icons/info_infirmier.png' title='Infirmier: ".$PrenomInfirmier." ".$NomInfirmier." ".$this->controlDate->convertDateTime($listeH['date_application'])." ' /> </div>
+								        <br><p id='zoneTexte' style='background:#f8faf8; font-size:17px; padding-left: 5px;'> ".$listeH['note']." </p>
+								     </td>";
+								$html .="</tr>";
+		
+								$html .="<script>
+								         $('.infoUtilisateur".$listeH['id_heure']."').mouseenter(function(){
+								           var tooltips = $( '.infoUtilisateur".$listeH['id_heure']."' ).tooltip({show: {effect: 'slideDown', delay: 250}});
+								           tooltips.tooltip( 'open' );
+       					                 });
+	                                     $('.infoUtilisateur".$listeH['id_heure']."').mouseleave(function(){
+	                                       var tooltips = $( '.infoUtilisateur".$listeH['id_heure']."' ).tooltip();
+	                                       tooltips.tooltip( 'close' );
+	                                     });
+	                                     </script>";
+							}
 						}
-	
-						$html .="<tr style='width: 99%;'>";
-						$html .="<td style='width: 100%; vertical-align:top;'><span id='labelHeureLABEL' style='font-weight:bold; font-size:19px; padding-left: 5px; color: #065d10; font-family: Times  New Roman;'>".$listeH['heure']."</span>
-						
-								   <div class='infoUtilisateur".$listeH['id_heure']."' style='float: right; padding-top: 10px; padding-right: 10px; cursor:pointer'> <img src='../images_icons/info_infirmier.png' title='Infirmier: ".$PrenomInfirmier." ".$NomInfirmier." ".$this->controlDate->convertDateTime($listeH['date_application'])." ' /> </div>
-								   <br><p id='zoneTexte' style='background:#f8faf8; font-size:17px; padding-left: 5px;'> ".$listeH['note']." </p>
-								 </td>";
-						$html .= "</tr>";
-	
-						$html .="<script>
-								 $('.infoUtilisateur".$listeH['id_heure']."').mouseenter(function(){
-								   var tooltips = $( '.infoUtilisateur".$listeH['id_heure']."' ).tooltip({show: {effect: 'slideDown', delay: 250}});
-								   tooltips.tooltip( 'open' );
-       					         });
-	                             $('.infoUtilisateur".$listeH['id_heure']."').mouseleave(function(){
-	                               var tooltips = $( '.infoUtilisateur".$listeH['id_heure']."' ).tooltip();
-	                               tooltips.tooltip( 'close' );
-	                             });
-	                           </script>";
 					}
+		
+					$html .="<script>
+ 							  if(".$listeDate['date']." != ".$aujourdhui."){
+                            	   $('#".$listeDate['date']."').toggle(false);
+                        	  } else {
+                            	   j = ".$i."; //la position de la date d aujourdhui dans le tableau
+ 				                }
+		
+ 							 </script>";
+					$html .="</table>";
+					$i++;
 				}
-					
+			//}
+		
+			$html .="<script> var tableau = ['']; var tableauDate = ['']; var indice=0; var position = j; encours = 1; var tableauHeures = ['']; </script>";
+			//LISTE DES DATE EN TABLEAU JS
+			$listeTouteDate = $this->getSoinHospitalisationTable()->getToutesDateDuSoinPourUneDate($id_sh, $aujourdhui);
+			$lastDate = null;
+			foreach ($listeTouteDate as $listeDate){
+				$html .="<script> tableau[indice] = '".$listeDate['date']."'; </script>";
+				$html .="<script> tableauDate[indice] = '".$this->controlDate->convertDate($listeDate['date'])."'; </script>";
+				$html .="<script> tableauHeures[indice++] = '".$this->getLesHeuresDuSoin($id_sh, $listeDate['date'])."'; </script>";
+				$lastDate = $listeDate['date'];
 			}
 				
- 			if($soinHosp->appliquer == 0) {
- 				$listeHeure = $this->getSoinHospitalisationTable()->getToutesHeures($id_sh);
-					
-				$html .="<tr style='width: 99%;'>
-					       <td colspan='2' style='width: 99%;'>
-					         <div id='titre_info_admis'>Informations sur l'application du soin</div><div id='barre_admis'></div>
-					       </td>
-					     </tr>";
-					
-				$html .="<table style='width: 99%; margin-top: 10px;'>";
-					
- 				if($listeHeure){
- 					foreach ($listeHeure as $listeH) {
- 						if($listeH['applique'] == 1){
-	
-							//RECUPERATION DES INFORMATIONS DE L'INFIRMIER AYANT APPLIQUER LES DONNEES
-							$infosInfirmier = $this->getSoinHospitalisationTable()->getInfosInfirmiers($listeH['id_personne_infirmier']);
-							$PrenomInfirmier = " Prenom  ";
-							$NomInfirmier = " Nom ";
-							if($infosInfirmier){
-								$PrenomInfirmier = $infosInfirmier['PRENOM'];
-								$NomInfirmier = $infosInfirmier['NOM'];
-							}
-								
-							$html .="<tr style='width: 99%;'>";
-							$html .="<td style='width: 100%; vertical-align:top;'><span id='labelHeureLABEL' style='font-weight:bold; font-size:19px; padding-left: 5px; color: #065d10; font-family: Times  New Roman;'>".$listeH['heure']."</span>
-	
-								   <div class='infoUtilisateur".$listeH['id_heure']."' style='float: right; padding-top: 10px; padding-right: 10px; cursor:pointer'> <img src='../images_icons/info_infirmier.png' title='Infirmier: ".$PrenomInfirmier." ".$NomInfirmier." ".$this->controlDate->convertDateTime($listeH['date_application'])." ' /> </div>
-								   <br><p id='zoneTexte' style='background:#f8faf8; font-size:17px; padding-left: 5px;'> ".$listeH['note']." </p>
-								 </td>";
-							$html .= "</tr>";
-								
-							$html .="<script>
-								      $('.infoUtilisateur".$listeH['id_heure']."').mouseenter(function(){
-								        var tooltips = $( '.infoUtilisateur".$listeH['id_heure']."' ).tooltip({show: {effect: 'slideDown', delay: 250}});
-								        tooltips.tooltip( 'open' );
-       					              });
-	                                  $('.infoUtilisateur".$listeH['id_heure']."').mouseleave(function(){
-	                                    var tooltips = $( '.infoUtilisateur".$listeH['id_heure']."' ).tooltip();
-	                                    tooltips.tooltip( 'close' );
-	                                  });
-	                                 </script>";
- 						}
- 					}
- 				}
-	
-	
-			}
+			$html .="<script>
+ 					 if( j == 0 ){
+ 					     j = position = tableau.length-1;
+ 					     $('#'+tableau[j]).toggle(true);
+ 					     $('.laDateDesSoins').text(tableauDate[j]);
+ 					     encours = 0; // les date pour l appmication du soin sont depassees
+ 					     if(tableau[position] == '".$hier."') {
+                   		    infoPlus = 'Hier - '+tableauDate[position];
+                       	    $('.laDateDesSoins').text(infoPlus);
+ 		                 }else if(tableau[position] == '".$aujourdhui."') {
+ 					     	infoPlus = 'Aujourd\'hui - '+tableauDate[position];
+                       	    $('.laDateDesSoins').text(infoPlus);
+ 					     }
+ 		                 		
+ 					     $('.lesHeuresRecAppDuSoin').html(tableauHeures[j]);
+ 		                 //Si la date est superieur a la date actuelle alors
+ 		                 if('".$dateAvenir."' > '".$aujourdhui."'){
+ 		                  	$('.lesHeuresRecAppDuSoin').html('".$lesHeures."');
+ 		                 }
+ 		             }
+		
+ 					 var infoPlus;
+ 					 function gauche(){
+                      $('.transfert_gauche').click(function(){ if(position > j) { position = j;}
+ 					    if(position > 0) {
+		
+ 					      //Active licone suivant
+ 					      $('.transfert_droite2').replaceWith(
+			                    '<img class=\'transfert_droite\' style=\'height: 14px; width: 18px; cursor:pointer;\' src=\'".$this->getPath()."/images_icons/transfert_droite.png\' >'
+			                  );
+ 					      droite();
+ 					      $('#'+tableau[position]).fadeOut(function(){
+			                    if(position > 0) { $('#'+tableau[position]).toggle(false); }
+ 					            $('#'+tableau[--position]).fadeIn();
+ 					            $('.lesHeuresRecAppDuSoin').html(tableauHeures[position]);
+			          
+			                    if(encours == 1){
+			                      if(position == j){ infoPlus = 'Aujourd\'hui - '+tableauDate[position]; }
+ 					                else if(position == j-1) { infoPlus = 'Hier - '+tableauDate[position];}
+ 					                     else { infoPlus = tableauDate[position]; }
+ 					               $('.laDateDesSoins').text(infoPlus);
+			                    }
+			                    else if(encours == 0){
+ 		                       		      infoPlus = tableauDate[position];
+			                       	      $('.laDateDesSoins').text(infoPlus);
+ 		                             }
+ 		                  });
+		
+			              if(position-1 == 0){
+			                $('.transfert_gauche').replaceWith(
+			                   '<img class=\'transfert_gauche2\' style=\'height: 14px; width: 18px;\' src=\'".$this->getPath()."/images_icons/transfert_gauche2.png\' >'
+			                );
+			              }
+		
+ 					    }else {
+			                   $('.transfert_gauche').replaceWith(
+			                    '<img class=\'transfert_gauche2\' style=\'height: 14px; width: 18px;\' src=\'".$this->getPath()."/images_icons/transfert_gauche2.png\' >'
+			                  );
+			                   return false;
+ 		                 }
+	                    stopPropagation();
+		               });
+			           return false;
+	                 }
+			          
+			         function droite(){
+	                   $('.transfert_droite').click(function(){ if(position < 0) { position = 0;}
+	                    if(position <j) {
+			          
+			               //Active l icone precedent
+			               $('.transfert_gauche2').replaceWith(
+			                    '<img class=\'transfert_gauche\' style=\'height: 14px; width: 18px; cursor:pointer;\' src=\'".$this->getPath()."/images_icons/transfert_gauche.png\' >'
+			                  );
+			               gauche();
+		
+	                      $('#'+tableau[position]).fadeOut(function(){
+			                    if(position < j ) { $('#'+tableau[position]).toggle(false); }
+	                    		$('#'+tableau[++position]).fadeIn();
+ 					            $('.lesHeuresRecAppDuSoin').html(tableauHeures[position]);
+			          
+			                    if(encours == 1){
+			                       if(position == j){ infoPlus = 'Aujourd\'hui - '+tableauDate[position]; }
+                                     else if(position == j-1) { infoPlus = 'Hier - '+tableauDate[position];}
+ 					                      else { infoPlus = tableauDate[position]; }
+ 					               $('.laDateDesSoins').text(infoPlus);
+			                    }
+			         
+			                    //Une fois les dates d application du soin sont depassees
+			                    if(encours == 0){
+			                       if(tableau[position] == '".$hier."') {
+ 		                       		  infoPlus = 'Hier - '+tableauDate[position];
+			                       	  $('.laDateDesSoins').text(infoPlus);
+ 		                           } else{
+			                       		infoPlus = tableauDate[position];
+			                       	    $('.laDateDesSoins').text(infoPlus);
+ 		                             }
+			                    }
+ 		                  });
+			          
+			              if(position+1 == j){
+			                 $('.transfert_droite').replaceWith(
+			                    '<img class=\'transfert_droite2\' style=\'height: 14px; width: 18px;\' src=\'".$this->getPath()."/images_icons/transfert_droite2.png\' >'
+			                  );
+			               }
+ 					    }else {
+			                   $('.transfert_droite').replaceWith(
+			                    '<img class=\'transfert_droite2\' style=\'height: 14px; width: 18px;\' src=\'".$this->getPath()."/images_icons/transfert_droite2.png\' >'
+			                  );
+			                   return false;
+ 		                 }
+			          
+	                    stopPropagation();
+		               });
+			           return false;
+			          
+			         }
+			          
+			         gauche();
+			         droite();
+ 					 </script>";
+		
 		}
-	
-		$html .="</table>";
-	
-	
+			
 		$this->getResponse ()->getHeaders ()->addHeaderLine ( 'Content-Type', 'application/html; charset=utf-8' );
 		return $this->getResponse ()->setContent ( Json::encode ($html) );
-	
 	}
 	
 	public function heureSuivanteAction() {
@@ -2786,23 +3415,23 @@ class ArchivageController extends AbstractActionController {
 		$html .= "</div>";
 	
 		$html .= "<div id='titre_info_deces'>
-				     <span id='titre_info_demande' style='margin-left: -10px; cursor:pointer;'>
+				     <span id='titre_info_demande' style='margin-left:-5px; cursor:pointer;'>
 				        <img src='".$chemin."/img/light/plus.png' /> D&eacute;tails des infos sur la demande
 				     </span>
 				  </div>
 		          <div id='barre'></div>";
 	
 		$html .= "<div id='info_demande'>";
-		$html .= "<table style='margin-top:10px; margin-left: 195px; width: 80%;'>";
+		$html .= "<table style='margin-top:10px; margin-left: 18%; width: 80%;'>";
 		$html .= "<tr style='width: 80%;'>";
 		$html .= "<td style='width: 25%; height: 50px; vertical-align: top;'><a style='text-decoration:underline; font-size:12px;'>Consultation:</a><br><p style='font-weight:bold; font-size:17px;'>" . $id_cons . "</p></td>";
-		$html .= "<td style='width: 25%; height: 50px; vertical-align: top;'><a style='text-decoration:underline; font-size:12px;'>Date de la demande:</a><br><p style=' font-weight:bold; font-size:17px;'>" . $this->controlDate->convertDateTime($demande['Datedemandehospi']) . "</p></td>";
+		$html .= "<td style='width: 25%; height: 50px; vertical-align: top;'><a style='text-decoration:underline; font-size:12px;'>Date d'enregistrement:</a><br><p style=' font-weight:bold; font-size:17px;'>" . $this->controlDate->convertDateTime($demande['date_demande_hospi']) . "</p></td>";
 		$html .= "<td style='width: 20%; height: 50px; vertical-align: top;'><a style='text-decoration:underline; font-size:12px;'>Date fin pr&eacute;vue:</a><br><p style=' font-weight:bold; font-size:17px;'>" . $this->controlDate->convertDate($demande['date_fin_prevue_hospi']) . "</p></td>";
 		$html .= "<td style='width: 30%; height: 50px; vertical-align: top;'><a style='text-decoration:underline; font-size:12px;'>M&eacute;decin demandeur:</a><br><p style=' font-weight:bold; font-size:17px;'>" .$demande['PrenomMedecin'].' '.$demande['NomMedecin']. "</p></td>";
 		$html .= "</tr>";
 		$html .= "</table>";
 	
-		$html .="<table style='margin-top:0px; margin-left:195px; width: 70%;'>";
+		$html .="<table style='margin-top:0px; margin-left:18%; width: 70%;'>";
 		$html .="<tr style='width: 70%'>";
 		$html .="<td style='padding-top: 10px; padding-bottom: 0px; padding-right: 30px; width: 20%; '><a style='text-decoration:underline; font-size:13px;'>Motif de la demande:</a><br><p id='circonstance_deces' style='background:#f8faf8; font-weight:bold; font-size:17px;'>". $demande['motif_demande_hospi'] ."</p></td>";
 		$html .="<td style='padding-top: 10px; padding-bottom: 0px; padding-right: 30px; width: 20%; '><a style='text-decoration:underline; font-size:13px;'>Note:</a><br><p id='circonstance_deces' style='background:#f8faf8; font-weight:bold; font-size:17px;'> </p></td>";
@@ -2821,16 +3450,16 @@ class ArchivageController extends AbstractActionController {
 			$batiment = $this->getBatimentTable()->getBatiment($salle->id_batiment);
 	
 			$html .= "<div id='titre_info_deces'>
-					   <span id='titre_info_hospitalisation' style='margin-left:-10px; cursor:pointer;'>
+					   <span id='titre_info_hospitalisation' style='margin-left:-5px; cursor:pointer;'>
 				          <img src='".$chemin."/img/light/plus.png' /> Infos sur l'hospitalisation
 				       </span>
 					  </div>
 		              <div id='barre'></div>";
 	
 			$html .= "<div id='info_hospitalisation'>";
-			$html .= "<table style='margin-top:10px; margin-left: 195px; width: 80%;'>";
+			$html .= "<table style='margin-top:10px; margin-left: 18%; width: 80%;'>";
 			$html .= "<tr style='width: 80%;'>";
-			$html .= "<td style='width: 25%; height: 50px; vertical-align: top;'><a style='text-decoration:underline; font-size:12px;'>Date d&eacute;but:</a><br><p style='font-weight:bold; font-size:17px;'>" . $this->controlDate->convertDateTime($hospitalisation->date_debut) . "</p></td>";
+			$html .= "<td style='width: 25%; height: 50px; vertical-align: top;'><a style='text-decoration:underline; font-size:12px;'>Date d&eacute;but:</a><br><p style='font-weight:bold; font-size:17px;'>" . $this->controlDate->convertDate($demande['Datedemandehospi']) . "</p></td>";
 			$html .= "<td style='width: 25%; height: 50px; vertical-align: top;'><a style='text-decoration:underline; font-size:12px;'>Batiment:</a><br><p style=' font-weight:bold; font-size:17px;'>".$batiment->intitule."</p></td>";
 			$html .= "<td style='width: 20%; height: 50px; vertical-align: top;'><a style='text-decoration:underline; font-size:12px;'>Salle:</a><br><p style=' font-weight:bold; font-size:17px;'>".$salle->numero_salle."</p></td>";
 			$html .= "<td style='width: 30%; height: 50px; vertical-align: top;'><a style='text-decoration:underline; font-size:12px;'>Lit:</a><br><p style=' font-weight:bold; font-size:17px;'>".$lit->intitule."</p></td>";
@@ -2840,28 +3469,82 @@ class ArchivageController extends AbstractActionController {
 		}
 	
 		$html .= "<div id='titre_info_deces'>
-				    <span id='titre_info_liste' style='margin-left:-10px; cursor:pointer;'>
+				    <span id='titre_info_liste' style='margin-left:-5px; cursor:pointer;'>
 				      <img src='".$chemin."/img/light/plus.png' /> Liste des soins
 				    </span>
 				  </div>
 		          <div id='barre'></div>";
 	
 		$hospitalisation = $this->getHospitalisationTable()->getHospitalisationWithCodedh($id_demande_hospi);
-		$html .= "<div id='info_liste' style='margin-left: 195px; width: 80%;'>";
+		$html .= "<div id='info_liste' style='margin-left: 18%; width: 80%;'>";
 		$html .= $this->raffraichirListeSoins($hospitalisation->id_hosp);
 		$html .= "</div>";
 	
 		$html .= "<div id='titre_info_deces'>
-				   <span id='titre_info_liberation' style='margin-left:-10px; cursor:pointer;'>
+				   <span id='titre_info_liberation' style='margin-left:-5px; cursor:pointer;'>
 				      <img src='".$chemin."/img/light/plus.png' /> Infos sur la lib&eacute;ration du patient
 				   </span>
 				  </div>
 		          <div id='barre'></div>";
 	
+		
+		
+				
+		
+		//Pour les infos sur le transfert du patient hospitalisé
+		//Pour les infos sur le transfert du patient hospitalisé
+		//Pour les infos sur le transfert du patient hospitalisé
+		$infoTransfert = $this->getTransfererPatientServiceTable()->getPatientMedecinDonnees($id_cons);
+		
+		//POUR LES MEDICAMENTS
+		//POUR LES MEDICAMENTS
+		//POUR LES MEDICAMENTS
+		// INSTANTIATION DE L'ORDONNANCE
+		$infoOrdonnance = $this->getOrdonnanceTable()->getOrdonnanceHospi($id_cons);
+		
+		if($infoOrdonnance) {
+			$idOrdonnance = $infoOrdonnance->id_document;
+			//LISTE DES MEDICAMENTS PRESCRITS
+			$listeMedicamentsPrescrits = $this->getOrdonnanceTable()->getMedicamentsParIdOrdonnance($idOrdonnance);
+			$nbMedPrescrit = $listeMedicamentsPrescrits->count();
+		}else{
+			$nbMedPrescrit = 0;
+			$listeMedicamentsPrescrits = null;
+		}
+		
+		//------------------------------------------------------
+		//------------------------------------------------------
+		//------------------------------------------------------
 		$html .= "<div id='info_liberation'>";
-		$html .= "<table style='margin-top:0px; margin-left:195px; width: 80%;'>";
+		$html .= "<table style='margin-top:0px; margin-left:18%; width: 80%;'>";
 		$html .= "<tr style='width: 80%'>";
-		$html .= "<td style='padding-top: 10px; width: 10%; height: 50px; vertical-align: top;'><a style='text-decoration:underline; font-size:14px;'>Date:</a><br><p style='font-weight:bold; font-size:17px;'>" . $this->controlDate->convertDateTime($hospitalisation->date_fin) . "</p></td>";
+		
+		$popupOrdonnace = "";
+		
+		if($infoTransfert){
+			
+			$html .= "<td style='padding-top: 10px; width: 25%; height: 50px; vertical-align: top;'><a style='text-decoration:underline; font-size:14px;'>Date du transfert:</a><br><p style='font-weight:bold; font-size:17px;'>" . $this->controlDate->convertDateTime($hospitalisation->date_fin) . "</p></td>";
+			$html .= "<td style='padding-top: 10px; width: 32%; height: 50px; vertical-align: top;'><a style='text-decoration:underline; font-size:14px;'>Pr&eacute;nom & nom du m&eacute;decin:</a><br><p style='font-weight:bold; font-size:17px;'>".$infoTransfert['PrenomMedecin']." ".$infoTransfert['NomMedecin']."</p></td>";
+			$html .= "<td style='padding-top: 10px; width: 43%; height: 50px; vertical-align: top;'><a style='text-decoration:underline; font-size:14px;'>Service d'accueil:</a><br><p style='font-weight:bold; font-size:17px;'>".$infoTransfert['NomService']."</p></td>";
+		
+		} else {
+				
+			if($infoOrdonnance){
+				$popupOrdonnace = "<div style='padding-top: 10px; height: 50px;'><img id='afficherOrdonnance' style='cursor:pointer;' src='".$chemin."/images_icons/clipboard_32.png' /> <span style='font-weight:bold; font-size:17px; font-family: Times  New Roman; color: #065d10;'> Ordonnance </span></div>";
+			}
+		
+		}
+		
+		$html .= "</tr>";
+		$html .= "</table>";
+
+		
+		
+		
+		
+		$html .= "<table style='margin-top:0px; margin-left:18%; width: 80%;'>";
+		$html .= "<tr style='width: 80%'>";
+		$html .= "<td style='padding-top: 10px; width: 10%; height: 50px; vertical-align: top;'><a style='text-decoration:underline; font-size:14px;'>Date de la lib&eacute;ration:</a><br><p style='font-weight:bold; font-size:17px;'>" . $this->controlDate->convertDateTime($hospitalisation->date_fin) . "</p> <p>".$popupOrdonnace."</p></td>";
 		$html .= "<td style='padding-top: 10px; padding-bottom: 0px; padding-right: 30px; width: 20%; '><a style='text-decoration:underline; font-size:14px;'>R&eacute;sum&eacute; m&eacute;dical:</a><br><p id='circonstance_deces' style='background:#f8faf8; font-weight:bold; font-size:17px;'>".$hospitalisation->resumer_medical."</p></td>";
 		$html .= "<td style='padding-top: 10px; padding-bottom: 0px; padding-right: 30px; width: 20%; '><a style='text-decoration:underline; font-size:14px;'>Motif sortie:</a><br><p id='circonstance_deces' style='background:#f8faf8; font-weight:bold; font-size:17px;'>".$hospitalisation->motif_sorti."</p></td>";
 		$html .= "</tr>";
@@ -2884,7 +3567,30 @@ class ArchivageController extends AbstractActionController {
 				  animationPliantDepliant2();
 				  animationPliantDepliant3();
 		          animationPliantDepliant4();
+				
+				  $('#nbMedecamentPourVisualisation').val(".$nbMedPrescrit.");
+				  var ik = 1;
 				 </script>";
+		//Remplissage automatique des champs
+		if($nbMedPrescrit != 0) {
+			foreach($listeMedicamentsPrescrits as $Medicaments){
+				$html .="<script> setTimeout(function(){ $('#medicament_0'+ik).val('".$Medicaments['Intitule']."'); }, 2000);  </script>";
+				$html .="<script> setTimeout(function(){ $('#forme_'+ik).val('".$Medicaments['FORME']."'); }, 2000);</script>";
+				$html .="<script> setTimeout(function(){ $('#nb_medicament_'+ik).val('".substr($Medicaments['QUANTITE'], 0, strpos($Medicaments['QUANTITE'], ' '))."'); }, 2000);  </script>";
+				$html .="<script> setTimeout(function(){ $('#quantite_'+ik).val('".substr($Medicaments['QUANTITE'], strpos($Medicaments['QUANTITE'], ' ')+1)."'); ik++; }, 2000);  </script>";
+			}
+			 
+			$html .="<script>
+		   			  setTimeout(function(){
+		   		        $('#listeMedicaments input, .form-duree_ input, .ordonnance input').attr('disabled', true).css({'background':'#f8f8f8'});
+		   		        $('#controls_medicament div').toggle(false);
+		   		        $('#iconeMedicament_supp_vider a img').toggle(false);
+	                    $('#bouton_Medicament_modifier_demande').toggle(false);
+	                    $('#bouton_Medicament_valider_demande').toggle(false);
+	                    $('#increm_decrem img').toggle(false);
+		              }, 2000);
+		   		    </script>";
+		}
 	
 		$this->getResponse ()->getHeaders ()->addHeaderLine ( 'Content-Type', 'application/html; charset=utf-8' );
 		return $this->getResponse ()->setContent ( Json::encode ( $html ) );
@@ -3003,7 +3709,7 @@ class ArchivageController extends AbstractActionController {
 				  <tr style='height:40px; width:100%; cursor:pointer;'>
 					<th style='width: 23%;'>M&eacute;dicament</th>
 					<th style='width: 21%;'>Voie d'administration</th>
-					<th style='width: 19%;'>Date recommand&eacute;e</th>
+					<th style='width: 19%;'>Dosage <span style='font-weight: normal;'>X</span> Fr&eacute;quence</th>
 					<th style='width: 19%;'>Heure suivante</th>
 				    <th style='width: 12%;'>Options</th>
 				    <th style='width: 6%;'>Etat</th>
@@ -3026,7 +3732,7 @@ class ArchivageController extends AbstractActionController {
 			$html .="<tr style='width: 100%;' id='".$Liste['id_sh']."'>";
 			$html .="<td style='width: 23%;'><div id='inform' style='float:left; font-weight:bold; font-size:17px;'>".$Liste['medicament']."</div></td>";
 			$html .="<td style='width: 21%;'><div id='inform' style='float:left; font-weight:bold; font-size:17px;'>".$Liste['voie_administration']."</div></td>";
- 			$html .="<td style='width: 19%;'><div id='inform' style='float:left; font-weight:bold; font-size:17px;'>".$this->controlDate->convertDate($Liste['date_debut_application'])."</div></td>";
+ 			$html .="<td style='width: 19%;'><div id='inform' style='float:left; font-weight:bold; font-size:17px;'>".$Liste['dosage']." <span style='font-weight: normal; font-family: arial; color: green; font-size: 13px;'>X</span> ".$Liste['frequence']."</div></td>";
 	
 			if($heureSuiv == null){
 				$html .="<td style='width: 18%;'><div id='inform' style='float:left; font-weight:bold; font-size:17px;'>Termin&eacute; </div></td>";
@@ -3184,7 +3890,7 @@ class ArchivageController extends AbstractActionController {
 	
 	public function supprimerSoinAction() {
 		$id_sh = $this->params()->fromPost('id_sh', 0);
-		$this->getSoinHospitalisation4Table()->supprimerHospitalisation($id_sh);
+		$this->getSoinHospitalisationTable()->supprimerHospitalisation($id_sh);
 	
 		$this->getResponse ()->getHeaders ()->addHeaderLine ( 'Content-Type', 'application/html; charset=utf-8' );
 		return $this->getResponse ()->setContent ( Json::encode () );
@@ -3195,8 +3901,8 @@ class ArchivageController extends AbstractActionController {
 		$id_sh = $this->params()->fromPost('id_sh', 0);
 		
 		$this->getDateHelper();
-		$soin = $this->getSoinHospitalisation4Table()->getSoinhospitalisationWithId_sh($id_sh);
-		$heure = $this->getSoinHospitalisation4Table()->getHeures($id_sh);
+		$soin = $this->getSoinHospitalisationTable()->getSoinhospitalisationWithId_sh($id_sh);
+		$heure = $this->getSoinHospitalisationTable()->getHeuresGroup($id_sh);
 		
 		$lesHeures = "";
 		if($heure){
@@ -3217,9 +3923,10 @@ class ArchivageController extends AbstractActionController {
  					'voie_administration_m' => $soin->voie_administration,
 					'frequence_m' => $soin->frequence,
 					'dosage_m' => $soin->dosage,
- 					'date_application_m' => $this->controlDate->convertDate($soin->date_application_recommandee),
+ 					'date_application_m' => $this->controlDate->convertDate($soin->date_debut_application),
 					'motif_m' => $soin->motif,
 					'note_m' => $soin->note,
+					'duree_m' => $soin->duree,
 			);
 				
 			$form->populateValues($data);
@@ -3243,8 +3950,8 @@ class ArchivageController extends AbstractActionController {
 		             		
 		           <tr class='comment-form-patient' style='width: 100%;'>
 		             <td style='width: 25%;'> ".$formRow($form->get('date_application_m')).$formText($form->get('date_application_m'))."</td>
-		             <td colspan='2' style='width: 25%;'>".$formRow($form->get('heure_recommandee_m')).$formText($form->get('heure_recommandee_m'))."</td>
-		             <td style='width: 25%;'></td>
+		             <td style='width: 25%;'> ".$formRow($form->get('duree_m')).$formText($form->get('duree_m'))."</td>
+             		 <td colspan='2' style='width: 25%;'>".$formRow($form->get('heure_recommandee_m')).$formText($form->get('heure_recommandee_m'))."</td>
 		           </tr>
 		         </table>
 		
@@ -3257,7 +3964,8 @@ class ArchivageController extends AbstractActionController {
 		           </tr>
 		         </table>";
 		$html .="<script>
-				  $('#medicament_m, #voie_administration_m, #frequence_m, #dosage_m, #date_application_m, #heure_recommandee_m, #motif_m, #note_m').css({'font-weight':'bold','color':'#065d10','font-family': 'Times  New Roman','font-size':'18px'});
+				    //$('#medicament_m, #voie_administration_m, #frequence_m, #dosage_m, #date_application_m, #heure_recommandee_m, #motif_m, #note_m').css({'font-weight':'bold','color':'#065d10','font-family': 'Times  New Roman','font-size':'18px'});
+				    $('#duree_m, #heure_recommandee_m').attr('disabled', true).css({'background':'f9f9f9'});
 				    $('#heure_recommandee_m').val('".$lesHeures."');
 				    $(function() {
     	              $('.SlectBox_m').SumoSelect({ csvDispCount: 6 });
@@ -3330,7 +4038,7 @@ class ArchivageController extends AbstractActionController {
 		$id_employe = $user['id_personne']; //L'utilisateur connecté
 		
 		// CHARGEMENT DE LA PHOTO ET ENREGISTREMENT DES DONNEES
-		if (isset ( $_POST ['terminer'] ))  // si formulaire soumis
+		if (isset ( $_POST ['terminer'] ))  //si formulaire soumis
 		{
 			$Control = new DateHelper();
 			$form = new PatientForm ();
@@ -3347,6 +4055,8 @@ class ArchivageController extends AbstractActionController {
 				$img = false;
 			}
 	
+			var_dump($form); exit();
+			
 			$donnees = array(
 					'LIEU_NAISSANCE' => $this->params ()->fromPost ( 'lieu_naissance' ),
 					'EMAIL' => $this->params ()->fromPost ( 'email' ),
@@ -3428,12 +4138,15 @@ class ArchivageController extends AbstractActionController {
 			$info['profession'] = $info['PROFESSION'];
 			$info['sexe'] = $info['SEXE'];
 			$info['email'] = $info['EMAIL'];
+			$info['nationalite_origine'] = $info['NATIONALITE_ORIGINE'];
+			$info['nationalite_actuelle'] = $info['NATIONALITE_ACTUELLE'];
 			$info['id_personne'] = $info['ID_PERSONNE'];
 		} catch ( \Exception $ex ) {
 			return $this->redirect ()->toRoute ( 'facturation', array (
 					'action' => 'liste-patient'
 			) );
 		}
+		
 		$form = new PatientForm ();
 		$form->get('nationalite_origine')->setvalueOptions($this->getPatientTable ()->listeDeTousLesPays());
 		$form->get('nationalite_actuelle')->setvalueOptions($this->getPatientTable ()->listeDeTousLesPays());
@@ -3514,6 +4227,23 @@ class ArchivageController extends AbstractActionController {
 				) );
 	}
 	
+	public function creerNumeroFacturation($numero) {
+		$nbCharNum = 10 - strlen($numero);
+	
+		$chaine ="";
+		for ($i=1 ; $i <= $nbCharNum ; $i++){
+			$chaine .= '0';
+		}
+		$chaine .= $numero;
+	
+		return $chaine;
+	}
+	
+	public function numeroFacture() {
+		$lastAdmission = $this->getAdmissionTable()->getLastAdmission();
+		return $this->creerNumeroFacturation($lastAdmission['id_admission']+1);
+	}
+	
 	public function admissionAction() {
 		$layout = $this->layout ();
 		$layout->setTemplate ( 'layout/archivage' );
@@ -3537,14 +4267,10 @@ class ArchivageController extends AbstractActionController {
 			$service = $this->getServiceTable()->getServiceparId($id_service);
 			
 			$today = new \DateTime ();
-			$numero = $today->format ( 'mHis' );
-			$dateAujourdhui = $today->format( 'Y-m-d' );
+			$numero = $this->numeroFacture();//$today->format ( 'mHis' );
 			
 			$id = ( int ) $this->params ()->fromPost ( 'id', 0 );
 			$pat = $this->getPatientTable ();
-			
-			//Verifier si le patient a un rendez-vous et si oui dans quel service et a quel heure
-			$RendezVOUS = $pat->verifierRV($id, $dateAujourdhui);
 			
 			$unPatient = $pat->getInfoPatient( $id );
 			$photo = $pat->getPhoto ( $id );
@@ -3557,41 +4283,34 @@ class ArchivageController extends AbstractActionController {
 			$html .= "<div id='photo' style='float:left; margin-left:40px; margin-top:10px; margin-right:30px;'> <img style='width:105px; height:105px;' src='".$this->baseUrl()."public/img/photos_patients/" . $photo . "' ></div>";
 			$html .= "</div>";
 			
-			$html .= "<div style='width: 65%; height: 190px; float:left;'>";
-			$html .= "<table style='margin-top:10px; float:left; width: 100%;'>";
+			$html .= "<div style='width: 67%; height: 200px; float:left;'>";
+			$html .= "<table style='margin-top:10px; width: 100%;'>";
 			$html .= "<tr style='width: 100%;'>";
-			$html .= "<td style='width: 20%; height: 50px;'><a style='text-decoration:underline; font-size:12px;'>Nom:</a><br><p style='font-weight:bold; font-size:17px;'>" . $unPatient['NOM'] . "</p></td>";
-			$html .= "<td style='width: 30%; height: 50px;'><a style='text-decoration:underline; font-size:12px;'>Lieu de naissance:</a><br><p style=' font-weight:bold; font-size:17px;'>" . $unPatient['LIEU_NAISSANCE'] . "</p></td>";
-			$html .= "<td style='width: 20%; height: 50px;'><a style='text-decoration:underline; font-size:12px;'>Nationalit&eacute;  d'origine:</a><br><p style=' font-weight:bold; font-size:17px;'>" . $unPatient['NATIONALITE_ORIGINE'] . "</p></td>";
+			$html .= "<td style='width: 19%; height: 50px; vertical-align: top; '><a style='text-decoration:underline; font-size:12px;'>Nom:</a><br><div style='width: 90%; max-width: 130px; height:40px; overflow:auto; margin-bottom: 3px;'><p style='font-weight:bold; font-size:17px;'>" . $unPatient['NOM'] . "</p></div></td>";
+			$html .= "<td style='width: 29%; height: 50px; vertical-align: top; '><a style='text-decoration:underline; font-size:12px;'>Lieu de naissance:</a><br><div style='width: 90%; max-width: 230px; height:40px; overflow:auto; margin-bottom: 3px;'><p style=' font-weight:bold; font-size:17px;'>" . $unPatient['LIEU_NAISSANCE'] . "</p></div></td>";
+			$html .= "<td style='width: 23%; height: 50px; vertical-align: top; '><a style='text-decoration:underline; font-size:12px;'>Nationalit&eacute;  d'origine:</a><br><div style='width: 90%; '><p style=' font-weight:bold; font-size:17px;'>" . $unPatient['NATIONALITE_ORIGINE'] . "</p></div></td>";
+			$html .= "<td style='width: 29%; height: 50px;'></td>";
+			$html .= "</tr>";
 					
-			$html .= "<td style='width: 30%; height: 50px;'></td>";
-			$html .= "</tr><tr style='width: 100%;'>";
-			$html .= "<td style='width: 20%; height: 50px;'><a style='text-decoration:underline; font-size:12px;'>Pr&eacute;nom:</a><br><p style=' font-weight:bold; font-size:17px;'>" . $unPatient['PRENOM'] . "</p></td>";
-			$html .= "<td style='width: 30%; height: 50px;'><a style='text-decoration:underline; font-size:12px;'>T&eacute;l&eacute;phone:</a><br><p style=' font-weight:bold; font-size:17px;'>" . $unPatient['TELEPHONE'] . "</p></td>";
-			$html .= "<td style='width: 20%; height: 50px;'><a style='text-decoration:underline; font-size:12px;'>Nationalit&eacute; actuelle:</a><br><p style=' font-weight:bold; font-size:17px;'>" . $unPatient['NATIONALITE_ACTUELLE']. "</p></td>";
-			$html .= "<td style='width: 30%; height: 50px;'><a style='text-decoration:underline; font-size:12px;'>Email:</a><br><p style='font-weight:bold; font-size:17px;'>" . $unPatient['EMAIL'] . "</p></td>";
+			$html .= "<tr style='width: 100%;'>";
+			$html .= "<td style='height: 50px; vertical-align: top;'><a style='text-decoration:underline; font-size:12px;'>Pr&eacute;nom:</a><br><div style='width: 90%; max-width: 130px; height:40px; overflow:auto; margin-bottom: 3px;'><p style=' font-weight:bold; font-size:17px;'>" . $unPatient['PRENOM'] . "</p></div></td>";
+			$html .= "<td style='height: 50px; vertical-align: top;'><a style='text-decoration:underline; font-size:12px;'>T&eacute;l&eacute;phone:</a><br><div style='width: 90%; max-width: 230px; height:40px; overflow:auto; margin-bottom: 3px;'><p style=' font-weight:bold; font-size:17px;'>" . $unPatient['TELEPHONE'] . "</p></div></td>";
+			$html .= "<td style='height: 50px; vertical-align: top;'><a style='text-decoration:underline; font-size:12px;'>Nationalit&eacute; actuelle:</a><br><div style='width: 90%; '><p style=' font-weight:bold; font-size:17px;'>" . $unPatient['NATIONALITE_ACTUELLE']. "</p></div></td>";
+			$html .= "<td style='height: 50px; vertical-align: top;'><a style='text-decoration:underline; font-size:12px;'>Email:</a><br><div style='width: 90%; '><p style='font-weight:bold; font-size:17px;'>" . $unPatient['EMAIL'] . "</p></td>";
+			$html .= "</tr>";
 			
-			$html .= "</tr><tr style='width: 100%;'>";
-			$html .= "<td style='width: 20%; height: 50px; vertical-align: top;'><a style='text-decoration:underline; font-size:12px;'>Date de naissance:</a><br><p style=' font-weight:bold; font-size:17px;'>" . $date . "</p></td>";
-			$html .= "<td style='width: 30%; height: 50px; vertical-align: top;'><a style='text-decoration:underline; font-size:12px;'>Adresse:</a><br><p style=' font-weight:bold; font-size:17px;'>" . $unPatient['ADRESSE'] . "</p></td>";
-			$html .= "<td style='width: 20%; height: 50px; vertical-align: top;'><a style='text-decoration:underline; font-size:12px;'>Profession:</a><br><p style=' font-weight:bold; font-size:17px;'>" .  $unPatient['PROFESSION'] . "</p></td>";
-					
-			
-			$html .= "<td style='width: 30%; height: 50px;'>";
-			if($RendezVOUS){
-				$html .= "<span> <i style='color:green;'>
-					        <span id='image-neon' style='color:red; font-weight:bold;'>Rendez-vous! </span> <br>
-					        <span style='font-size: 16px;'>Service:</span> <span style='font-size: 16px; font-weight:bold;'> ". $pat->getServiceParId($RendezVOUS[ 'ID_SERVICE' ])[ 'NOM' ]." </span> <br> 
-					        <span style='font-size: 16px;'>Heure:</span>  <span style='font-size: 16px; font-weight:bold;'>". $RendezVOUS[ 'HEURE' ]." </span> </i>
-			              </span>";
-			}
+			$html .= "<tr style='width: 100%;'>";
+			$html .= "<td style='height: 50px; vertical-align: top;'><a style='text-decoration:underline; font-size:12px;'>Date de naissance:</a><br><div style='width: 90%; max-width: 130px; height:40px; overflow:auto; margin-bottom: 3px;'><p style=' font-weight:bold; font-size:17px;'>" . $date . "</p></div></td>";
+			$html .= "<td style='height: 50px; vertical-align: top;'><a style='text-decoration:underline; font-size:12px;'>Adresse:</a><br><div style='width: 90%; max-width: 235px; height:50px; overflow:auto; margin-bottom: 5px;'><p style=' font-weight:bold; font-size:17px;'>" . $unPatient['ADRESSE'] . "</p></div></td>";
+			$html .= "<td style='height: 50px; vertical-align: top;'><a style='text-decoration:underline; font-size:12px;'>Profession:</a><br><div style='width: 90%; '><p style=' font-weight:bold; font-size:17px;'>" .  $unPatient['PROFESSION'] . "</p></div></td>";
+			$html .= "<td style='height: 50px;'>";
 			$html .="</td>";
 			$html .= "</tr>";
 			$html .= "</table>";
 			$html .="</div>";
 			
-			$html .= "<div style='width: 17%; height: 190px; float:left;'>";
-			$html .= "<div id='' style='color: white; opacity: 0.09; float:left; margin-right:20px; margin-left:25px; margin-top:5px;'> <img style='width:105px; height:105px;' src='".$this->baseUrl()."public/img/photos_patients/" . $photo . "'></div>";
+			$html .= "<div style='width: 15%; height: 190px; float:left;'>";
+			$html .= "<div style='color: white; opacity: 0.09; float:left; margin-right:20px; margin-left:25px; margin-top:5px;'> <img style='width:105px; height:105px;' src='".$this->baseUrl()."public/img/photos_patients/" . $photo . "'></div>";
 			$html .= "</div>";
 			
 			$html .= "</div>";
@@ -3603,18 +4322,15 @@ class ArchivageController extends AbstractActionController {
 
 					         $('#service').css({'font-weight':'bold','color':'#065d10','font-family': 'Times  New Roman','font-size':'14px'});
 					         $('#service').val(" . $id_service . ");
+					         $('#service').attr('disabled',true);
 					         		
 					         $('#numero, #date').css({'font-weight':'bold','color':'#065d10','font-family': 'Times  New Roman','font-size':'17px'});
 
 					         $('#montant').css({'background':'#eee','border-bottom-width':'0px','border-top-width':'0px','border-left-width':'0px','border-right-width':'0px','font-weight':'bold','color':'blue','font-family': 'Times  New Roman','font-size':'22px'});
 					         $('#montant').attr('readonly',true);
 					         $('#montant').val(" . $service['TARIF'] . ");
-					
-					         function FaireClignoterImage (){
-                                $('#image-neon').fadeOut(900).delay(300).fadeIn(800);
-                             }
-                             setInterval('FaireClignoterImage()',2200);
-					 </script>"; // Uniquement pour la facturation
+					        
+					 </script>";
 
 			$this->getResponse ()->getHeaders ()->addHeaderLine ( 'Content-Type', 'application/html; charset=utf-8' );
 			return $this->getResponse ()->setContent ( Json::encode ( $html ) );
@@ -3767,22 +4483,23 @@ class ArchivageController extends AbstractActionController {
 		$html .= "<div id='photo' style='float:left; margin-left:40px; margin-top:10px; margin-right:30px;'> <img style='width:105px; height:105px;' src='".$this->baseUrl()."public/img/photos_patients/" . $photo . "' ></div>";
 		$html .= "</div>";
 			
-		$html .= "<div style='width: 65%; height: 180px; float:left;'>";
+		$html .= "<div style='width: 70%; height: 180px; float:left;'>";
 		$html .= "<table style='margin-top:10px; float:left'>";
 		$html .= "<tr>";
-		$html .= "<td><a style='text-decoration:underline; font-size:12px;'>Nom:</a><br><p style='width:150px; font-weight:bold; font-size:17px;'>" . $unPatient['NOM'] . "</p></td>";
-		$html .= "<td><a style='text-decoration:underline; font-size:12px;'>Lieu de naissance:</a><br><p style=' font-weight:bold; font-size:17px;'>" . $unPatient['LIEU_NAISSANCE'] . "</p></td>";
-		$html .= "<td><a style='text-decoration:underline; font-size:12px;'>Nationalit&eacute; d'origine:</a><br><p style='width:150px; font-weight:bold; font-size:17px;'>" . $unPatient['NATIONALITE_ORIGINE'] . "</p></td>";
+		$html .= "<td style='width: 19%;' ><a style='text-decoration:underline; font-size:12px;'>Nom:</a><br><div style='width: 90%; max-width: 130px; height:40px; overflow:auto; margin-bottom: 3px;'><p style='font-weight:bold; font-size:17px;'>" . $unPatient['NOM'] . "</p></div></td>";
+		$html .= "<td style='width: 29%;' ><a style='text-decoration:underline; font-size:12px;'>Lieu de naissance:</a><br><div style='width: 90%; max-width: 235px; height:40px; overflow:auto; margin-bottom: 3px;'><p style=' font-weight:bold; font-size:17px;'>" . $unPatient['LIEU_NAISSANCE'] . "</p></div></td>";
+		$html .= "<td style='width: 23%;' ><a style='text-decoration:underline; font-size:12px;'>Nationalit&eacute; d'origine:</a><br><div style='width: 90%; '><p style='width:150px; font-weight:bold; font-size:17px;'>" . $unPatient['NATIONALITE_ORIGINE'] . "</p></div></td>";
+		$html .= "<td style='width: 29%;' ></td>";
 		$html .= "</tr><tr>";
-		$html .= "<td><a style='text-decoration:underline; font-size:12px;'>Pr&eacute;nom:</a><br><p style=' font-weight:bold; font-size:17px;'>" . $unPatient['PRENOM'] . "</p></td>";
-		$html .= "<td><a style='text-decoration:underline; font-size:12px;'>T&eacute;l&eacute;phone:</a><br><p style=' font-weight:bold; font-size:17px;'>" . $unPatient['TELEPHONE'] . "</p></td>";
-		$html .= "<td><a style='text-decoration:underline; font-size:12px;'>Nationalit&eacute; actuelle:</a><br><p style=' font-weight:bold; font-size:17px;'>" . $unPatient['NATIONALITE_ACTUELLE'] . "</p></td>";
-		$html .= "<td><a style='text-decoration:underline; font-size:12px;'>Email:</a><br><p style='width:200px; font-weight:bold; font-size:17px;'>" . $unPatient['EMAIL'] . "</p></td>";
+		$html .= "<td><a style='text-decoration:underline; font-size:12px;'>Pr&eacute;nom:</a><br><div style='width: 90%; max-width: 130px; height:40px; overflow:auto; margin-bottom: 3px;'><p style=' font-weight:bold; font-size:17px;'>" . $unPatient['PRENOM'] . "</p></div></td>";
+		$html .= "<td><a style='text-decoration:underline; font-size:12px;'>T&eacute;l&eacute;phone:</a><br><div style='width: 90%; max-width: 235px; height:40px; overflow:auto; margin-bottom: 3px;'><p style=' font-weight:bold; font-size:17px;'>" . $unPatient['TELEPHONE'] . "</p></div></td>";
+		$html .= "<td><a style='text-decoration:underline; font-size:12px;'>Nationalit&eacute; actuelle:</a><br><div style='width: 90%; '><p style=' font-weight:bold; font-size:17px;'>" . $unPatient['NATIONALITE_ACTUELLE'] . "</p></div></td>";
+		$html .= "<td><a style='text-decoration:underline; font-size:12px;'>Email:</a><br><div style='width: 90%;'><p style='width:200px; font-weight:bold; font-size:17px;'>" . $unPatient['EMAIL'] . "</p></div></td>";
 		$html .= "</tr><tr>";
-		$html .= "<td style='width: 30%;vertical-align: top;'><a style='text-decoration:underline; font-size:12px;'>Date de naissance:</a><br><p style=' font-weight:bold; font-size:17px;'>" . $this->controlDate->convertDate($unPatient['DATE_NAISSANCE']) . "</p></td>";
-		$html .= "<td style='width: 20%;vertical-align: top;'><a style='text-decoration:underline; font-size:12px;'>Adresse:</a><br><p style='width:210px; font-weight:bold; font-size:17px;'>" . $unPatient['ADRESSE'] . "</p></td>";
-		$html .= "<td style='width: 20%;vertical-align: top;'><a style='text-decoration:underline; font-size:12px;'>Profession:</a><br><p style=' font-weight:bold; font-size:17px;'>" . $unPatient['PROFESSION'] . "</p></td>";
-		$html .= "<td style='width: 30%; height: 50px;'>";
+		$html .= "<td style=' vertical-align: top;'><a style='text-decoration:underline; font-size:12px;'>Date de naissance:</a><br><div style='width: 90%; max-width: 130px; height:40px; overflow:auto; margin-bottom: 3px;'><p style=' font-weight:bold; font-size:17px;'>" . $this->controlDate->convertDate($unPatient['DATE_NAISSANCE']) . "</p></div></td>";
+		$html .= "<td style=' vertical-align: top;'><a style='text-decoration:underline; font-size:12px;'>Adresse:</a><br><div style='width: 90%; max-width: 235px; height:50px; overflow:auto; margin-bottom: 3px;'><p style='font-weight:bold; font-size:17px;'>" . $unPatient['ADRESSE'] . "</p></div></td>";
+		$html .= "<td style=' vertical-align: top;'><a style='text-decoration:underline; font-size:12px;'>Profession:</a><br><div style='width: 90%; '><p style=' font-weight:bold; font-size:17px;'>" . $unPatient['PROFESSION'] . "</p></div></td>";
+		$html .= "<td style=' '>";
 	
 		if($RendezVOUS){
 			$html .= "<span> <i style='color:green;'>
@@ -3796,8 +4513,8 @@ class ArchivageController extends AbstractActionController {
 		$html .= "</table>";
 		$html .="</div>";
 			
-		$html .= "<div style='width: 17%; height: 180px; float:left;'>";
-		$html .= "<div id='' style='color: white; opacity: 0.09; float:left; margin-right:20px; margin-left:25px; margin-top:5px;'> <img style='width:105px; height:105px;' src='".$this->baseUrl()."public/img/photos_patients/" . $photo . "'></div>";
+		$html .= "<div style='width: 12%; height: 180px; float:left; '>";
+		$html .= "<div id='' style='color: white; opacity: 0.09; float:left; margin-right:10px; margin-left:5px; margin-top:5px;'> <img style='width:105px; height:105px;' src='".$this->baseUrl()."public/img/photos_patients/" . $photo . "'></div>";
 		$html .= "</div>";
 			
 		$html .= "</div>";
@@ -3805,7 +4522,7 @@ class ArchivageController extends AbstractActionController {
 		$html .="<div id='titre_info_admis'>Informations sur l'admission</div>";
 		$html .="<div id='barre_separateur'></div>";
 	
-		$html .="<table style='margin-top:10px; margin-left:195px; width: 80%;'>";
+		$html .="<table style='margin-top:10px; margin-left:18%; width: 80%;'>";
 	
 		$html .="<tr style='width: 80%;'>";
 		$html .= "<td style='width: 25%;' ><a style='text-decoration:underline; font-size:12px;'>Date d'enregistrement:</a><br><p style='font-weight:bold; font-size:17px;'>" . $this->controlDate->convertDateTime( $InfoAdmis->date_enregistrement ) . "</p></td>";
@@ -3820,7 +4537,7 @@ class ArchivageController extends AbstractActionController {
 		$html .="</tr>";
 		
 		$html .="</table>";
-		$html .="<table style='margin-top:10px; margin-left:195px; width: 80%;'>";
+		$html .="<table style='margin-top:10px; margin-left:18%; width: 80%;'>";
 		$html .="<tr style='width: 80%;'>";
 	
 		$html .="<td class='block' id='thoughtbot' style='width: 35%;  vertical-align: bottom; padding-left:350px; padding-bottom: 15px; padding-top: 30px; padding-right: 150px;'><button type='submit' id='terminer'>Terminer</button></td>";
@@ -3941,21 +4658,36 @@ class ArchivageController extends AbstractActionController {
 		$html .= "</div>";
 	
 		$html .= "<div id='titre_info_deces'>Informations sur la demande d'examen </div>
-		          <div id='barre'></div>";
+		          <div id='barre'></div>
+		
+		          <div style='width: 100%;'>
+		          <table style='width:100%;'>
+		          <tr style='width:100%;'>
+		          <td style='width: 18%;'> </td>
+		          <td style='width: 80%;'>";
 		foreach ($demande as $donnees) {
-			$html .= "<table style='margin-top:10px; margin-left: 195px; width: 80%;'>";
+			$html .= "<table style='margin-top:10px; width: 80%;'>";
 			$html .= "<tr style='width: 80%;'>";
 			$html .= "<td style='width: 25%; height: 50px; vertical-align: top;'><a style='text-decoration:underline; font-size:12px;'>Consultation:</a><br><p style='font-weight:bold; font-size:17px;'>" . $id_cons . "</p></td>";
 			$html .= "<td style='width: 25%; height: 50px; vertical-align: top;'><a style='text-decoration:underline; font-size:12px;'>Date de la demande:</a><br><p style=' font-weight:bold; font-size:17px;'>" .$this->controlDate->convertDate( $donnees['Datedemande']). "</p></td>";
 			$html .= "<td style='width: 30%; height: 50px; vertical-align: top;'><a style='text-decoration:underline; font-size:12px;'>M&eacute;decin demandeur:</a><br><p style=' font-weight:bold; font-size:17px;'>" . $donnees['PrenomMedecin'] ." ".$donnees['NomMedecin'] . "</p></td>";
 			$html .= "</tr>";
-			$html .= "</table>";
+			$html .= "</table>
+					
+					</td>
+				    </tr>
+				    </table>
+				    </div>";
 		}
 	
 		$html .= "<div id='titre_info_deces'>Liste des examens demand&eacute;s </div>
 		          <div id='barre'></div>
 	
-				  <div id='info_liste'>";
+				  <div id='info_liste' style='width: 100%;'>
+		          <table style='width:100%;'>
+		          <tr style='width:100%;'>
+		          <td style='width: 18%;'> </td>
+		          <td id='info_liste_table' style='width: 80%;'>";
 		if($examensBio == 1){
 			$html .= $this->listeExamensBiologiquesAction($id_cons);
 		}
@@ -3963,7 +4695,11 @@ class ArchivageController extends AbstractActionController {
 		{
 			$html .= $this->listeExamensAction($id_cons, $idListe);
 		}
-		$html .="</div>";
+		$html .="
+				 </td>
+				 </tr>
+				 </table>
+				</div>";
 	
 		if($terminer == 0) {
 			$html .="<div style='width: 100%; height: 100px;'>
@@ -3986,7 +4722,7 @@ class ArchivageController extends AbstractActionController {
 		$html = "";
 		$this->getDateHelper();
 			
-		$html .="<table class='table table-bordered tab_list_mini'  style='margin-top:10px; margin-bottom:20px; margin-left:195px; width:80%;' id='listeDesExamens'>";
+		$html .="<table class='table table-bordered tab_list_mini'  style='margin-top:10px; margin-bottom:20px;  width:98%;' id='listeDesExamens'>";
 			
 		$html .="<thead style='width: 100%;'>
 				  <tr style='height:40px; width:100%; cursor:pointer; font-family: Times New Roman; font-weight: bold;'>
@@ -4312,21 +5048,36 @@ class ArchivageController extends AbstractActionController {
 		$html .= "</div>";
  	
  		$html .= "<div id='titre_info_deces'>Informations sur la demande d'examen </div>
-		          <div id='barre'></div>";
+		          <div id='barre'></div>
+ 				
+     			  <div style='width: 100%;'>
+		          <table style='width:100%;'>
+				  <tr style='width:100%;'>
+				  <td style='width: 18%;'></td>
+				  <td style='width: 80%;'>";
  		foreach ($demande as $donnees) {
- 			$html .= "<table style='margin-top:10px; margin-left: 195px; width: 80%;'>";
+ 			$html .= "<table style='margin-top:10px; width: 80%;'>";
  			$html .= "<tr style='width: 80%;'>";
  			$html .= "<td style='width: 25%; height: 50px; vertical-align: top;'><a style='text-decoration:underline; font-size:12px;'>Consultation:</a><br><p style='font-weight:bold; font-size:17px;'>" . $id_cons . "</p></td>";
  			$html .= "<td style='width: 25%; height: 50px; vertical-align: top;'><a style='text-decoration:underline; font-size:12px;'>Date de la demande:</a><br><p style=' font-weight:bold; font-size:17px;'>" .$this->controlDate->convertDate($donnees['Datedemande']). "</p></td>";
  			$html .= "<td style='width: 30%; height: 50px; vertical-align: top;'><a style='text-decoration:underline; font-size:12px;'>M&eacute;decin demandeur:</a><br><p style=' font-weight:bold; font-size:17px;'>" . $donnees['PrenomMedecin'] ." ".$donnees['NomMedecin'] . "</p></td>";
  			$html .= "</tr>";
- 			$html .= "</table>";
+ 			$html .= "</table>
+ 					
+ 					</td>
+				    </tr>
+				    </table>
+				    </div>";
  		}
  	
  		$html .= "<div id='titre_info_deces'>Liste des examens demand&eacute;s </div>
 		          <div id='barre'></div>
  	
-				 <div id='info_liste'>";
+ 		          <div id='info_liste' style='width: 100%;'>
+ 		          <table style='width:100%;'>
+ 		          <tr style='width:100%;'>
+ 		          <td style='width: 18%;'> </td>
+ 		          <td id='info_liste_table' style='width: 80%;'>";
  		if($examensBio == 1){
  			$html .= $this->listeExamensBiologiquesAction($id_cons);
  		}
@@ -4334,7 +5085,12 @@ class ArchivageController extends AbstractActionController {
  		{
  			//$html .= $this->listeExamensAction($id_cons);
  		}
- 		$html .="</div>";
+ 		$html .="
+ 				 </td>
+				 </tr>
+				 </table>
+				 </div>
+ 				 </div>";
  	
  		if($terminer == 0) {
  			$html .="<div style='width: 100%; height: 100px;'>
@@ -4357,7 +5113,7 @@ class ArchivageController extends AbstractActionController {
  		$html = "";
  		$this->getDateHelper();
  			
- 		$html .="<table class='table table-bordered tab_list_mini'  style='margin-top:10px; margin-bottom:20px; margin-left:195px; width:80%;' id='listeDesExamens'>";
+ 		$html .="<table class='table table-bordered tab_list_mini'  style='margin-top:10px; margin-bottom:20px; width:98%;' id='listeDesExamens'>";
  			
  		$html .="<thead style='width: 100%;'>
 				  <tr style='height:40px; width:100%; cursor:pointer; font-family: Times New Roman; font-weight: bold;'>
@@ -4506,9 +5262,10 @@ class ArchivageController extends AbstractActionController {
  		$html .="</table>";
  	
  		$html .="<style>
-				  #listeDataTable{
-	                margin-left: 185px;
-                  }
+				 /* #listeDataTable{
+	                margin-left: 35%;
+                  }*/
+ 				
  	
 				  div .dataTables_paginate
                   {
@@ -4608,9 +5365,9 @@ class ArchivageController extends AbstractActionController {
  	
  		$demande = $this->getResultatExamenTable()->getResultatExamen($idDemande);
  		$html ="<script>
-				   $('#technique_utilise').val('".$demande->techniqueUtiliser."');
-				   $('#resultat').val('".$demande->noteResultat."');
-				   $('#conclusion').val('".$demande->conclusion."');
+				   $('#technique_utilise').val('".str_replace("'", "\'", $demande->techniqueUtiliser)."');
+				   $('#resultat').val('".str_replace("'", "\'", $demande->noteResultat)."');
+				   $('#conclusion').val('".str_replace("'", "\'", $demande->conclusion)."');
 				   $('#typeExamen_tmp').val(".$demandeDem->idExamen.");
 				</script>";
  	
@@ -4724,7 +5481,7 @@ class ArchivageController extends AbstractActionController {
 		$html .= "<div id='titre_info_deces'>Informations sur la demande de VPA </div>
 		          <div id='barre'></div>";
 		foreach ($demande as $donnees) {
-			$html .= "<table style='margin-top:10px; margin-left: 195px; width: 80%;'>";
+			$html .= "<table style='margin-top:10px; margin-left: 18%; width: 80%;'>";
 			$html .= "<tr style='width: 80%;'>";
 			$html .= "<td style='width: 25%; height: 50px; vertical-align: top;'><a style='text-decoration:underline; font-size:12px;'>Consultation:</a><br><p style='font-weight:bold; font-size:17px;'>" . $id_cons . "</p></td>";
 			$html .= "<td style='width: 25%; height: 50px; vertical-align: top;'><a style='text-decoration:underline; font-size:12px;'>Date de la demande:</a><br><p style=' font-weight:bold; font-size:17px;'>" .$this->controlDate->convertDate($donnees['Datedemande']). "</p></td>";
@@ -4732,7 +5489,7 @@ class ArchivageController extends AbstractActionController {
 			$html .= "</tr>";
 			$html .= "</table>";
 				
-			$html .= "<table style='margin-top:10px; margin-left: 195px; width: 80%;'>";
+			$html .= "<table style='margin-top:10px; margin-left: 18%; width: 80%;'>";
 			$html .= "<tr style='width: 80%;'>";
 			$html .= "<td style='width: 25%; padding-top: 10px; padding-right:10px;'><a style='text-decoration:underline; font-size:13px;'>Diagnostic:</a><br><p id='circonstance_deces' style='background:#f8faf8; font-weight:bold; font-size:17px; padding-left: 5px;'> ". $donnees['DIAGNOSTIC'] ." </p></td>";
 			$html .= "<td style='width: 25%; padding-top: 10px; padding-right:10px;'><a style='text-decoration:underline; font-size:13px;'>observation:</a><br><p id='circonstance_deces' style='background:#f8faf8; font-weight:bold; font-size:17px; padding-left: 5px;'> ". $donnees['OBSERVATION'] ." </p></td>";
@@ -4759,7 +5516,7 @@ class ArchivageController extends AbstractActionController {
 		$html .= $formHidden($formVpa->get('idVpa'));
 		$html .= $formHidden($formVpa->get('idPersonne'));
 	
-		$html .="<div style='width: 80%; margin-left: 195px;'>";
+		$html .="<div style='width: 80%; margin-left: 18%;'>";
 		$html .="<table id='form_patient_vpa' style='width: 100%; '>
 					 <tr  style='width: 100%'>
 					   <td  class='comment-form-patient'  style='width: 35%; '>". $formRow($formVpa->get('numero_vpa')).$formText($formVpa->get('numero_vpa'))."</td>
@@ -4890,7 +5647,7 @@ class ArchivageController extends AbstractActionController {
 		$html .= "<div id='titre_info_deces'>Informations sur la demande de VPA </div>
 		          <div id='barre'></div>";
 		foreach ($demande as $donnees) {
-			$html .= "<table style='margin-top:10px; margin-left: 195px; width: 80%;'>";
+			$html .= "<table style='margin-top:10px; margin-left: 18%; width: 80%;'>";
 			$html .= "<tr style='width: 80%;'>";
 			$html .= "<td style='width: 25%; height: 50px; vertical-align: top;'><a style='text-decoration:underline; font-size:12px;'>Consultation:</a><br><p style='font-weight:bold; font-size:17px;'>" . $id_cons . "</p></td>";
 			$html .= "<td style='width: 25%; height: 50px; vertical-align: top;'><a style='text-decoration:underline; font-size:12px;'>Date de la demande:</a><br><p style=' font-weight:bold; font-size:17px;'>" .$this->controlDate->convertDate($donnees['Datedemande']). "</p></td>";
@@ -4898,7 +5655,7 @@ class ArchivageController extends AbstractActionController {
 			$html .= "</tr>";
 			$html .= "</table>";
 	
-			$html .= "<table style='margin-top:10px; margin-left: 195px; width: 80%;'>";
+			$html .= "<table style='margin-top:10px; margin-left: 18%; width: 80%;'>";
 			$html .= "<tr style='width: 80%;'>";
 			$html .= "<td style='width: 25%; padding-top: 10px; padding-right:10px;'><a style='text-decoration:underline; font-size:13px;'>Diagnostic:</a><br><p id='circonstance_deces' style='background:#f8faf8; font-weight:bold; font-size:17px; padding-left: 5px;'> ". $donnees['DIAGNOSTIC'] ." </p></td>";
 			$html .= "<td style='width: 25%; padding-top: 10px; padding-right:10px;'><a style='text-decoration:underline; font-size:13px;'>Observation:</a><br><p id='circonstance_deces' style='background:#f8faf8; font-weight:bold; font-size:17px; padding-left: 5px;'> ". $donnees['OBSERVATION'] ." </p></td>";
@@ -4911,7 +5668,7 @@ class ArchivageController extends AbstractActionController {
 	
 		$resultatVpa = $this->getResultatVpa()->getResultatVpa($idVpa);
 	
-		$html .= "<table style='margin-top:10px; margin-left: 195px; width: 80%;'>";
+		$html .= "<table style='margin-top:10px; margin-left: 18%; width: 80%;'>";
 	
 		$html .= "<tr style='width: 80%; font-family: time new romans'>";
 		$html .= "<td style='width: 55%; height: 50px; '><span style='font-size:15px; font-family: Felix Titling;'>Num&eacute;ro VPA: </span> <span style='font-weight:bold; font-size:20px; color: #065d10;'>" .$resultatVpa->numeroVpa. "</span></td>";
@@ -4945,5 +5702,512 @@ class ArchivageController extends AbstractActionController {
 	
 		$this->getResponse ()->getHeaders ()->addHeaderLine ( 'Content-Type', 'application/html; charset=utf-8' );
 		return $this->getResponse ()->setContent ( Json::encode ( $html ) );
+	}
+	
+	/***** LECTEUR VIDEO ---- LECTEUR VIDEO  *****/
+	/***** LECTEUR VIDEO ---- LECTEUR VIDEO  *****/
+	/***** LECTEUR VIDEO ---- LECTEUR VIDEO  *****/
+	public function lecteurVideoAction($ListeDesVideos){
+	
+		$html ='<script>
+				 var tab = [];
+		        </script>';
+		$i = 0;
+		foreach ($ListeDesVideos as $Liste) {
+				
+			if($Liste['format'] == "video/mp4" || $Liste['format'] == "video/m4v") {
+				$html .='<script>
+        		 tab['.$i++.'] = {
+	                     "title":"'. $Liste['titre'] .' <span class=\'supprimerVideoIns'.$i.'\' >  </span>",
+		                 "m4v":"/simens/public/videos/'. $Liste['nom'] .'",
+		         };
+	
+		         setTimeout(function() {
+	                $(function () {
+		              $(".supprimerVideoIns'.$i.'").click(function () { return false; });
+		              $(".supprimerVideoIns'.$i.'").dblclick(function () { supprimerVideo('.$Liste['id'].'); return false; });
+	                });
+                 }, 1000);
+        		 </script>';
+			}
+			else
+			if($Liste['format'] == "video/webm") {
+				$html .='<script>
+        		 tab['.$i++.'] = {
+	                     "title":"'. $Liste['titre'] .'<span class=\'supprimerVideoIns'.$i.'\' >  </span>",
+		                 "webmv":"/simens/public/videos/'. $Liste['nom'] .'",
+		         };
+		  
+		         setTimeout(function() {
+	                $(function () {
+		              $(".supprimerVideoIns'.$i.'").click(function () { return false; });
+		              $(".supprimerVideoIns'.$i.'").dblclick(function () { supprimerVideo('.$Liste['id'].'); return false; });
+	                });
+                 }, 1000);
+        		 </script>';
+			}
+		}
+	
+		$html .='<script>
+				 $(document).ready(function(){
+	
+	               new jPlayerPlaylist({
+		             jPlayer: "#jquery_jplayer_1",
+		             cssSelectorAncestor: "#jp_container_1"
+	               },
+				      tab
+				    ,{
+		               swfPath: "../../dist/jplayer",
+		               supplied: "webmv, ogv, m4v",
+		               useStateClassSkin: true,
+		               autoBlur: false,
+		               smoothPlayBar: true,
+		               keyEnabled: true
+	               });
+	
+                 });
+	
+				scriptAjoutVideo();
+		        </script>';
+			
+		$html .='
+	
+		<form id="my_form_video" method="post" action="/simens/public/consultation/ajouter-video" enctype="multipart/form-data">
+		<div id="jp_container_1" class="jp-video jp-video-270p" role="application" aria-label="media player" style="margin: auto;">
+	    <div class="jp-type-playlist">
+		<div id="jquery_jplayer_1" class="jp-jplayer"></div>
+		<div class="jp-gui">
+			<div class="jp-video-play">
+				<button class="jp-video-play-icon" role="button" tabindex="0">play</button>
+			</div>
+			<div class="jp-interface">
+				<div class="jp-progress">
+					<div class="jp-seek-bar">
+						<div class="jp-play-bar"></div>
+					</div>
+				</div>
+				<div class="jp-current-time" role="timer" aria-label="time">&nbsp;</div>
+				<div class="jp-duration" role="timer" aria-label="duration">&nbsp;</div>
+				<div class="jp-controls-holder">
+					<div class="jp-controls">
+						<button class="jp-previous" role="button" tabindex="0">previous</button>
+						<button class="jp-play" role="button" tabindex="0">play</button>
+						<button class="jp-next" role="button" tabindex="0">next</button>
+						<button class="jp-stop" role="button" tabindex="0">stop</button>
+					</div>
+					<div class="jp-volume-controls">
+						<button class="jp-mute" role="button" tabindex="0">mute</button>
+						<button class="jp-volume-max" role="button" tabindex="0">max volume</button>
+						<div class="jp-volume-bar">
+							<div class="jp-volume-bar-value"></div>
+						</div>
+					</div>
+					<div class="jp-toggles">
+						<button class="jp-full-screen" role="button" tabindex="0">full screen</button>
+					</div>
+	
+				    <div class="jp-toggles2" id="jp-toggles-video" >
+				        <div class="jp-ajouter-video">
+				           <input type="file" name="fichier-video" id="fichier-video">
+				        </div>
+					</div>
+	
+				</div>
+				<div class="jp-details">
+					<div class="jp-title" aria-label="title">&nbsp;</div>
+				</div>
+			</div>
+		</div>
+		<div class="jp-playlist">
+			<ul>
+				<li>&nbsp;</li>
+			</ul>
+		</div>
+	    </div>
+        </div>
+		</form>';
+		return $html;
+	}
+	
+	public function afficherVideoAction(){
+		$id_cons = $this->params()->fromPost('id_cons', 0);
+		$listeDesVideos = $this->getConsultationTable()->getVideos($id_cons);
+		$html = $this->lecteurVideoAction($listeDesVideos);
+	
+		$this->getResponse ()->getHeaders ()->addHeaderLine ( 'Content-Type', 'application/html; charset=utf-8' );
+		return $this->getResponse ()->setContent ( Json::encode ( $html ) );
+	}
+	
+	
+	public function ajouterVideoAction(){
+	
+		$type = $_FILES['fichier-video']['type'];
+		$nom_file = "";
+		$tmp = $_FILES['fichier-video']['tmp_name'];
+	
+		$date = new \DateTime();
+		$aujourdhui = $date->format('H-i-s_d-m-y');
+			
+		/**
+		 * 'video/mp4' pour chrome
+		 * 'video/x-m4v pour firefox
+		*/
+			
+		if($type == 'video/webm' || $type == 'video/mp4' || $type == 'video/x-m4v'){
+			if($type == 'video/webm'){
+				$nom_file ="arch_v_scan_".$aujourdhui.".webm";
+			}
+			else
+			if($type == 'video/mp4'){
+				$nom_file ="arch_v_scan_".$aujourdhui.".mp4";
+			}
+			else
+			if($type == 'video/x-m4v'){
+				$nom_file ="arch_v_scan_".$aujourdhui.".m4v";
+				$type = 'video/m4v';
+			}
+			$result = move_uploaded_file($tmp, 'C:\wamp\www\simens\public\videos\\'.$nom_file);
+		}
+			
+		$html = array($nom_file, $type);
+		$this->getResponse ()->getHeaders ()->addHeaderLine ( 'Content-Type', 'application/html; charset=utf-8' );
+		return $this->getResponse ()->setContent ( Json::encode ($html) );
+	
+	}
+	
+	
+	public function insererBdVideoAction(){
+		$id_cons = $this->params()->fromPost('id_cons', 0);
+		$nom_file = $this->params()->fromPost('nom_file', 0);
+		$type_file = $this->params()->fromPost('type_file', 0);
+	
+		$html = 0;
+		if($type_file == 'video/webm' || $type_file == 'video/mp4' || $type_file == 'video/m4v'){
+			$this->getConsultationTable ()->insererVideo($nom_file, $nom_file, $type_file, $id_cons);
+			$ListeDesVideos = $this->getConsultationTable ()->getVideos($id_cons);
+			$html = $this->lecteurVideoAction($ListeDesVideos);
+		}
+	
+	
+		$this->getResponse ()->getHeaders ()->addHeaderLine ( 'Content-Type', 'application/html; charset=utf-8' );
+		return $this->getResponse ()->setContent ( Json::encode ($html) );
+	}
+	
+	public function supprimerVideoAction(){
+		$id = $this->params()->fromPost('id', 0);
+	
+		$result = $this->getConsultationTable ()->supprimerVideo($id);
+	
+		$this->getResponse ()->getHeaders ()->addHeaderLine ( 'Content-Type', 'application/html; charset=utf-8' );
+		return $this->getResponse ()->setContent ( Json::encode ($result) );
+	}
+	
+	/***** LECTEUR MP3 ---- LECTEUR MP3  *****/
+	/***** LECTEUR MP3 ---- LECTEUR MP3  *****/
+	/***** LECTEUR MP3 ---- LECTEUR MP3  *****/
+	public function lecteurMp3Action($ListeDesSons){
+		$html ='<script>
+				 var tab = [];
+		        </script>';
+		$i = 0;
+		foreach ($ListeDesSons as $Liste) {
+			$html .='<script>
+        		 tab['.$i++.'] = {
+	                     "title":"'. $Liste['titre'] .'<span class=\"supprimerSon'.$i.'\" >  </span>",
+		                 "mp3":"/simens/public/audios/'. $Liste['nom'] .'",
+		         };
+		         
+		         setTimeout(function() {
+	                $(function () {
+		              $(".supprimerSon'.$i.'").click(function () { return false; });
+		              $(".supprimerSon'.$i.'").dblclick(function () { supprimerAudioMp3('.$i.'); return false; });
+	                });
+                 }, 1000);
+        		 </script>';
+		}
+	
+		$html .='<script>
+        		$(function(){
+	              new jPlayerPlaylist({
+		          jPlayer: "#jquery_jplayer_2",
+		          cssSelectorAncestor: "#jp_container_2"
+	            }, tab , {
+		        swfPath: "/simens/public/js/plugins/jPlayer-2.9.2/dist/jplayer",
+		        supplied: "mp3",
+		        wmode: "window",
+		        useStateClassSkin: true,
+		        autoBlur: false,
+		        smoothPlayBar: true,
+		        keyEnabled: true,
+		        remainingDuration: true,
+		        toggleDuration: true
+	            });
+                });
+        		scriptAjoutMp3();
+                </script>';
+		 
+		$html .='
+				<form id="my_form" method="post" action="/simens/public/consultation/ajouter-mp3" enctype="multipart/form-data">
+                <div id="jquery_jplayer_2" class="jp-jplayer" style="margin-bottom: 30px;"></div>
+                <div id="jp_container_2" class="jp-audio" role="application" aria-label="media player"  style="margin-bottom: 30px;">
+	            <div class="jp-type-playlist">
+		         <div class="jp-gui jp-interface">
+			       <div class="jp-controls">
+				      <button class="jp-previous" role="button" tabindex="0">previous</button>
+				      <button class="jp-play" role="button" tabindex="0">play</button>
+				      <button class="jp-next" role="button" tabindex="0">next</button>
+				      <button class="jp-stop" role="button" tabindex="0">stop</button>
+			       </div>
+			   <div class="jp-progress">
+				<div class="jp-seek-bar">
+					<div class="jp-play-bar"></div>
+				</div>
+			   </div>
+			   <div class="jp-volume-controls">
+				<button class="jp-mute" role="button" tabindex="0">mute</button>
+				<button class="jp-volume-max" role="button" tabindex="0">max volume</button>
+				<div class="jp-volume-bar">
+					<div class="jp-volume-bar-value"></div>
+				</div>
+			   </div>
+			   <div class="jp-time-holder">
+				<div class="jp-current-time" role="timer" aria-label="time">&nbsp;</div>
+				<div class="jp-duration" role="timer" aria-label="duration">&nbsp;</div>
+			   </div>
+			   <div class="jp-toggles">
+				<button class="jp-repeat" role="button" tabindex="0">repeat</button>
+				<!-- button class="jp-shuffle" role="button" tabindex="0">shuffle</button-->
+				<div class="jp-ajouter" id="ajouter">
+				  <input type="file" name="fichier" id="fichier">
+				</div>
+			   </div>
+		       </div>
+		       <div class="jp-playlist">
+			      <ul>
+				     <li>&nbsp;</li>
+			      </ul>
+		       </div>
+	           </div>
+               </div>
+               </form>';
+		return $html;
+	}
+	
+	public function lecteurMp3InstrumentalAction($ListeDesSons){
+		$html ='<script>
+				 var tab = [];
+		        </script>';
+		$i = 0;
+		foreach ($ListeDesSons as $Liste) {
+			$html .='<script>
+        		 tab['.$i++.'] = {
+	                     "title":"'. $Liste['titre'] .'<span class=\"supprimerSonIns'.$i.'\" >  </span>",
+		                 "mp3":"/simens/public/audios/'. $Liste['nom'] .'",
+		         };
+		    
+		         setTimeout(function() {
+	                $(function () {
+		              $(".supprimerSonIns'.$i.'").click(function () { return false; });
+		              $(".supprimerSonIns'.$i.'").dblclick(function () { supprimerAudioMp3('.$i.'); return false; });
+	                });
+                 }, 1000);
+        		 </script>';
+		}
+	
+		$html .='<script>
+        		$(function(){
+	              new jPlayerPlaylist({
+		          jPlayer: "#jquery_jplayer",
+		          cssSelectorAncestor: "#jp_container"
+	            }, tab , {
+		        swfPath: "/simens/public/js/plugins/jPlayer-2.9.2/dist/jplayer",
+		        supplied: "mp3",
+		        wmode: "window",
+		        useStateClassSkin: true,
+		        autoBlur: false,
+		        smoothPlayBar: true,
+		        keyEnabled: true,
+		        remainingDuration: true,
+		        toggleDuration: true
+	            });
+                });
+        		scriptAjoutMp3_Instrumental();
+                </script>';
+			
+		$html .='
+				<form id="my_form2" method="post" action="/simens/public/consultation/ajouter-mp3" enctype="multipart/form-data">
+                <div id="jquery_jplayer" class="jp-jplayer" style="margin-bottom: 30px;"></div>
+                <div id="jp_container" class="jp-audio" role="application" aria-label="media player"  style="margin-bottom: 30px;">
+	            <div class="jp-type-playlist">
+		         <div class="jp-gui jp-interface">
+			       <div class="jp-controls">
+				      <button class="jp-previous" role="button" tabindex="0">previous</button>
+				      <button class="jp-play" role="button" tabindex="0">play</button>
+				      <button class="jp-next" role="button" tabindex="0">next</button>
+				      <button class="jp-stop" role="button" tabindex="0">stop</button>
+			       </div>
+			   <div class="jp-progress">
+				<div class="jp-seek-bar">
+					<div class="jp-play-bar"></div>
+				</div>
+			   </div>
+			   <div class="jp-volume-controls">
+				<button class="jp-mute" role="button" tabindex="0">mute</button>
+				<button class="jp-volume-max" role="button" tabindex="0">max volume</button>
+				<div class="jp-volume-bar">
+					<div class="jp-volume-bar-value"></div>
+				</div>
+			   </div>
+			   <div class="jp-time-holder">
+				<div class="jp-current-time" role="timer" aria-label="time">&nbsp;</div>
+				<div class="jp-duration" role="timer" aria-label="duration">&nbsp;</div>
+			   </div>
+			   <div class="jp-toggles">
+				<button class="jp-repeat" role="button" tabindex="0">repeat</button>
+				<!-- button class="jp-shuffle" role="button" tabindex="0">shuffle</button-->
+				<div class="jp-ajouter" id="ajouter2">
+				  <input type="file" name="fichier" id="fichier">
+				</div>
+			   </div>
+		       </div>
+		       <div class="jp-playlist">
+			      <ul>
+				     <li>&nbsp;</li>
+			      </ul>
+		       </div>
+	           </div>
+               </div>
+               </form>';
+		return $html;
+	}
+	
+	public function afficherMp3Action(){
+		$id_cons = $this->params()->fromPost('id_cons', 0);
+		$type = (int)$this->params()->fromPost('type', 0);
+	
+		$ListeDesSons = $this->getConsultationTable ()->getMp3($id_cons, $type);
+	
+		$html = null;
+		if($type == 1){
+			$html = $this->lecteurMp3Action($ListeDesSons);
+		}else {
+			$html = $this->lecteurMp3InstrumentalAction($ListeDesSons);
+		}
+	
+	
+		$this->getResponse ()->getHeaders ()->addHeaderLine ( 'Content-Type', 'application/html; charset=utf-8' );
+		return $this->getResponse ()->setContent ( Json::encode ($html) );
+	}
+	
+	public function supprimerMp3Action(){
+		$id = $this->params()->fromPost('id', 0);
+		$id_cons = $this->params()->fromPost('id_cons', 0);
+		$type = $this->params()->fromPost('type', 0);
+	
+		$this->getConsultationTable ()->supprimerMp3($id, $id_cons, $type);
+	
+		$ListeDesSons = $this->getConsultationTable ()->getMp3($id_cons, $type);
+	
+		$html = null;
+		if($type == 1){
+			$html = $this->lecteurMp3Action($ListeDesSons);
+		}else {
+			$html = $this->lecteurMp3InstrumentalAction($ListeDesSons);
+		}
+		$this->getResponse ()->getHeaders ()->addHeaderLine ( 'Content-Type', 'application/html; charset=utf-8' );
+		return $this->getResponse ()->setContent ( Json::encode ($html) );
+	}
+	
+	public function ajouterMp3Action(){
+	
+		$type = $_FILES['fichier']['type'];
+		//$nom_file = $_FILES['fichier']['name'];
+		$tmp = $_FILES['fichier']['tmp_name'];
+	
+		$date = new \DateTime();
+		$aujourdhui = $date->format('H-i-s_d-m-y');
+		$nom_file = "arch_audio_".$aujourdhui.".mp3";
+	
+		if($type == 'audio/mp3'){
+			$result = move_uploaded_file($tmp, 'C:\wamp\www\simens\public\audios\\'.$nom_file);
+		} else {
+			$nom_file = 0;
+		}
+	
+		$this->getResponse ()->getHeaders ()->addHeaderLine ( 'Content-Type', 'application/html; charset=utf-8' );
+		return $this->getResponse ()->setContent ( Json::encode ($nom_file) );
+	
+	}
+	
+	public function insererBdMp3Action(){
+		$id_cons = $this->params()->fromPost('id_cons', 0);
+		$nom_file = $this->params()->fromPost('nom_file', 0);
+		$type = $this->params()->fromPost('type', 0);
+	
+		$this->getConsultationTable ()->insererMp3($nom_file, $nom_file, $id_cons, $type);
+		$ListeDesSons = $this->getConsultationTable ()->getMp3($id_cons, $type);
+	
+		$html = null;
+		if($type == 1){
+			$html = $this->lecteurMp3Action($ListeDesSons);
+		}else {
+			$html = $this->lecteurMp3InstrumentalAction($ListeDesSons);
+		}
+	
+		$this->getResponse ()->getHeaders ()->addHeaderLine ( 'Content-Type', 'application/html; charset=utf-8' );
+		return $this->getResponse ()->setContent ( Json::encode ($html) );
+	}
+	
+	
+	//ENREGISTREMENT DES EXAMENS DU JOUR
+	//ENREGISTREMENT DES EXAMENS DU JOUR
+	//ENREGISTREMENT DES EXAMENS DU JOUR
+	//ENREGISTREMENT DES EXAMENS DU JOUR
+	//ENREGISTREMENT DES EXAMENS DU JOUR
+	//ENREGISTREMENT DES EXAMENS DU JOUR
+	//ENREGISTREMENT DES EXAMENS DU JOUR
+	public function listeExamenDuJourAction(){
+		$user = $this->layout()->user;
+		$IdService = $user['IdService'];
+		$id_hosp = $this->params()->fromPost('id_hosp', 0);
+	
+		$this->getDateHelper();
+		$listeExamens = $this->getConsultationTable()->getExamenDuJour($id_hosp);
+	
+		$html ="";
+	
+		$html .='<table id="ListingExamens" class="table table-bordered tab_list_mini" >
+		           <thead>
+		             <tr id="nomMaj" style="height: 40px; width:100%;">
+		                <th style="width: 20%; cursor: pointer;">D<minus>ate</minus></th>
+		                <th style="width: 20%; cursor: pointer;">H<minus>eure</minus></th>
+		                <th style="width: 50%; cursor: pointer;">P<minus>r&eacute;nom & nom m&eacute;decin</minus></th>
+		                <th style="width: 10%;" >O<minus>ptions</minus></th>
+		             </tr>
+		           </thead>
+	
+		         <tbody id="donnees" class="liste_patient">';
+	
+		foreach ($listeExamens as $liste) {
+			$html .='<tr id="ExamenDuJourLigne'.$liste['ID_EXAMEN_JOUR'].'">
+					  <td> '.$this->controlDate->convertDate($liste['DATEONLY']).' </td>
+					  <td> '.$this->controlDate->getTime($liste['DATE']).' </td>
+					  <td> '.$liste['PrenomMedecin'].' '.$liste['NomMedecin'].' </td>
+					  <td>
+					  	 <a href="javascript:visualiserExamenDuJour('.$liste['ID_EXAMEN_JOUR'].')"><img style="margin-left: 5%;" src="../images_icons/voird.png" title="visualiser"></a>
+					     <a href="javascript:supprimerExamenDuJour('.$liste['ID_EXAMEN_JOUR'].')"><img style="margin-left: 20%;" src="../images_icons/sup.png" title="supprimer"></a>
+			  		  </td>
+					</tr>';
+				
+		}
+	
+		$html .='</tbody>
+				 </table>';
+	
+		$html .="<script>
+				  initialisationScriptDataTable();
+				</script>";
+		$this->getResponse ()->getHeaders ()->addHeaderLine ( 'Content-Type', 'application/html; charset=utf-8' );
+		return $this->getResponse ()->setContent ( Json::encode ($html) );
 	}
 }

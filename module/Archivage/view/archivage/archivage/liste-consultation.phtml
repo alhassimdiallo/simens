@@ -96,6 +96,19 @@ $(window).load(function () {
 
 				<script>
 				$("<?php echo '#cal'.$Id_cons ?>").toggle(false);
+
+				$('#patient tbody tr').contextmenu({
+
+					target: '#context-menu',
+					onItem: function (context, e) {
+						
+						if($(e.target).text() == 'Visualisation' || $(e.target).is('#visualisationCTX')){
+							visualiser('<?php echo $donnees['Id'];?>','<?php echo $donnees['Id_cons'];?>');
+						}
+						
+					}
+
+				 });
 				</script>
 				<?php endforeach; ?>
 
@@ -118,13 +131,29 @@ $(window).load(function () {
 		</table>
 </div>
 
+
+<div id="context-menu">
+    <ul class="dropdown-menu" >
+         <li><a style="cursor: pointer;" ><img id="visualisationCTX" style='margin-right: 10px; margin-left: -3px; width: 19px; height: 16px;' src='/simens/public/images_icons/voir2.png'>Visualisation</a></li>
+         <li class="divider"></li>
+         <li><a id="quitterCTX"  style="cursor: pointer;">Quitter</a></li>
+    </ul>
+</div>
+
+
+
 <script type="text/javascript">
 initialisation();
+
+function visualiser(id, id_cons){
+	vart = tabUrl[0]+'public/archivage/visualisation-consultation?id_patient='+id+'&id_cons='+id_cons;
+    $(location).attr("href",vart);
+}
 </script>
 
-<?php echo $this->headScript()->appendFile($this->basePath().'/js/jquery-1.9.1.js');?>
-<?php echo $this->headScript()->appendFile($this->basePath().'/js/jquery-ui.js');?>
-<?php echo $this->headLink()->appendStylesheet($this->basePath().'/css/smoothness/jquery-ui.css');?>
+<?php //echo $this->headScript()->appendFile($this->basePath().'/js/jquery-1.9.1.js');?>
+<?php //echo $this->headScript()->appendFile($this->basePath().'/js/jquery-ui.js');?>
+<?php //echo $this->headLink()->appendStylesheet($this->basePath().'/css/smoothness/jquery-ui.css');?>
 <script type="text/javascript">
 calendrier();
 </script>

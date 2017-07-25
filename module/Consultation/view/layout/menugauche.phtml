@@ -1,3 +1,19 @@
+<style>
+#sidebarMenu{ visibility: hidden }
+</style>
+
+<script>
+$(window).load(function () {
+
+	$('#waitMenuGauche').toggle(false);
+	$('#sidebarMenu').fadeIn().css({'visibility':'visible'});
+	 
+});
+</script>
+
+<div id="waitMenuGauche" style="color: #cccccc; font-size: 13px;  margin-top: 80px;  margin-left: 60px;" > <span> Chargement ... </span> </div>
+
+
 
 <ul id="sidebarMenu">
 	<!-- MENU ***SURVEILLANT DE SERVICE*** -->
@@ -45,8 +61,9 @@
 	   </div>
 	</li>
 
+	<li id="separateurMenuArchive"><a> <span>...............................................</span></a> </li>
 	<li id='archivage'> 
-	   <span style='color: #48ce77;'> ___________________________ </span> 
+	   
 	   <div style="margin-left:30px; height:40px;"><a href="<?php echo $this->url('archivage', array('action'=> 'liste-dossiers-patients'));?>">
 	       <img style="margin-left:5px;" src='<?php echo $this->basePath().'/images_icons/Folders2.png'?>'  />
 	       <span  style="font-size:15px; color: white; font-family:Times New Roman;">Archivage</span></a>

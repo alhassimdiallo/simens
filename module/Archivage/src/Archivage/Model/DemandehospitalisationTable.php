@@ -64,7 +64,7 @@ class DemandehospitalisationTable {
 		$sQuery = $sql->select()
 		->from(array('pat' => 'patient'))->columns(array())
 		->join(array('pers' => 'personne'), 'pers.ID_PERSONNE = pat.ID_PERSONNE', array('Nom'=>'nom','Prenom'=>'prenom','Datenaissance'=>'date_naissance','Sexe'=>'sexe','Adresse'=>'adresse','id'=>'id_personne'))
-		->join(array('cons' => 'consultation'), 'cons.ID_PATIENT= pat.ID_PERSONNE', array('Datedemandehospi'=>'date', 'Idcons'=>'id_cons'))
+		->join(array('cons' => 'consultation'), 'cons.ID_PATIENT= pat.ID_PERSONNE', array('Datedemandehospi'=>'DATE', 'Idcons'=>'ID_CONS'))
 		->join(array('dh' => 'demande_hospitalisation'), 'dh.id_cons = cons.id_cons' , array('*'))
 		->join(array('med' => 'personne') , 'med.ID_PERSONNE = cons.id_medecin' , array('NomMedecin' =>'nom', 'PrenomMedecin' => 'prenom'))
 		->where(array('cons.id_cons' => $id_cons));
@@ -94,7 +94,7 @@ class DemandehospitalisationTable {
 	{
 		$db = $this->tableGateway->getAdapter();
 		
-		$aColumns = array('Nom','Prenom','Datenaissance','Sexe', 'Datedemandehospi', 'Prenom&NomMedecin' , 'id');
+		$aColumns = array('Nom','Prenom','Datenaissance','Sexe', 'Datedemandehospi', 'Prenom&NomMedecin' , 'id' , 'id2');
 		
 		/* Indexed column (used for fast and accurate table cardinality) */
 		$sIndexColumn = "id";
@@ -132,7 +132,7 @@ class DemandehospitalisationTable {
 		$sql = new Sql($db);
 		$sQuery = $sql->select()
 		->from(array('pat' => 'patient'))->columns(array())
-		->join(array('pers' => 'personne'), 'pers.ID_PERSONNE = pat.ID_PERSONNE', array('Nom'=>'NOM','Prenom'=>'PRENOM','Datenaissance'=>'DATE_NAISSANCE','Sexe'=>'SEXE','Adresse'=>'ADRESSE','id'=>'ID_PERSONNE'))
+		->join(array('pers' => 'personne'), 'pers.ID_PERSONNE = pat.ID_PERSONNE', array('Nom'=>'NOM','Prenom'=>'PRENOM','Datenaissance'=>'DATE_NAISSANCE','Sexe'=>'SEXE','Adresse'=>'ADRESSE','id'=>'ID_PERSONNE','id2'=>'ID_PERSONNE'))
 		->join(array('cons' => 'consultation'), 'cons.ID_PATIENT = pat.ID_PERSONNE', array('Datedemandehospi'=>'DATE', 'Idcons'=>'ID_CONS'))
 		->join(array('dh' => 'demande_hospitalisation'), 'dh.id_cons = cons.ID_CONS' , array('*'))
 		->join(array('med' => 'personne') , 'med.ID_PERSONNE = cons.ID_MEDECIN' , array('NomMedecin' =>'NOM', 'PrenomMedecin' => 'PRENOM'))
@@ -188,7 +188,7 @@ class DemandehospitalisationTable {
 		
 					else if ($aColumns[$i] == 'id') {
 						$html  ="<infoBulleVue><a href='javascript:affichervue(".$aRow[ $aColumns[$i] ].")'>";
-						$html .="<img style='display: inline; margin-right: 15%;' src='".$tabURI[0]."public/images_icons/voir2.png' title='détails'></a></infoBulleVue>";
+						$html .="<img style='display: inline; margin-right: 15%;' src='".$tabURI[0]."public/images_icons/voir2.png' title='Détails'></a></infoBulleVue>";
 		
 						$html  .="<infoBulleVue><a href='javascript:hospitaliser(".$aRow[ $aColumns[$i] ].")'>";
 						$html .="<img style='display: inline; margin-right: 5%;' src='".$tabURI[0]."public/images_icons/details.png' title='Hospitaliser'></a></infoBulleVue>";
@@ -229,7 +229,7 @@ class DemandehospitalisationTable {
 	
 		$db = $this->tableGateway->getAdapter();
 	
-		$aColumns = array('Nom','Prenom','Datenaissance','Sexe', 'Datedebut', 'date_fin_prevue_hospi' , 'id');
+		$aColumns = array('Nom','Prenom','Datenaissance','Sexe', 'Datedemandehospi', 'date_fin_prevue_hospi' , 'id' , 'id_demande_hospi' , 'Terminer');
 	
 		/* Indexed column (used for fast and accurate table cardinality) */
 		$sIndexColumn = "id";
@@ -264,10 +264,10 @@ class DemandehospitalisationTable {
 		$sql = new Sql($db);
 		$sQuery = $sql->select()
 		->from(array('pat' => 'patient'))->columns(array())
-		->join(array('pers' => 'personne'), 'pers.ID_PERSONNE = pat.ID_PERSONNE', array('Nom'=>'NOM','Prenom'=>'PRENOM','Datenaissance'=>'DATE_NAISSANCE','Sexe'=>'SEXE','Adresse'=>'ADRESSE','id'=>'ID_PERSONNE'))
+		->join(array('pers' => 'personne'), 'pers.ID_PERSONNE = pat.ID_PERSONNE', array('Nom'=>'NOM','Prenom'=>'PRENOM','Datenaissance'=>'DATE_NAISSANCE','Sexe'=>'SEXE','Adresse'=>'ADRESSE','id'=>'ID_PERSONNE','id2'=>'ID_PERSONNE'))
 		->join(array('cons' => 'consultation'), 'cons.ID_PATIENT = pat.ID_PERSONNE', array('Datedemandehospi'=>'DATE', 'Idcons'=>'ID_CONS', 'Archivage' => 'ARCHIVAGE'))
 		->join(array('dh' => 'demande_hospitalisation'), 'dh.id_cons = cons.ID_CONS' , array('*'))
-		->join(array('s' => 'service'), 's.ID_SERVICE = cons.ID_SERVICE', array())
+		->join(array('s' => 'service'), 's.ID_SERVICE = cons.ID_SERVICE', array('*'))
 		->join(array('h' => 'hospitalisation'), 'h.code_demande_hospitalisation = dh.id_demande_hospi' , array('Datedebut'=>'date_debut', 'Idhosp'=>'id_hosp', 'Terminer'=>'terminer'))
 		->where(array('dh.valider_demande_hospi'=>1 , 's.ID_SERVICE'=> $id_service, 'cons.ARCHIVAGE'=>1))
 		->order('h.terminer ASC');
@@ -325,7 +325,7 @@ class DemandehospitalisationTable {
 						
 						if($aRow[ 'Terminer' ] == 0) {
 							$html  ="<infoBulleVue><a href='javascript:affichervue(".$aRow[ 'id_demande_hospi' ].")'>";
-							$html .="<img style='display: inline; margin-right: 10%;' src='".$tabURI[0]."public/images_icons/voir.png' title='détails'></a></infoBulleVue>";
+							$html .="<img style='display: inline; margin-right: 10%;' src='".$tabURI[0]."public/images_icons/voir.png' title='Détails'></a></infoBulleVue>";
 							
 							$html  .="<infoBulleVue><a href='javascript:administrerSoin(".$aRow[ 'id_demande_hospi' ].")'>";
 							$html .="<img style='display: inline; margin-right: 14%;' src='".$tabURI[0]."public/images_icons/details.png' title='Administrer'></a></infoBulleVue>";
@@ -335,7 +335,7 @@ class DemandehospitalisationTable {
 						
 						}else {
 							$html  ="<infoBulleVue><a href='javascript:affichervuedetailhospi(".$aRow[ 'id_demande_hospi' ].")'>";
-							$html .="<img style='display: inline; margin-right: 10%;' src='".$tabURI[0]."public/images_icons/voir.png' title='détails'></a></infoBulleVue>";
+							$html .="<img style='display: inline; margin-right: 10%;' src='".$tabURI[0]."public/images_icons/voir.png' title='Détails'></a></infoBulleVue>";
 								
 							$html  .="<infoBulleVue><a>";
 							$html .="<img style='color: white; opacity: 0.15; margin-right: 14%;' src='".$tabURI[0]."public/images_icons/details.png' ></a></infoBulleVue>";
@@ -356,8 +356,8 @@ class DemandehospitalisationTable {
 						$row[] = $Control->convertDate($aRow[ 'date_fin_prevue_hospi' ]);
 					}
 						
-					else if ($aColumns[$i] == 'Datedebut') {
-						$row[] = $Control->convertDateTime($aRow[ 'Datedebut' ]);
+					else if ($aColumns[$i] == 'Datedemandehospi') {
+						$row[] = $Control->convertDate($aRow[ 'Datedemandehospi' ]);
 					}
 						
 					else {
@@ -380,14 +380,14 @@ class DemandehospitalisationTable {
 	
 	
 	/**
-	 * Recuperation de la liste des patients en cours d'hospitalisation pour le suivi des patients
+	 * Recuperation de la liste des patients en cours d'hospitalisation pour le suivi des patients 
 	 */
-	public function getListePatientSuiviHospitalisation()
+	public function getListePatientSuiviHospitalisation($id_service)
 	{
 	
 		$db = $this->tableGateway->getAdapter();
 	
-		$aColumns = array('Nom','Prenom','Datenaissance','Sexe', 'Datedebut', 'date_fin_prevue_hospi' , 'id');
+		$aColumns = array('Nom','Prenom','Datenaissance','Sexe', 'Datedebut', 'date_fin_prevue_hospi' , 'id' , 'id_demande_hospi');
 	
 		/* Indexed column (used for fast and accurate table cardinality) */
 		$sIndexColumn = "id";
@@ -427,10 +427,11 @@ class DemandehospitalisationTable {
 		->from(array('pat' => 'patient'))->columns(array())
 		->join(array('pers' => 'personne'), 'pers.ID_PERSONNE = pat.ID_PERSONNE', array('Nom'=>'NOM','Prenom'=>'PRENOM','Datenaissance'=>'DATE_NAISSANCE','Sexe'=>'SEXE','Adresse'=>'ADRESSE','id'=>'ID_PERSONNE'))
 		->join(array('cons' => 'consultation'), 'cons.ID_PATIENT = pat.ID_PERSONNE', array('Datedemandehospi'=>'DATE', 'Idcons'=>'ID_CONS', 'Archivage' => 'ARCHIVAGE'))
+		->join(array('s' => 'service'), 's.ID_SERVICE = cons.ID_SERVICE', array('*'))
 		->join(array('dh' => 'demande_hospitalisation'), 'dh.id_cons = cons.ID_CONS' , array('*'))
 		->join(array('med' => 'personne'), 'med.ID_PERSONNE = cons.ID_MEDECIN', array('NomMedecin' =>'NOM', 'PrenomMedecin' => 'PRENOM'))
 		->join(array('h' => 'hospitalisation'), 'h.code_demande_hospitalisation = dh.id_demande_hospi' , array('Datedebut'=>'date_debut', 'Idhosp'=>'id_hosp', 'Terminer'=>'terminer'))
-		->where(array('dh.valider_demande_hospi'=>1, 'cons.ARCHIVAGE'=>1, 'h.terminer' => 0));
+		->where(array('dh.valider_demande_hospi' => 1, 's.ID_SERVICE'=> $id_service, 'cons.ARCHIVAGE' => 1, 'h.terminer' => 0));
 		
 		/* Data set length after filtering */
 		$stat = $sql->prepareStatementForSqlObject($sQuery);
@@ -483,7 +484,7 @@ class DemandehospitalisationTable {
 					else if ($aColumns[$i] == 'id') {
 	
 						$html  ="<infoBulleVue><a href='javascript:affichervue(".$aRow[ 'id_demande_hospi' ].")'>";
-						$html .="<img style='display: inline; margin-right: 10%;' src='".$tabURI[0]."public/images_icons/voir.png' title='détails'></a></infoBulleVue>";
+						$html .="<img style='display: inline; margin-right: 10%;' src='".$tabURI[0]."public/images_icons/voir.png' title='Détails'></a></infoBulleVue>";
 								
 						$html  .="<infoBulleVue><a href='javascript:administrerSoin(".$aRow[ 'id_demande_hospi' ].")'>";
 						$html .="<img style='display: inline; margin-right: 0%;' src='".$tabURI[0]."public/img/dark/blu-ray.png' title='Appliquer un soin'></a></infoBulleVue>";

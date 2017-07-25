@@ -220,7 +220,7 @@ class DemandehospitalisationTable {
 	
 		$db = $this->tableGateway->getAdapter();
 	
-		$aColumns = array('Nom','Prenom','Datenaissance','Sexe', 'Datedebut', 'date_fin_prevue_hospi' , 'id');
+		$aColumns = array('Nom','Prenom','Datenaissance','Sexe', 'Datedebut', 'date_fin_prevue_hospi' , 'id',  /*utiliser pour le menu-contxtuel =>*/ 'id2', 'id_demande_hospi', 'Terminer2');
 	
 		/* Indexed column (used for fast and accurate table cardinality) */
 		$sIndexColumn = "id";
@@ -272,12 +272,12 @@ class DemandehospitalisationTable {
 		$sql = new Sql($db);
 		$sQuery = $sql->select()
 		->from(array('pat' => 'patient'))->columns(array())
-		->join(array('pers' => 'personne'), 'pers.ID_PERSONNE = pat.ID_PERSONNE', array('Nom'=>'NOM','Prenom'=>'PRENOM','Datenaissance'=>'DATE_NAISSANCE','Sexe'=>'SEXE','Adresse'=>'ADRESSE','id'=>'ID_PERSONNE'))
+		->join(array('pers' => 'personne'), 'pers.ID_PERSONNE = pat.ID_PERSONNE', array('Nom'=>'NOM','Prenom'=>'PRENOM','Datenaissance'=>'DATE_NAISSANCE','Sexe'=>'SEXE','Adresse'=>'ADRESSE','id'=>'ID_PERSONNE','id2'=>'ID_PERSONNE'))
 		->join(array('cons' => 'consultation'), 'cons.ID_PATIENT = pat.ID_PERSONNE', array('Datedemandehospi'=>'DATE', 'Idcons'=>'ID_CONS', 'Archivage' => 'ARCHIVAGE'))
 		->join(array('cons_eff' => 'consultation_effective'), 'cons_eff.ID_CONS = cons.ID_CONS' , array('*'))
 		->join(array('dh' => 'demande_hospitalisation'), 'dh.id_cons = cons.ID_CONS' , array('*'))
 		->join(array('s' => 'service'), 's.ID_SERVICE = cons.ID_SERVICE', array())
-		->join(array('h' => 'hospitalisation'), 'h.code_demande_hospitalisation = dh.id_demande_hospi' , array('Datedebut'=>'date_debut', 'Idhosp'=>'id_hosp', 'Terminer'=>'terminer'))
+		->join(array('h' => 'hospitalisation'), 'h.code_demande_hospitalisation = dh.id_demande_hospi' , array('Datedebut'=>'date_debut', 'Idhosp'=>'id_hosp', 'Terminer'=>'terminer', 'Terminer2'=>'terminer' ))
 		->where(array('dh.valider_demande_hospi'=>1 , 's.ID_SERVICE'=> $id_service, new NotIn ( 'pat.ID_PERSONNE', $sQuery1 )))
 		->order('h.terminer ASC');
 	

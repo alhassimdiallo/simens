@@ -1,9 +1,24 @@
 <style>
+#sidebarMenu{ visibility: hidden }
 </style>
-<ul>
+
+<script>
+$(window).load(function () {
+
+	$('#waitMenuGauche').toggle(false);
+	$('#sidebarMenu').fadeIn().css({'visibility':'visible'});
+	 
+});
+</script>
+
+<div id="waitMenuGauche" style="color: #cccccc; font-size: 13px;  margin-top: 80px;  margin-left: 60px;" > <span> Chargement ... </span> </div>
+
+
+
+<ul id="sidebarMenu">
 	<!-- MENU ***DOSSIER PERSONNEL*** -->
 	<li id="dossier_personnel"><a href="">
-	    <span style="margin-left:0px; color: #48ce77; font-weight:bold; font-size:18px; font-family:Times New Roman;"> <img id="image" style="display: inline;" src='<?php echo $this->basePath().'/images_icons/add.PNG'?>' alt='Liste' /> Dossiers du personnel </span></a> </li>
+	    <span style="margin-left:0px; color: #48ce77; font-weight:bold; font-size:18px; font-family:Times New Roman;"> <img id="image" style="display: inline;" src='<?php echo $this->basePath().'/images_icons/plus-green1.png'?>' alt='Liste' /> Dossiers du personnel </span></a> </li>
 
 	<li id="plus_dossier_personnel" style="background: #4a5765;" >
 
@@ -20,9 +35,10 @@
 
 
 
+	<?php /*?>
 	<!-- MENU ***OPERATIONS** -->
 	<li id="operation"><a href="">
-	    <span style="margin-left:0px; color: #48ce77; font-weight:bold; font-size:18px; font-family:Times New Roman;"> <img id="image" style="display: inline;" src='<?php echo $this->basePath().'/images_icons/add.PNG'?>' alt='Liste' /> Op&eacute;rations </span></a> </li>
+	    <span style="margin-left:0px; color: #48ce77; font-weight:bold; font-size:18px; font-family:Times New Roman;"> <img id="image" style="display: inline;" src='<?php echo $this->basePath().'/images_icons/plus-green1.png'?>' alt='Liste' /> Op&eacute;rations </span></a> </li>
 
 	<li id="plus_operation" style="background: #4a5765;" >
 	   <!-- PARTIE DES TRANSFERTS -->
@@ -41,6 +57,7 @@
 	       <img style="margin-left:5px; display: inline;" src='<?php echo $this->basePath().'/images_icons/liste.PNG'?>' alt='Liste' />
 	       <span id="liste_intervention_style" style="font-size:15px; color: white; font-family:Times New Roman;">Liste intervent..</span></a>
 	   </div>
+	   <?php */?>
 
 	</li>
 
@@ -48,11 +65,14 @@
 	</ul>
 
 <script>
+var base_url = window.location.toString();
+var tabUrl = base_url.split("public");
+
 //*******************************************************************************************************************************
 //operation
 function dep1(){
 	$('#operation').click(function(){
-		$("#operation").replaceWith("<li id='operation'><a href=''><span style='margin-left:0px; color: #48ce77; font-weight:bold; font-size:18px; font-family:Times New Roman;'> <img style='display: inline;' src='/simens_derniereversion/public/images_icons/add.PNG' alt='Liste' /> Op&eacute;rations </span></a></li>");
+		$("#operation").replaceWith("<li id='operation'><a href=''><span style='margin-left:0px; color: #48ce77; font-weight:bold; font-size:18px; font-family:Times New Roman;'> <img style='display: inline;' src='"+tabUrl[0]+"public/images_icons/plus-green1.png' alt='Liste' /> Op&eacute;rations </span></a></li>");
 		dep2();
 	    $('#plus_operation').animate({
 	        height : 'toggle'
@@ -63,7 +83,7 @@ function dep1(){
 
 function dep2(){
 	$('#operation').click(function(){
-		$("#operation").replaceWith("<li id='operation' style='background:#4a5765;'><a href=''><span style='margin-left:0px; color: #ffffff; font-weight:bold; font-size:18px; font-family:Times New Roman;'> <img style='display: inline;' src='/simens_derniereversion/public/images_icons/moins-vert.PNG' alt='Liste' /> Op&eacute;rations </span></a></li>");
+		$("#operation").replaceWith("<li id='operation' style='background:#4a5765;'><a href=''><span style='margin-left:0px; color: #ffffff; font-weight:bold; font-size:18px; font-family:Times New Roman;'> <img style='display: inline;' src='"+tabUrl[0]+"public/images_icons/moin-green2.png' alt='Liste' /> Op&eacute;rations </span></a></li>");
 		dep1();
 	    $('#plus_operation').animate({
 	        height : 'toggle'
@@ -74,7 +94,7 @@ function dep2(){
 
 $('#plus_operation').toggle(false);
 $('#operation').click(function(){
-	$("#operation").replaceWith("<li id='operation' style='background:#4a5765;'><a href=''><span style='margin-left:0px; color: #ffffff; font-weight:bold; font-size:18px; font-family:Times New Roman;'> <img style='display: inline;' src='/simens_derniereversion/public/images_icons/moins-vert.PNG' alt='Liste' /> Op&eacute;rations </span></a></li>");
+	$("#operation").replaceWith("<li id='operation' style='background:#4a5765;'><a href=''><span style='margin-left:0px; color: #ffffff; font-weight:bold; font-size:18px; font-family:Times New Roman;'> <img style='display: inline;' src='"+tabUrl[0]+"public/images_icons/moin-green2.png' alt='Liste' /> Op&eacute;rations </span></a></li>");
 	dep1();
     $('#plus_operation').animate({
         height : 'toggle'
@@ -86,7 +106,7 @@ $('#operation').click(function(){
 //DECES
 function dep_deces1(){
 	$('#deces').click(function(){
-		$("#deces").replaceWith("<li id='deces'><a href=''><span style='margin-left:0px; color: #48ce77; font-weight:bold; font-size:18px; font-family:Times New Roman;'> <img style='display: inline;' src='/simens_derniereversion/public/images_icons/add.PNG' alt='Liste' /> D&eacute;c&egrave;s </span></a></li>");
+		$("#deces").replaceWith("<li id='deces'><a href=''><span style='margin-left:0px; color: #48ce77; font-weight:bold; font-size:18px; font-family:Times New Roman;'> <img style='display: inline;' src='"+tabUrl[0]+"public/images_icons/plus-green1.png' alt='Liste' /> D&eacute;c&egrave;s </span></a></li>");
 		dep_deces2();
 	    $('#plus_deces').animate({
 	        height : 'toggle'
@@ -97,7 +117,7 @@ function dep_deces1(){
 
 function dep_deces2(){
 	$('#deces').click(function(){
-		$("#deces").replaceWith("<li id='deces' style='background:#4a5765;'><a href=''><span style='margin-left:0px; color: #ffffff; font-weight:bold; font-size:18px; font-family:Times New Roman;'> <img style='display: inline;' src='/simens_derniereversion/public/images_icons/moins-vert.PNG' alt='Liste' /> D&eacute;c&egrave;s </span></a></li>");
+		$("#deces").replaceWith("<li id='deces' style='background:#4a5765;'><a href=''><span style='margin-left:0px; color: #ffffff; font-weight:bold; font-size:18px; font-family:Times New Roman;'> <img style='display: inline;' src='"+tabUrl[0]+"public/images_icons/moin-green2.png' alt='Liste' /> D&eacute;c&egrave;s </span></a></li>");
 		dep_deces1();
 	    $('#plus_deces').animate({
 	        height : 'toggle'
@@ -108,7 +128,7 @@ function dep_deces2(){
 
 $('#plus_deces').toggle(false);
 $('#deces').click(function(){
-	$("#deces").replaceWith("<li id='deces' style='background:#4a5765;'><a href=''><span style='margin-left:0px; color: #ffffff; font-weight:bold; font-size:18px; font-family:Times New Roman;'> <img style='display: inline;' src='/simens_derniereversion/public/images_icons/moins-vert.PNG' alt='Liste' /> D&eacute;c&egrave;s </span></a></li>");
+	$("#deces").replaceWith("<li id='deces' style='background:#4a5765;'><a href=''><span style='margin-left:0px; color: #ffffff; font-weight:bold; font-size:18px; font-family:Times New Roman;'> <img style='display: inline;' src='"+tabUrl[0]+"public/images_icons/moin-green2.png' alt='Liste' /> D&eacute;c&egrave;s </span></a></li>");
 	dep_deces1();
     $('#plus_deces').animate({
         height : 'toggle'
@@ -121,7 +141,7 @@ $('#deces').click(function(){
 //ADMISSION
 function dep_admission1(){
 	$('#admission').click(function(){
-		$("#admission").replaceWith("<li id='admission'><a href=''><span style='margin-left:0px; color: #48ce77; font-weight:bold; font-size:18px; font-family:Times New Roman;'> <img style='display: inline;' src='/simens_derniereversion/public/images_icons/add.PNG' alt='Liste' /> Facturation </span></a></li>");
+		$("#admission").replaceWith("<li id='admission'><a href=''><span style='margin-left:0px; color: #48ce77; font-weight:bold; font-size:18px; font-family:Times New Roman;'> <img style='display: inline;' src='"+tabUrl[0]+"public/images_icons/plus-green1.png' alt='Liste' /> Facturation </span></a></li>");
 		dep_admission2();
 	    $('#plus_admission').animate({
 	        height : 'toggle'
@@ -132,7 +152,7 @@ function dep_admission1(){
 
 function dep_admission2(){
 	$('#admission').click(function(){
-		$("#admission").replaceWith("<li id='admission' style='background:#4a5765;'><a href=''><span style='margin-left:0px; color: #ffffff; font-weight:bold; font-size:18px; font-family:Times New Roman;'> <img style='display: inline;' src='/simens_derniereversion/public/images_icons/moins-vert.PNG' alt='Liste' /> Facturation </span></a></li>");
+		$("#admission").replaceWith("<li id='admission' style='background:#4a5765;'><a href=''><span style='margin-left:0px; color: #ffffff; font-weight:bold; font-size:18px; font-family:Times New Roman;'> <img style='display: inline;' src='"+tabUrl[0]+"public/images_icons/moin-green2.png' alt='Liste' /> Facturation </span></a></li>");
 		dep_admission1();
 	    $('#plus_admission').animate({
 	        height : 'toggle'
@@ -143,7 +163,7 @@ function dep_admission2(){
 
 $('#plus_admission').toggle(false);
 $('#admission').click(function(){
-	$("#admission").replaceWith("<li id='admission' style='background:#4a5765;'><a href=''><span style='margin-left:0px; color: #ffffff; font-weight:bold; font-size:18px; font-family:Times New Roman;'> <img style='display: inline;' src='/simens_derniereversion/public/images_icons/moins-vert.PNG' alt='Liste' /> Facturation </span></a></li>");
+	$("#admission").replaceWith("<li id='admission' style='background:#4a5765;'><a href=''><span style='margin-left:0px; color: #ffffff; font-weight:bold; font-size:18px; font-family:Times New Roman;'> <img style='display: inline;' src='"+tabUrl[0]+"public/images_icons/moin-green2.png' alt='Liste' /> Facturation </span></a></li>");
 	dep_admission1();
 $('#plus_admission').animate({
     height : 'toggle'
@@ -156,7 +176,7 @@ return false;
 //DOSSIER PERSONNEL
 function dep_dossier_personnel1(){
 	$('#dossier_personnel').click(function(){
-		$("#dossier_personnel").replaceWith("<li id='dossier_personnel'><a href=''><span style='margin-left:0px; color: #48ce77; font-weight:bold; font-size:18px; font-family:Times New Roman;'> <img style='display: inline;' src='/simens_derniereversion/public/images_icons/add.PNG' alt='Liste' /> Dossiers du personnel </span></a></li>");
+		$("#dossier_personnel").replaceWith("<li id='dossier_personnel'><a href=''><span style='margin-left:0px; color: #48ce77; font-weight:bold; font-size:18px; font-family:Times New Roman;'> <img style='display: inline;' src='"+tabUrl[0]+"public/images_icons/plus-green1.png' alt='Liste' /> Dossiers du personnel </span></a></li>");
 		dep_dossier_personnel2();
 	    $('#plus_dossier_personnel').animate({
 	        height : 'toggle'
@@ -167,7 +187,7 @@ function dep_dossier_personnel1(){
 
 function dep_dossier_personnel2(){
 	$('#dossier_personnel').click(function(){
-		$("#dossier_personnel").replaceWith("<li id='dossier_personnel' style='background:#4a5765;'><a href=''><span style='margin-left:0px; color: #ffffff; font-weight:bold; font-size:18px; font-family:Times New Roman;'> <img style='display: inline;' src='/simens_derniereversion/public/images_icons/moins-vert.PNG' alt='Liste' /> Dossiers du personnel </span></a></li>");
+		$("#dossier_personnel").replaceWith("<li id='dossier_personnel' style='background:#4a5765;'><a href=''><span style='margin-left:0px; color: #ffffff; font-weight:bold; font-size:18px; font-family:Times New Roman;'> <img style='display: inline;' src='"+tabUrl[0]+"public/images_icons/moin-green2.png' alt='Liste' /> Dossiers du personnel </span></a></li>");
 		dep_dossier_personnel1();
 	    $('#plus_dossier_personnel').animate({
 	        height : 'toggle'
@@ -178,7 +198,7 @@ function dep_dossier_personnel2(){
 
 $('#plus_dossier_personnel').toggle(false);
 $('#dossier_personnel').click(function(){
-	$("#dossier_personnel").replaceWith("<li id='dossier_personnel' style='background:#4a5765;'><a href=''><span style='margin-left:0px; color: #ffffff; font-weight:bold; font-size:18px; font-family:Times New Roman;'> <img style='display: inline;' src='/simens_derniereversion/public/images_icons/moins-vert.PNG' alt='Liste' /> Dossiers du personnel </span></a></li>");
+	$("#dossier_personnel").replaceWith("<li id='dossier_personnel' style='background:#4a5765;'><a href=''><span style='margin-left:0px; color: #ffffff; font-weight:bold; font-size:18px; font-family:Times New Roman;'> <img style='display: inline;' src='"+tabUrl[0]+"public/images_icons/moin-green2.png' alt='Liste' /> Dossiers du personnel </span></a></li>");
 	dep_dossier_personnel1();
 $('#plus_dossier_personnel').animate({
 height : 'toggle'

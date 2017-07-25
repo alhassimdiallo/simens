@@ -2,7 +2,6 @@
 
 namespace Personnel\Model;
 
-use Zend\InputFilter\InputFilter;
 use Zend\InputFilter\InputFilterInterface;
 
 class Logistique {

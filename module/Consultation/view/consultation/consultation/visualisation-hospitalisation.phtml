@@ -2,13 +2,11 @@
 use Facturation\View\Helper\DateHelper;
 echo $this->headLink()->appendStylesheet($this->basepath().'/css/consultation/styleEncours.css');
 echo $this->headScript()->appendFile($this->basepath().'/js/consultation/jsEncours.js');
+echo $this->headScript()->appendFile($this->basePath().'/js/consultation/ajouterMedicamentsHospi.js');
 
 $controle = new DateHelper();
 ?>
 <style>
-/* #listeDataTable{ */
-/* 	margin-left: 185px; */
-/* } */
 		
 div .dataTables_paginate
 {
@@ -102,7 +100,7 @@ $(window).load(function () {
   <div id='barre'></div>
 		
   <div id='info_demande'>
-	<table style='margin-top:10px; margin-left: 195px; width: 80%;'>
+	<table style='margin-top:10px; margin-left: 18%; width: 80%;'>
 	 <tr style='width: 80%;'>
 	  <td style='width: 25%; height: 50px; vertical-align: top;'><a style='text-decoration:underline; font-size:12px;'>Consultation:</a><br><p style='font-weight:bold; font-size:17px;'><?php echo $this->demande['id_cons']; ?></p></td>
 	  <td style='width: 25%; height: 50px; vertical-align: top;'><a style='text-decoration:underline; font-size:12px;'>Date de la demande:</a><br><p style=' font-weight:bold; font-size:17px;'><?php echo $controle->convertDateTime($this->demande['Datedemandehospi']); ?> </p></td>
@@ -111,7 +109,7 @@ $(window).load(function () {
 	 </tr>
 	</table>
 	
-	<table style='margin-top:0px; margin-left:195px; width: 70%;'>
+	<table style='margin-top:0px; margin-left:18%; width: 70%;'>
 	 <tr style='width: 70%'>
 	  <td style='padding-top: 10px; padding-bottom: 0px; padding-right: 30px; width: 20%; '><a style='text-decoration:underline; font-size:13px;'>Motif de la demande:</a><br><p id='circonstance_deces' style='background:#f8faf8; font-weight:bold; font-size:17px;'><?php echo $this->demande['motif_demande_hospi']; ?></p></td>
 	  <td style='padding-top: 10px; padding-bottom: 0px; padding-right: 30px; width: 20%; '><a style='text-decoration:underline; font-size:13px;'>Note:</a><br><p id='circonstance_deces' style='background:#f8faf8; font-weight:bold; font-size:17px;'> </p></td>
@@ -127,7 +125,7 @@ $(window).load(function () {
   <div id='barre'></div>
 				
   <div id='info_hospitalisation'>
-   <table style='margin-top:10px; margin-left: 195px; width: 80%;'>
+   <table style='margin-top:10px; margin-left: 18%; width: 80%;'>
     <tr style='width: 80%;'>
       <td style='width: 25%; height: 50px; vertical-align: top;'><a style='text-decoration:underline; font-size:12px;'>Date d&eacute;but:</a><br><p style='font-weight:bold; font-size:17px;'><?php echo $controle->convertDateTime($this->hospitalisation->date_debut); ?></p></td>
       <td style='width: 25%; height: 50px; vertical-align: top;'><a style='text-decoration:underline; font-size:12px;'>Batiment:</a><br><p style=' font-weight:bold; font-size:17px;'><?php echo $this->batiment->intitule; ?></p></td>
@@ -145,7 +143,7 @@ $(window).load(function () {
   </div>
   <div id='barre'></div>
   
-  <div id='info_liste'>
+  <div id='info_liste' style='margin-left: 18%;'>
   
      <!-- EMPLACEMENT DE LA LISTE DES SOINS  -->
 
@@ -159,14 +157,48 @@ $(window).load(function () {
   </div>
   <div id='barre'></div>
 		
-  <div id='info_liberation'>
-  <table style='margin-top:0px; margin-left:195px; width: 80%;'>
-   <tr style='width: 80%'>
-    <td style='padding-top: 10px; width: 10%; height: 50px; vertical-align: top;'><a style='text-decoration:underline; font-size:14px;'>Date:</a><br><p style='font-weight:bold; font-size:17px;'><?php echo $controle->convertDateTime($this->hospitalisation->date_fin); ?></p></td>
-    <td style='padding-top: 10px; padding-bottom: 0px; padding-right: 30px; width: 20%; '><a style='text-decoration:underline; font-size:14px;'>R&eacute;sum&eacute; m&eacute;dical:</a><br><p id='circonstance_deces' style='background:#f8faf8; font-weight:bold; font-size:17px;'><?php echo $this->hospitalisation->resumer_medical; ?></p></td>
-    <td style='padding-top: 10px; padding-bottom: 0px; padding-right: 30px; width: 20%; '><a style='text-decoration:underline; font-size:14px;'>Motif sortie:</a><br><p id='circonstance_deces' style='background:#f8faf8; font-weight:bold; font-size:17px;'><?php echo $this->hospitalisation->motif_sorti; ?></p></td>
-   </tr>
-  </table>
+  
+  <?php 
+        $infoTransfert = $this->infoTransfert;
+        $infoOrdonnance = $this->infoOrdonnance;
+        $nbMedPrescrit = $this->nbMedPrescrit;
+        $listeMedicamentsPrescrits = $this->listeMedicamentsPrescrits;
+       
+		$popupOrdonnance = "";
+	?>
+
+	<div id='info_liberation'>
+	  <table style='margin-top:0px; margin-left:18%; width: 80%;'>
+	    <tr style='width: 80%'>
+		
+		
+    <?php if($infoTransfert){ ?>
+			
+			<td style='padding-top: 10px; width: 25%; height: 50px; vertical-align: top;'><a style='text-decoration:underline; font-size:14px;'>Date du transfert:</a><br><p style='font-weight:bold; font-size:17px;'><?php echo  $controle->convertDateTime($hospitalisation->date_fin); ?></p></td>
+			<td style='padding-top: 10px; width: 32%; height: 50px; vertical-align: top;'><a style='text-decoration:underline; font-size:14px;'>Pr&eacute;nom & nom du m&eacute;decin:</a><br><p style='font-weight:bold; font-size:17px;'><?php echo  $infoTransfert['PrenomMedecin']." ".$infoTransfert['NomMedecin']; ?></p></td>
+			<td style='padding-top: 10px; width: 43%; height: 50px; vertical-align: top;'><a style='text-decoration:underline; font-size:14px;'>Service d'accueil:</a><br><p style='font-weight:bold; font-size:17px;'><?php echo $infoTransfert['NomService']; ?></p></td>
+		
+	<?php } else { 
+				
+			if($infoOrdonnance){ 
+				$popupOrdonnance = "<div style='padding-top: 10px; height: 50px;'><img id='afficherOrdonnance' style='cursor:pointer;' src='../images_icons/clipboard_32.png' /> <span style='font-weight:bold; font-size:17px; font-family: Times  New Roman; color: #065d10;'> Ordonnance </span></div>";
+		    }
+		
+		  } 
+	?>
+		
+	    </tr>
+	  </table>
+  
+  
+    <table style='margin-top:0px; margin-left:18%; width: 80%;'>
+      <tr style='width: 80%'>
+        <td style='padding-top: 10px; width: 10%; height: 50px; vertical-align: top;'><a style='text-decoration:underline; font-size:14px;'>Date:</a><br><p style='font-weight:bold; font-size:17px;'><?php echo $controle->convertDateTime($this->hospitalisation->date_fin); ?></p> <p><?php echo $popupOrdonnance; ?></p></td>
+        <td style='padding-top: 10px; padding-bottom: 0px; padding-right: 30px; width: 20%; '><a style='text-decoration:underline; font-size:14px;'>R&eacute;sum&eacute; m&eacute;dical:</a><br><p id='circonstance_deces' style='background:#f8faf8; font-weight:bold; font-size:17px;'><?php echo $this->hospitalisation->resumer_medical; ?></p></td>
+        <td style='padding-top: 10px; padding-bottom: 0px; padding-right: 30px; width: 20%; '><a style='text-decoration:underline; font-size:14px;'>Motif sortie:</a><br><p id='circonstance_deces' style='background:#f8faf8; font-weight:bold; font-size:17px;'><?php echo $this->hospitalisation->motif_sorti; ?></p></td>
+      </tr>
+    </table>
+    
   </div>
   
   <div style='width:80%; height: 40px;'>
@@ -180,6 +212,56 @@ $(window).load(function () {
    </div>
 </div>
 
+
+
+<!--***********************************************************************************************-->                              
+
+<!--==========================POP UP pour Afficher les détails =================================-->                              
+                          
+<!--***********************************************************************************************-->  
+        <div id="PrescriptionOrdonnancePopupInterface" title="Prescription de l'ordonnance" style="display:none;">
+             
+                      <input type="hidden"  id="id_consForOrdonnance">   
+                      <input type="hidden"  id="id_personneForOrdonnance">
+                      
+                      <input type="hidden"  id="nbMedecamentPourVisualisation">
+                 
+                 <div id="listeMedicaments" style="float:left; width: 100%;">
+				                  
+				    <table class="table table-bordered" style="width: 100%; margin-bottom: 0px; margin-left: 0px;">
+                      <thead style="width: 100%;">
+		                <tr style="width: 100%; height: 40px; font-family: police2;">
+		                  <th style="width: 4%;  font-weight: bold; font-size: 15px; ">N&ordm;</th>
+		                  <th style="width: 29%; font-weight: bold; font-size: 15px; text-align: left;">M&eacute;dicaments</th>
+		                  <th style="width: 29%; font-weight: bold; font-size: 15px; text-align: left;">Forme</th>
+		                  <th style="width: 29%; font-weight: bold; font-size: 15px; text-align: left;">Quantit&eacute;</th>
+		                  <th style="width: 9%;  font-weight: bold; font-size: 15px; ">Options</th>
+		                </tr>
+		              </thead>
+			        </table>
+			                         
+				    <div id="Medicament_0" style="width: 100%;">
+					    <!-- A ne pas enlever -->
+				    </div>
+				 
+				    <!--********************* BOUTON AJOUTER-SUPPRIMER ************************-->
+			        <!--********************* BOUTON AJOUTER-SUPPRIMER ************************-->
+				    <div id="controls_medicament" style="margin-top: 20px; width: 100%;">
+					   <div style="width: 100%;">
+					      <div style="width: 3%; float: left; cursor: pointer; " id="supprimer_medicament">
+						     <img style='margin-left: 5px;' src='../images_icons/moin-green.png' title='supprimer' />
+					      </div>
+					      <div style="width: 3%; float: left; cursor: pointer; " id="ajouter_medicament">
+					         <img style='margin-left: 5px;' src='../images_icons/plus-green.png' title='ajouter' />
+					      </div>
+				       </div>
+				    </div>
+				    
+				 </div>
+				 
+        </div>  
+
+        
 <script>
  ListeSoinsVisualisationHospi();
  initAnimation();
@@ -187,4 +269,64 @@ $(window).load(function () {
  animationPliantDepliant2();
  animationPliantDepliant3();
  animationPliantDepliant4();
+
+
+
+ //NOUVEAU SCRIPT
+ //NOUVEAU SCRIPT
+ //NOUVEAU SCRIPT
+ partDefautMedicament(null, null, null, 0);
+ function AffichageOrdonnancePopup(){
+	 	$( "#PrescriptionOrdonnancePopupInterface" ).dialog({
+	 	    resizable: false,
+	 	    height:460,
+	 	    width:930,
+	 	    autoOpen: false,
+	 	    modal: true,
+	 	    buttons: {
+	 	   
+	 	        "Terminer": function() {
+	 	        	$( this ).dialog( "close" );   
+	 	        	return false;
+	             }
+	 	       
+	 	    }
+	 	});
+ }
+ 
+ $('#afficherOrdonnance').click(function(){ 
+     AffichageOrdonnancePopup();
+    $('#PrescriptionOrdonnancePopupInterface').dialog('open'); 
+ });
+
+ var ik = 1;
+ var $nbMedPrescrit = '<?php echo $nbMedPrescrit; ?>';
+ if($nbMedPrescrit != 0){
+		  var i=0;
+		  for( i ; i < $nbMedPrescrit ; i++){
+		     $('#ajouter_medicament').trigger('click');
+		  } 
+ }
+
 </script>
+
+<?php 
+if($nbMedPrescrit != 0) {
+	foreach($listeMedicamentsPrescrits as $Medicaments){ ?>
+		<script> setTimeout(function(){ $('#medicament_0'+ik).val('<?php echo $Medicaments['Intitule']; ?>'); }, 2000);  </script>
+		<script> setTimeout(function(){ $('#forme_'+ik).val('<?php echo $Medicaments['FORME']; ?>'); }, 2000);</script>
+		<script> setTimeout(function(){ $('#nb_medicament_'+ik).val('<?php echo substr($Medicaments['QUANTITE'], 0, strpos($Medicaments['QUANTITE'], ' ')); ?>'); }, 2000);  </script>
+		<script> setTimeout(function(){ $('#quantite_'+ik).val('<?php echo substr($Medicaments['QUANTITE'], strpos($Medicaments['QUANTITE'], ' ')+1); ?>'); ik++; }, 2000);  </script>
+<?php	} ?>
+
+	<script>
+	setTimeout(function(){
+	   $('#listeMedicaments input, .form-duree_ input, .ordonnance input').attr('disabled', true).css({'background':'#f8f8f8'});
+	   $('#controls_medicament div').toggle(false);
+	   $('#iconeMedicament_supp_vider a img').toggle(false);
+	   $('#bouton_Medicament_modifier_demande').toggle(false);
+	   $('#bouton_Medicament_valider_demande').toggle(false);
+	   $('#increm_decrem img').toggle(false);
+	}, 2000);
+    </script>
+<?php } ?>

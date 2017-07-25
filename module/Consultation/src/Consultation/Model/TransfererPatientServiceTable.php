@@ -14,6 +14,7 @@ class TransfererPatientServiceTable{
 		$select = $sql->select('hopital');
 		$stat = $sql->prepareStatementForSqlObject($select);
 		$result = $stat->execute();
+		$options = array();
 		foreach ($result as $data) {
 			$options[$data['ID_HOPITAL']] = $data['NOM_HOPITAL'];
 		}
@@ -28,6 +29,7 @@ class TransfererPatientServiceTable{
 		$select->join(array('s'=>'service'), 's.ID_SERVICE = hs.ID_SERVICE' , array('*'));
 		$stat = $sql->prepareStatementForSqlObject($select);
 		$result = $stat->execute();
+		$options = array();
 		foreach ($result as $data) {
 			$options[$data['ID_SERVICE']] = $data['NOM'];
 		}

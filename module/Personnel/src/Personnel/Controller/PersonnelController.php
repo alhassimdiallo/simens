@@ -148,23 +148,27 @@ class PersonnelController extends AbstractActionController {
 	}
 	
 	public function dossierPersonnelAction(){
+		$user = $this->layout()->user;
+		$id_employe = $user['id_personne'];
+		
 		$this->layout()->setTemplate('layout/personnel');
 		$this->getFormPersonnel();
 		$formPersonnel = $this->formPersonnel;
-		$patientTable = $this->getPatientTable();
 		
-		$listeDesPays = array_merge(array(0 =>''), $patientTable->listePays());
-		$formPersonnel->get('nationalite')->setvalueOptions($listeDesPays);
-		$listeDesServices = array_merge(array(0 =>''), $this->getPatientTable()->listeServices());
-		$formPersonnel->get('service_accueil')->setValueOptions($listeDesServices);
+		$formPersonnel->get('nationalite')->setvalueOptions($this->getPatientTable()->listeDeTousLesPays());
+		$data = array('nationalite' => 'Sénégal');
+		$formPersonnel->get('service_accueil')->setValueOptions($this->getPatientTable()->listeServices());
+		$formPersonnel->get('type_personnel')->setValueOptions($this->getPatientTable()->getTypePersonnel());
 
+		$formPersonnel->populateValues($data);
+		
 		$request = $this->getRequest();
-		if ($request->isPost()) {
-			$personnel =  new Personnel();
-			$formPersonnel->setInputFilter($personnel->getInputFilter());
-			$formPersonnel->setData($request->getPost());
-			if ($formPersonnel->isValid()) {
-				$personnel->exchangeArray($formPersonnel->getData());
+ 		if ($request->isPost()) {
+ 			$personnel =  new Personnel();
+ 			$formPersonnel->setInputFilter($personnel->getInputFilter());
+ 			$formPersonnel->setData($request->getPost());
+ 			if ($formPersonnel->isValid()) {
+ 				$personnel->exchangeArray($formPersonnel->getData());
 				//**************************************************************
 			
 			    //============ ENREGISTREMENT DE L'ETAT CIVIL ==================
@@ -186,9 +190,11 @@ class PersonnelController extends AbstractActionController {
 
 			    	//ON ENREGISTRE AVEC LA PHOTO
 			    	$id_personnel = $this->getPersonnelTable()->savePersonnel($personnel,$nomPhoto);
+			    	
 			    } else {
 			    	//ON ENREGISTRE SANS LA PHOTO
 			    	$id_personnel = $this->getPersonnelTable()->savePersonnel($personnel);
+			    	
 			    }
 			    
 			    //***************************************************************
@@ -198,27 +204,28 @@ class PersonnelController extends AbstractActionController {
 			    //***************************************************************
 			    
 			    if($personnel->type_personnel == 1) {
-			    	$this->getMedecinTable()->saveMedecin($personnel, $id_personnel);
-			    }else 
-			        if($personnel->type_personnel == 2){
-			        	$this->getMedicoTechniqueTable()->saveMedicoTechnique($personnel, $id_personnel);
-			        }else
-			    	    if($personnel->type_personnel == 3){
-			    	    	$this->getLogistiqueTable()->saveLogistique($personnel, $id_personnel);
-			    	    }		    	
+			    	$this->getMedecinTable()->saveMedecin($personnel, $id_personnel, $id_employe);
+			    }else
+			    if($personnel->type_personnel == 2){
+			    	$this->getMedicoTechniqueTable()->saveMedicoTechnique($personnel, $id_personnel, $id_employe);
+			    }else
+			    if($personnel->type_personnel == 3){
+			    	$this->getLogistiqueTable()->saveLogistique($personnel, $id_personnel, $id_employe);
+			    }
+			   		    	
+ 			    //***************************************************************
 			    	    
-			    //***************************************************************
+ 			    //========== ENREGISTREMENT DES DONNEES SUR L'AFFECTATION =======
 			    	    
-			    //========== ENREGISTREMENT DES DONNEES SUR L'AFFECTATION =======
-			    	    
-			    //***************************************************************
+ 			    //***************************************************************
 			    
-			    $this->getAffectationTable()->saveAffectation($personnel, $id_personnel);
+ 			    $this->getAffectationTable()->saveAffectation($personnel, $id_personnel, $id_employe);
 			    	
-			    return $this->redirect ()->toRoute ( 'personnel', array ('action' => 'liste-personnel'));
-			} 
-			//Quelque soit alpha le formulaire doit etre valide avant d'enregistrer les donnees. Donc pas besoin de ELSE
-		}
+ 			    
+ 			    return $this->redirect ()->toRoute ( 'personnel', array ('action' => 'liste-personnel'));
+ 			} 
+ 			//Quelque soit alpha le formulaire doit etre valide avant d'enregistrer les donnees. Donc pas besoin de ELSE
+ 		}
 		
 		return array (
 				'form' =>$formPersonnel,
@@ -226,8 +233,7 @@ class PersonnelController extends AbstractActionController {
 	}
 	
 	public function listePersonnelAjaxAction() {
-		$personnel = $this->getPersonnelTable();
-		$output = $personnel->getListePersonnel();
+		$output = $this->getPersonnelTable()->getListePersonnel();
 		return $this->getResponse ()->setContent ( Json::encode ( $output, array (
 				'enableJsonExprFinder' => true
 		) ) );
@@ -267,7 +273,7 @@ class PersonnelController extends AbstractActionController {
 	
 	public function infoPersonnelAction() {
 		
-		$identif = (int) $this->params() ->fromPost('identif', null);
+		//$identif = (int) $this->params() ->fromPost('identif', 0);
 		
 		$id_personne = (int) $this->params() ->fromPost('id');
 		$this->getDateHelper();
@@ -279,14 +285,15 @@ class PersonnelController extends AbstractActionController {
 		 * ======= COMPLEMENTS DES INFORMATIONS SUR L'AGENT==============
 		 * **************************************************************
 		 * **************************************************************/
-		$donneesComplement = "";
-		if($unAgent->type_personnel == 'Logistique'){
-			$donneesComplement = $this->getLogistiqueTable()->getLogistique($id_personne);
-		}else
-		if($unAgent->type_personnel  == 'Médico-technique'){
+ 		$donneesComplement = "";
+ 		if($unAgent['id_type_employe'] == 3){
+ 			$donneesComplement = $this->getLogistiqueTable()->getLogistique($id_personne);
+ 		}
+ 		else
+		if($unAgent['id_type_employe']  == 2){
 			$donneesComplement = $this->getMedicoTechniqueTable()->getMedicoTechnique($id_personne);
 		}else
-		if($unAgent->type_personnel  == 'Médecin'){
+		if($unAgent['id_type_employe']  == 1){
 			$donneesComplement = $this->getMedecinTable()->getMedecin($id_personne);
 		}
 		
@@ -303,6 +310,9 @@ class PersonnelController extends AbstractActionController {
 		 * ========= AFFICHAGE DES INFORMATION SUR LA VUE ===============
 		 * **************************************************************
 		 * **************************************************************/
+		 
+		 $date_naissance = $unAgent['DATE_NAISSANCE'];
+		 if($date_naissance){ $date_naissance = $this->dateHelper->convertDate($date_naissance); } else { $date_naissance = ""; } 
 		$html ="<div style='width: 100%;'>
 		
 		       <img id='photo' src='".$this->baseUrl()."public/img/photos_personnel/" . $photoAgent . "'  style='float:left; margin-left:20px; margin-right:40px; width:105px; height:105px;'/>
@@ -314,15 +324,15 @@ class PersonnelController extends AbstractActionController {
 		       <table>
                  <tr>
 			   	   <td style='width:160px; font-family: police1;font-size: 12px;'>
-			   		   <div id='aa'><a style='text-decoration: underline;'>Pr&eacute;nom</a><br><p style='font-weight: bold;font-size: 17px;'>".$unAgent->prenom."</p></div>
+			   		   <div id='aa'><a style='text-decoration: underline;'>Pr&eacute;nom</a><br><p style='font-weight: bold;font-size: 17px;'>".$unAgent['PRENOM']."</p></div>
 			   	   </td>
 
 			   	   <td style='width:160px; font-family: police1;font-size: 12px;'>
-			   		   <div id='aa'><a style='text-decoration: underline;'>Date de naissance</a><br><p style='font-weight: bold;font-size: 17px;'>".$this->dateHelper->convertDate($unAgent->date_naissance)."</p></div>
+			   		   <div id='aa'><a style='text-decoration: underline;'>Date de naissance</a><br><p style='font-weight: bold;font-size: 17px;'>".$date_naissance."</p></div>
 			   	   </td>
 
 			       <td style='width:160px; font-family: police1;font-size: 12px;'>
-			   		   <div id='aa'><a style='text-decoration: underline;'>T&eacute;l&eacute;phone</a><br><p style='font-weight: bold;font-size: 17px;'>".$unAgent->telephone."</p></div>
+			   		   <div id='aa'><a style='text-decoration: underline;'>T&eacute;l&eacute;phone</a><br><p style='font-weight: bold;font-size: 17px;'>".$unAgent['TELEPHONE']."</p></div>
 			   	   </td>
 			   		   		
 			   	   <td style='width:160px; font-family: police1;font-size: 12px;'>
@@ -332,34 +342,34 @@ class PersonnelController extends AbstractActionController {
 			   		   		
 			   	  <tr>
 			   	   <td style='width:160px; font-family: police1;font-size: 12px;'>
-			   		   <div id='aa'><a style='text-decoration: underline;'>Nom</a><br><p style='font-weight: bold;font-size: 17px;'>".$unAgent->nom."</p></div>
+			   		   <div id='aa'><a style='text-decoration: underline;'>Nom</a><br><p style='font-weight: bold;font-size: 17px;'>".$unAgent['NOM']."</p></div>
 			   	   </td>
 
 			   	   <td style='width:160px; font-family: police1;font-size: 12px;'>
-			   		   <div id='aa'><a style='text-decoration: underline;'>Lieu de naissance</a><br><p style='font-weight: bold;font-size: 17px;'>".$unAgent->lieu_naissance."</p></div>
+			   		   <div id='aa'><a style='text-decoration: underline;'>Lieu de naissance</a><br><p style='font-weight: bold;font-size: 17px;'>".$unAgent['LIEU_NAISSANCE']."</p></div>
 			   	   </td>
 
 			       <td style='width:160px; font-family: police1;font-size: 12px;'>
-			   		   <div id='aa'><a style='text-decoration: underline;'>Nationalit&eacute;</a><br><p style='font-weight: bold;font-size: 17px;'>".$unAgent->nationalite."</p></div>
+			   		   <div id='aa'><a style='text-decoration: underline;'>Nationalit&eacute;</a><br><p style='font-weight: bold;font-size: 17px;'>".$unAgent['NATIONALITE_ACTUELLE']."</p></div>
 			   	   </td>
 			   		   		
 			   	   <td style='width:160px; font-family: police1;font-size: 12px; padding-left: 15px;'>
-			   		   <div id='aa'><a style='text-decoration: underline;'>@-Email</a><br><p style='font-weight: bold;font-size: 17px;'>".$unAgent->email."</p></div>
+			   		   <div id='aa'><a style='text-decoration: underline;'>@-Email</a><br><p style='font-weight: bold;font-size: 17px;'>".$unAgent['EMAIL']."</p></div>
 			   	   </td>
 			   		   		
 			      </tr>
 			   		   		
 			   	  <tr>
 			   	   <td style='width:160px; font-family: police1;font-size: 12px; vertical-align: top;'>
-			   		   <div id='aa'><a style='text-decoration: underline;'>Sexe</a><br><p style='font-weight: bold;font-size: 17px;'>".$unAgent->sexe."</p></div>
+			   		   <div id='aa'><a style='text-decoration: underline;'>Sexe</a><br><p style='font-weight: bold;font-size: 17px;'>".$unAgent['SEXE']."</p></div>
 			   	   </td>
 
 			   	   <td style='width:160px; font-family: police1;font-size: 12px; vertical-align: top;'>
-			   		   <div id='aa'><a style='text-decoration: underline;'>Profession</a><br><p style='font-weight: bold;font-size: 17px;'>".$unAgent->profession."</p></div>
+			   		   <div id='aa'><a style='text-decoration: underline;'>Profession</a><br><p style='font-weight: bold;font-size: 17px;'>".$unAgent['PROFESSION']."</p></div>
 			   	   </td>
 
 			       <td style='width:180px; font-family: police1;font-size: 12px; vertical-align: top;'>
-			   		   <div id='aa'><a style='text-decoration: underline;'>Adresse</a><br><p style='font-weight: bold;font-size: 17px;'>".$unAgent->adresse."</p></div>
+			   		   <div id='aa'><a style='text-decoration: underline;'>Adresse</a><br><p style='font-weight: bold;font-size: 17px;'>".$unAgent['ADRESSE']."</p></div>
 			   	   </td>
 			   		   		
 			   	   <td style='width:160px; font-family: police1;font-size: 12px;'>
@@ -369,11 +379,11 @@ class PersonnelController extends AbstractActionController {
 			   		   		
 		        </table>
 
-			    <div id='titre_info_deces'>Compl&eacute;ments informations (Personnel ".$unAgent->type_personnel.") </div>
+			    <div id='titre_info_deces'>Compl&eacute;ments informations (Personnel ".$unAgent['NOM_TYPE'].") </div>
 			    <div id='barre'></div>";
-			   		   		
-		if($unAgent->type_personnel == 'Logistique' && $donneesComplement){
-			$html .="<table style='margin-top:10px; margin-left:185px;'>";
+		   		   		
+		if($unAgent['id_type_employe'] == 3 && $donneesComplement){
+			$html .="<table style='margin-top:10px; margin-left:17%;'>";
 			$html .="<tr>";
 			$html .="<td style='width:200px; vertical-align: top;'><a style='float:left; margin-right: 10px; text-decoration:underline; font-size:13px;'>Matricule:</a><div id='inform' style='float:left; font-weight:bold; font-size:16px;'>".$donneesComplement->matricule_logistique."</div></td>";
 			$html .="<td style='width:190px; vertical-align: top;'><a style='float:left; margin-right: 10px; text-decoration:underline; font-size:13px;'>Grade:</a><div id='inform' style='float:left; font-weight:bold; font-size:16px;'>".$donneesComplement->grade_logistique."</div></td>";
@@ -382,7 +392,7 @@ class PersonnelController extends AbstractActionController {
 			$html .="</tr>";
 			$html .="</table>";
 		}else
-		if($unAgent->type_personnel == 'Médico-technique' && $donneesComplement){
+		if($unAgent['id_type_employe'] == 2 && $donneesComplement){
 			$html .="<table style='margin-top:10px; margin-left:185px;'>";
 			$html .="<tr>";
 			$html .="<td style='width:200px; vertical-align: top;'><a style='float:left; margin-right: 10px; text-decoration:underline; font-size:13px;'>Matricule:</a><div id='inform' style='float:left; font-weight:bold; font-size:16px;'>".$donneesComplement->matricule_medico."</div></td>";
@@ -392,7 +402,7 @@ class PersonnelController extends AbstractActionController {
 			$html .="</tr>";
 			$html .="</table>";
 		}else
-		if($unAgent->type_personnel == 'Médecin' && $donneesComplement){
+		if($unAgent['id_type_employe'] == 1 && $donneesComplement){
 			$html .="<table style='margin-top:10px; margin-left:185px;'>";
 			$html .="<tr>";
 			$html .="<td style='width:200px; vertical-align: top;'><a style='float:left; margin-right: 10px; text-decoration:underline; font-size:13px;'>Matricule:</a><div id='inform' style='float:left; font-weight:bold; font-size:16px;'>".$donneesComplement->matricule."</div></td>";
@@ -403,20 +413,37 @@ class PersonnelController extends AbstractActionController {
 			$html .="</table>";
 		}
 
+		
 		$html .="<div id='titre_info_deces' style='margin-top: 25px;' >Affectation</div>";
 		$html .="<div id='barre'></div>";
 		if($donneesAffectation){
+			$dateAffectDeb = $donneesAffectation->date_debut;
+			$dateAffectFin = $donneesAffectation->date_fin;
+			
 		$html .="<table style='margin-top:10px; margin-left:185px; margin-bottom: 30px;'>";
 		$html .="<tr>";
 		$html .="<td style='width:310px; vertical-align: top;'><a style='float:left; margin-right: 10px; text-decoration:underline; font-size:13px;'>Service:</a><div id='inform' style='float:left; font-weight:bold; font-size:15px;'>".$leService->nom."</div></td>";
-		$html .="<td style='width:190px; vertical-align: top;'><a style='float:left; margin-right: 10px; text-decoration:underline; font-size:13px;'>Date d&eacute;but:</a><div id='inform' style='float:left; font-weight:bold; font-size:16px;'>".$this->dateHelper->convertDate($donneesAffectation->date_debut)."</div></td>";
-		$html .="<td style='width:190px; vertical-align: top;'><a style='float:left; margin-right: 10px; text-decoration:underline; font-size:13px;'>Date fin:</a><div id='inform' style='float:left; font-weight:bold; font-size:16px;'>".$this->dateHelper->convertDate($donneesAffectation->date_fin)."</div></td>";
-		$html .="<td style='width:200px; vertical-align: top;'><a style='float:left; margin-right: 10px; text-decoration:underline; font-size:13px;'>Num&eacute;ro OS:</a><div id='inform' style='float:left; font-weight:bold; font-size:16px;'>".$donneesAffectation->numero_os."</div></td>";
+
+		if($dateAffectDeb){ 
+			$dateAffectDeb = $this->dateHelper->convertDate($donneesAffectation->date_debut); 
+			$html .="<td style='width:190px; vertical-align: top;'><a style='float:left; margin-right: 10px; text-decoration:underline; font-size:13px;'>Date d&eacute;but:</a><div id='inform' style='float:left; font-weight:bold; font-size:16px;'>".$dateAffectDeb."</div></td>";
+		} 
+		
+		if($dateAffectFin){ 
+			$dateAffectFin = $this->dateHelper->convertDate($donneesAffectation->date_fin); 
+			$html .="<td style='width:190px; vertical-align: top;'><a style='float:left; margin-right: 10px; text-decoration:underline; font-size:13px;'>Date fin:</a><div id='inform' style='float:left; font-weight:bold; font-size:16px;'>".$dateAffectFin."</div></td>";
+		} 
+
+
+		if($donneesAffectation->numero_os){
+			$html .="<td style='width:200px; vertical-align: top;'><a style='float:left; margin-right: 10px; text-decoration:underline; font-size:13px;'>Num&eacute;ro OS:</a><div id='inform' style='float:left; font-weight:bold; font-size:16px;'>".$donneesAffectation->numero_os."</div></td>";
+		}
+
 		$html .="</tr>";
 		$html .="</table>";
 		}
 		
-
+/*
 		//APPLIQUER UNIQUEMENT SUR L'INTERFACE DE VISUALISATION SUR LA LISTE DES AGENTS TRANSFERES
 		
 		if($identif == 1){
@@ -471,7 +498,7 @@ class PersonnelController extends AbstractActionController {
 					$html .="</table>";
 				}
 			}
-		}
+		}*/
 		
 	    $html .="<div style='width: 100%; height: 100px;'>
 	    		 <div style='color: white; opacity: 1; width:95px; height:40px; padding-right:15px; float:right;'>
@@ -493,41 +520,43 @@ class PersonnelController extends AbstractActionController {
 		$this->layout()->setTemplate('layout/personnel');
 		$this->getDateHelper();
 		
+		$user = $this->layout()->user;
+		$id_employe = $user['id_personne'];
+		
 		$id_personne = (int) $this->params()->fromRoute('val', 0);
 		
 		if (!$id_personne) {
-			var_dump($id_personne); exit();
 			return $this->redirect()->toRoute('personnel', array(
 					'action' => 'dossier-personnel'
 			));
 		}
-		
+
 		/****************************************************************
 		 * ============== INITIALISATION DU FORMULAIRE ==================
 		 * **************************************************************
 		 * **************************************************************/
+		
 		$this->getFormPersonnel();
 		$formPersonnel = $this->formPersonnel;
-		
-		$listeDesPays = array_merge(array(0 =>''), $this->getPatientTable()->listePays());
-		$formPersonnel->get('nationalite')->setvalueOptions($listeDesPays);
-		
-		$listeDesServices = array_merge(array(0 =>''), $this->getPatientTable()->listeServices());
-		$formPersonnel->get('service_accueil')->setValueOptions($listeDesServices);
+		$formPersonnel->get('nationalite')->setvalueOptions($this->getPatientTable()->listeDeTousLesPays());
+		$formPersonnel->get('type_personnel')->setValueOptions($this->getPatientTable()->getTypePersonnel());
+		$formPersonnel->get('service_accueil')->setValueOptions($this->getPatientTable()->listeServices());
 		
 		/****************************************************************
 		 * ============= ENREGISTREMENT DES MODIFICATIONS ===============
 		 * **************************************************************
 		 * **************************************************************/
 		$request = $this->getRequest();
+		
 		if ($request->isPost()) {
 			$personnel =  new Personnel();
 			$formPersonnel->setInputFilter($personnel->getInputFilter());
+			
 			$formPersonnel->setData($request->getPost());
-		
+			
 			if ($formPersonnel->isValid()) {
 				$personnel->exchangeArray($formPersonnel->getData());
-				
+
 				/*************************************************************
 				 ============ ENREGISTREMENT DE L'ETAT CIVIL =================
 				 *************************************************************
@@ -542,7 +571,7 @@ class PersonnelController extends AbstractActionController {
 				} else {
 					$img = false;
 				}
-				$anciennePhoto = $this->getPersonnelTable()->getPersonne($id_personne)->photo;
+				$anciennePhoto = $this->getPersonnelTable()->getPersonne($id_personne)['PHOTO'];
 				
 				if ($img != false) {
 					if($anciennePhoto){ //SI LA PHOTO EXISTE BIEN ELLE EST SUPPRIMER DU DOSSIER POUR ETRE REMPLACER PAR LA NOUVELLE
@@ -561,28 +590,28 @@ class PersonnelController extends AbstractActionController {
 				 ============ ENREGISTREMENT DES DONNEES DES COMPLEMENTS =======
 				 ***************************************************************
 				 ***************************************************************/
-				if($personnel->type_personnel == 1) {
+				if($personnel->type_personnel == 1) { 
 					$this->getMedicoTechniqueTable()->deleteMedicoTechnique($id_personne);
 					$this->getLogistiqueTable()->deleteLogistique($id_personne);
-					$this->getMedecinTable()->saveMedecin($personnel, $id_personne);
+					$this->getMedecinTable()->saveMedecin($personnel, $id_personne, $id_employe);
 				}else
 				if($personnel->type_personnel == 2){
 					$this->getMedecinTable()->deleteMedecin($id_personne);
 					$this->getLogistiqueTable()->deleteLogistique($id_personne);
-					$this->getMedicoTechniqueTable()->saveMedicoTechnique($personnel, $id_personne);
+					$this->getMedicoTechniqueTable()->saveMedicoTechnique($personnel, $id_personne, $id_employe);
 				}else
 				if($personnel->type_personnel == 3){
 					$this->getMedecinTable()->deleteMedecin($id_personne);
 					$this->getMedicoTechniqueTable()->deleteMedicoTechnique($id_personne);
-					$this->getLogistiqueTable()->saveLogistique($personnel, $id_personne);
+					$this->getLogistiqueTable()->saveLogistique($personnel, $id_personne, $id_employe);
 				}
 				
 				/***************************************************************
 				 ============ ENREGISTREMENT DES DONNEES SUR L'AFFECTATION =====
-				***************************************************************
-				***************************************************************/
+				 ***************************************************************
+				 ***************************************************************/
 				 
-				$this->getAffectationTable()->saveAffectation($personnel, $id_personne);
+				$this->getAffectationTable()->saveAffectation($personnel, $id_personne, $id_employe);
 				
 				// Redirection a la liste du personnel
 				return $this->redirect()->toRoute('personnel', array('action' =>'liste-personnel') );
@@ -595,17 +624,39 @@ class PersonnelController extends AbstractActionController {
 		 * **************************************************************/
 		try {
 			$laPersonne = $this->getPersonnelTable()->getPersonne($id_personne);
+			$donneesPersonnel = new Personnel();
+
+			if($laPersonne){
+				$donneesPersonnel ->sexe = $laPersonne['SEXE'];
+				$donneesPersonnel ->prenom = $laPersonne['PRENOM'];
+				$donneesPersonnel ->nom = $laPersonne['NOM'];
+				$donneesPersonnel ->date_naissance = $laPersonne['DATE_NAISSANCE'];
+				$donneesPersonnel ->lieu_naissance = $laPersonne['LIEU_NAISSANCE'];
+				$donneesPersonnel ->nationalite = $laPersonne['NATIONALITE_ACTUELLE'];
+				$donneesPersonnel ->situation_matrimoniale = $laPersonne['SITUATION_MATRIMONIALE'];
+				$donneesPersonnel ->adresse = $laPersonne['ADRESSE'];
+				$donneesPersonnel ->telephone = $laPersonne['TELEPHONE'];
+				$donneesPersonnel ->email = $laPersonne['EMAIL'];
+				$donneesPersonnel ->profession = $laPersonne['PROFESSION'];
+				$donneesPersonnel ->id_personne = $laPersonne['ID_PERSONNE'];
+			}
+			$type_personnel = $laPersonne['id_type_employe'];
+			$donneesComplement= "";
 			
-			if($laPersonne->type_personnel == 'Logistique'){
-				$donneesComplement = $this->getLogistiqueTable()->getLogistique($id_personne);
-			}else
-			if($laPersonne->type_personnel == 'Médico-technique'){
-				$donneesComplement = $this->getMedicoTechniqueTable()->getMedicoTechnique($id_personne);
-			}else
-			if($laPersonne->type_personnel == 'Médecin'){
+			if($type_personnel == 1){
 				$donneesComplement = $this->getMedecinTable()->getMedecin($id_personne);
 			}
+			else
+			if($type_personnel == 2){
+				$donneesComplement = $this->getMedicoTechniqueTable()->getMedicoTechnique($id_personne);
+			}
+			else
+			if($type_personnel == 3){
+				$donneesComplement = $this->getLogistiqueTable()->getLogistique($id_personne);
+			}
+			
 			$donneesAffectation = $this->getAffectationTable()->getAffectation($id_personne);
+			
 		}
 		catch (\Exception $ex) {
 			return $this->redirect()->toRoute('personnel', array(
@@ -613,28 +664,32 @@ class PersonnelController extends AbstractActionController {
 			));
 		}
 		
-		$date = array();
+		$data = array();
 		if($laPersonne){
-			$date['date_naissance'] = $this->dateHelper->convertDate($laPersonne->date_naissance);
+			if($laPersonne['DATE_NAISSANCE']){ $data['date_naissance'] = $this->dateHelper->convertDate($laPersonne['DATE_NAISSANCE']); } else { $data['date_naissance'] = ""; }
 		}
 		if($donneesAffectation){
-			$date['date_debut'] = $this->dateHelper->convertDate($donneesAffectation->date_debut);
-			$date['date_fin']   = $this->dateHelper->convertDate($donneesAffectation->date_fin);
+			if($donneesAffectation->date_debut){ $data['date_debut'] = $this->dateHelper->convertDate($donneesAffectation->date_debut); } else { $data['date_debut'] = ""; }
+			if($donneesAffectation->date_fin){ $data['date_fin'] = $this->dateHelper->convertDate($donneesAffectation->date_fin); } else { $data['date_fin'] = ""; }
 		}
 		
-		$laPhoto = $laPersonne->photo;
-		if(!$laPersonne->photo){ $laPhoto = 'identite'; }
-		
-		if($laPersonne){ $formPersonnel->bind($laPersonne); }
-		if($donneesComplement){ $formPersonnel->bind($donneesComplement);}
-		if($donneesAffectation){ $formPersonnel->bind($donneesAffectation);}
-		$formPersonnel->populateValues($date);
+ 		$laPhoto = $laPersonne['PHOTO'];
+ 		if(!$laPhoto){ $laPhoto = 'identite'; }
+ 		
+ 		if($donneesPersonnel){ $formPersonnel->bind($donneesPersonnel); }
+ 		if($donneesComplement){ $formPersonnel->bind($donneesComplement); }
+ 		if($donneesAffectation){ $formPersonnel->bind($donneesAffectation); }
+ 		
+ 		
+ 		$formPersonnel->populateValues($data);
+ 		
+ 		//var_dump($donneesPersonnel); exit();
 
 		return array (
 				'photo' => $laPhoto,
-				'type_personnel' =>$laPersonne->type_personnel,
-				'id_personne' =>$id_personne,
-				'form' =>$formPersonnel,
+				'type_personnel' => $type_personnel,
+				'id_personne' => $id_personne,
+				'form' => $formPersonnel,
 		);
 	}
 	

@@ -22,8 +22,10 @@
     	    tooltips.tooltip( 'open' );
     	  });
     }
+    
+    var  oTable;
     function initialisation(){
-        var  oTable = $('#patient').dataTable
+            oTable = $('#patient').dataTable
     	( {
     					"sPaginationType": "full_numbers",
     					"aLengthMenu": [5,7,10,15],
@@ -42,6 +44,12 @@
     					   },
 
     					"sAjaxSource": ""+tabUrl[0]+"public/archivage/liste-demande-hospi-ajax", 
+    					
+    					"fnDrawCallback": function() 
+    					{
+    						//markLine();
+    						clickRowHandler();
+    					}
     					
     	}); 
         
@@ -97,6 +105,39 @@
   
     }
     
+    
+
+    function clickRowHandler() 
+    {
+    	var id;
+    	$('#patient tbody tr').contextmenu({
+    		target: '#context-menu',
+    		onItem: function (context, e) {
+    			
+    			if($(e.target).text() == 'Détails' || $(e.target).is('#detailsCTX')){
+    				affichervue(id);
+    			} else 
+    				if($(e.target).text() == 'Hospitaliser' || $(e.target).is('#hospitaliserCTX')){
+    					hospitaliser(id);
+    				}
+    			
+    		}
+    	
+    	}).bind('mousedown', function (e) {
+    			var aData = oTable.fnGetData( this );
+    		    id = aData[7];
+    	});
+    	
+    	
+    	
+    	$("#patient tbody tr").bind('dblclick', function (event) {
+    		var aData = oTable.fnGetData( this );
+    		var id = aData[7];
+    		affichervue(id);
+    	});
+    	
+    }
+
     /************************************************************************************************************************/
     /************************************************************************************************************************/
     /************************************************************************************************************************/
@@ -120,7 +161,7 @@
      }
     
     function listepatient(){
-	    $("#terminer").click(function(){
+	    $("#terminerVisualisationHosp").click(function(){
 	    	$("#titre2").replaceWith("<div id='titre' style='font-family: police2; color: green; font-size: 20px; font-weight: bold; padding-left:20px;'><iS style='font-size: 25px;'>&curren;</iS> LISTE DES PATIENTS </div>");
   	    	$("#vue_patient").fadeOut(function(){$("#contenu").fadeIn("fast"); });
   	    });
@@ -184,4 +225,70 @@
         });
     }
 
+    /** CETTE PARTIE CONCERNE LA VUE DES DETAILS SUR LES INFOS DEMANDE D'HOSPITALISATION ET INFOS HOSPITALISATION **/
+    /** CETTE PARTIE CONCERNE LA VUE DES DETAILS SUR LES INFOS DEMANDE D'HOSPITALISATION ET INFOS HOSPITALISATION**/
+    /** CETTE PARTIE CONCERNE LA VUE DES DETAILS SUR LES INFOS DEMANDE D'HOSPITALISATION ET INFOS HOSPITALISATION**/
+    /** CETTE PARTIE CONCERNE LA VUE DES DETAILS SUR LES INFOS DEMANDE D'HOSPITALISATION ET INFOS HOSPITALISATION**/
     
+    /**INFO HOSPITALISATION**/
+    function depliantPlus21() {
+    	$('#titre_info_hospitalisation21').click(function(){
+    		$("#titre_info_hospitalisation21").replaceWith(
+    			"<span id='titre_info_hospitalisation21' style='margin-left:-5px; cursor:pointer;'>" +
+    			"<img src='"+tabUrl[0]+"public/img/light/plus.png' /> Infos sur l'hospitalisation "+
+    		    "</span>");
+    		animationPliantDepliant21();
+    		$('#info_hospitalisation21').animate({
+    			height : 'toggle'
+    		},1000);
+    		return false;
+    	});
+    }
+    
+    function animationPliantDepliant21() {
+    	$('#titre_info_hospitalisation21').click(function(){
+    		$("#titre_info_hospitalisation21").replaceWith(
+    			"<span id='titre_info_hospitalisation21' style='margin-left:-5px; cursor:pointer;'>" +
+    			"<img src='"+tabUrl[0]+"public/img/light/minus.png' /> Infos sur l'hospitalisation"+
+    		    "</span>");
+    		depliantPlus21();
+    		$('#info_hospitalisation21').animate({
+    			height : 'toggle'
+    		},1000);
+    		return false;
+    	});
+    }
+    
+    /**INFO DEMANDE**/
+    function depliantPlus41() {
+    	$('#titre_info_demande41').click(function(){
+    		$("#titre_info_demande41").replaceWith(
+    			"<span id='titre_info_demande41' style='margin-left:-5px; cursor:pointer;'>" +
+    			"<img src='"+tabUrl[0]+"public/img/light/plus.png' /> D&eacute;tails des infos sur la demande "+
+    		    "</span>");
+    		animationPliantDepliant41();
+    		$('#info_demande41').animate({
+    			height : 'toggle'
+    		},1000);
+    		return false;
+    	});
+    }
+    
+    function animationPliantDepliant41() {
+    	$('#titre_info_demande41').click(function(){
+    		$("#titre_info_demande41").replaceWith(
+    			"<span id='titre_info_demande41' style='margin-left:-5px; cursor:pointer;'>" +
+    			"<img src='"+tabUrl[0]+"public/img/light/minus.png' /> D&eacute;tails des infos sur la demande "+
+    		    "</span>");
+    		depliantPlus41();
+    		$('#info_demande41').animate({
+    			height : 'toggle'
+    		},1000);
+    		return false;
+    	});
+    }
+    
+    function initAnimationVue() {
+    	$('#info_hospitalisation21').toggle(false);
+    	$('#info_demande41').toggle(false);
+    }

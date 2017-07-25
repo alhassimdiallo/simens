@@ -49,6 +49,8 @@ use Consultation\Model\BatimentTable;
 use Consultation\Model\Batiment;
 use Consultation\Model\ResultatVisitePreanesthesiqueTable;
 use Consultation\Model\ResultatVisitePreanesthesique;
+use Consultation\Model\DemandeActeTable;
+use Consultation\Model\DemandeActe;
 
 class Module implements AutoloaderProviderInterface {
 	
@@ -310,6 +312,17 @@ class Module implements AutoloaderProviderInterface {
 							$resultSetPrototype = new ResultSet ();
 							$resultSetPrototype->setArrayObjectPrototype ( new ResultatVisitePreanesthesique() );
 							return new TableGateway ( 'resultat_vpa', $dbAdapter, null, $resultSetPrototype );
+						},
+						'Consultation\Model\DemandeActeTable' => function ($sm) {
+							$tableGateway = $sm->get ( 'DemandeActeTableGateway' );
+							$table = new DemandeActeTable($tableGateway);
+							return $table;
+						},
+						'DemandeActeTableGateway' => function ($sm) {
+							$dbAdapter = $sm->get ( 'Zend\Db\Adapter\Adapter' );
+							$resultSetPrototype = new ResultSet();
+							$resultSetPrototype->setArrayObjectPrototype ( new DemandeActe());
+							return new TableGateway ( 'demande_acte', $dbAdapter, null, $resultSetPrototype );
 						},
 				)
 		);

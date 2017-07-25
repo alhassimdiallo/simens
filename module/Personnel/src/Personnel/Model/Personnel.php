@@ -113,7 +113,7 @@ class Personnel {
 
 			$inputFilter->add (array (
 					'name' => 'date_enregistrement',
-					'required' => true,
+					'required' => false,
 					'filters' => array (
 							array (
 									'name' => 'StripTags'
@@ -140,7 +140,7 @@ class Personnel {
 			
 			$inputFilter->add (array (
 					'name' => 'nom',
-					'required' => false, //true
+					'required' => true, //true
 					'filters' => array (
 							array (
 									'name' => 'StripTags'
@@ -163,7 +163,7 @@ class Personnel {
 
 			$inputFilter->add (array (
 					'name' => 'prenom',
-					'required' => false, //True
+					'required' => true, //True
 					'filters' => array (
 							array (
 									'name' => 'StripTags'
@@ -283,7 +283,7 @@ class Personnel {
 			 
 			 $inputFilter->add (array (
 					'name' => 'nationalite',
-					'required' => true,
+					'required' => false,
 					'filters' => array (
 							array (
 									'name' => 'StripTags'
@@ -713,17 +713,8 @@ class Personnel {
 			 				array (
 			 						'name' => 'StringTrim'
 			 				)
-			 		),
-			 		'validators' => array (
-			 				array (
-			 						'name' => 'StringLength',
-			 						'options' => array (
-			 								'encoding' => 'UTF-8',
-			 								'min' => 1,
-			 								'max' => 100
-			 						)
-			 				)
 			 		)
+			 		
 			 ) );
 			 
 			 $inputFilter->add (array (

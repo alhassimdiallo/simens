@@ -89,10 +89,28 @@ $(window).load(function () {
 					    <a>
 					       <img style="color: white; opacity: 0.05;" src='<?php echo $this->basePath()."/images_icons/tick_16.png"?>' />
 					    </a>
+					    
 					</td>
 				</tr>
 				
-				<script> $("#"+"<?php echo $donnees['Id']; ?>").toggle(false); </script>
+				<script> 
+				$("#"+"<?php echo $donnees['Id']; ?>").toggle(false); 
+
+
+				$('#patient tbody tr').contextmenu({
+
+					target: '#context-menu',
+					onItem: function (context, e) {
+						
+						if($(e.target).text() == 'Consultation' || $(e.target).is('#consultationCTX')){
+							consulter('<?php echo $donnees['Id_admission'];?>');
+						}
+						
+					}
+
+				 });
+
+				</script>
 				
 				<?php endforeach; ?>
 
@@ -114,11 +132,24 @@ $(window).load(function () {
 
 </div>
 
-<!-- ul id="ctxMenu" class="contextMenuJQ" style="margin-left: -240px; margin-top: -100px;" >
-	<li class=""><a id="simens_modif" href="#simens_modif">Modifier</a></li>
-	<li class=""><a id="simens_affiche" href="#simens_affiche">Afficher les details</a></li>
-</ul-->
+
+
+<div id="context-menu">
+    <ul class="dropdown-menu" >
+         <li><a style="cursor: pointer;" ><img id="consultationCTX" style='margin-right: 10px; margin-left: -3px; width: 19px; height: 16px;' src='/simens/public/images_icons/doctor_16.png'>Consultation</a></li>
+         <li class="divider"></li>
+         <li><a id="quitterCTX"  style="cursor: pointer;">Quitter</a></li>
+    </ul>
+</div>
+
+
+
 <script type="text/javascript">
+
+            var base_url = window.location.toString();
+            var tabUrl = base_url.split("public");
+
+				
 			var asInitVals = new Array();
 			var oTable = $('#patient').dataTable
 			( {
@@ -184,4 +215,11 @@ $(window).load(function () {
 				}
 			} );
 
+
+			function consulter( id ){
+				vart = tabUrl[0]+'public/archivage/consultation?id_admission_patient='+id;
+			    $(location).attr("href",vart);
+			}
+
+			
 </script>

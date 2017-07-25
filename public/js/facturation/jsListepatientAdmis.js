@@ -3,7 +3,7 @@
     var base_url = window.location.toString();
 	var tabUrl = base_url.split("public");
 	//BOITE DE DIALOG POUR LA CONFIRMATION DE SUPPRESSION
-    function confirmation(id){
+    function confirmation(id, idPatient, idService){
 	  $( "#confirmation" ).dialog({
 	    resizable: false,
 	    height:170,
@@ -20,11 +20,14 @@
 	                type: 'POST',
 	                url: chemin ,
 	                data: $(this).serialize(),  
-	                data:'id='+cle,
+	                data:{'id':cle, 'idPatient':idPatient, 'idService':idService},
 	                success: function(data) {
 	                	     var result = jQuery.parseJSON(data);  
-	                	     $("#"+cle).fadeOut(function(){$("#"+cle).empty();});
-	                	     $("#compteur").html(result);
+	                	     if(result == 1){
+	                	    	 alert('impossible de supprimer le patient est deja consulter'); return false;
+	                	     } else {
+		                	     $("#"+cle).fadeOut(function(){$("#"+cle).empty();}); 
+	                	     }
 	                	     
 	                },
 	                error:function(e){console.log(e);alert("Une erreur interne est survenue!");},
@@ -40,8 +43,8 @@
 	  });
     }
     
-    function envoyer(id){
-   	   confirmation(id);
+    function envoyer(id, idPatient, idService){
+   	   confirmation(id, idPatient, idService);
        $("#confirmation").dialog('open');
    	}
     
@@ -65,7 +68,7 @@
             error:function(e){console.log(e);alert("Une erreur interne est survenue!");},
             dataType: "html"
         });
-	    return false;
+	    //return false;
     }
     
     function listepatient(){

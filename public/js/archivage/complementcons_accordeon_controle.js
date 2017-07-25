@@ -208,6 +208,53 @@ $(function(){
 		return false;
 	});
 	
+	//COMPTE RENDU OPERATOIRE CHIRURGICAL
+	//COMPTE RENDU OPERATOIRE CHIRURGICAL
+	$("#bouton_compte_rendu_chirurgical_valider").toggle(true);
+	$("#bouton_compte_rendu_chirurgical_modifier").toggle(false);
+	
+	$("#bouton_compte_rendu_chirurgical_valider").click(function(){
+		$("#note_compte_rendu_operatoire").attr( 'readonly', true).css({'background':'#f8f8f8'});
+		
+		$("#bouton_compte_rendu_chirurgical_valider").toggle(false);
+		$("#bouton_compte_rendu_chirurgical_modifier").toggle(true);
+		
+		return false;
+	});
+	
+	$("#bouton_compte_rendu_chirurgical_modifier").click(function(){
+		$("#note_compte_rendu_operatoire").attr( 'readonly', false).css({'background':'#fff'});
+		
+		$("#bouton_compte_rendu_chirurgical_valider").toggle(true);
+		$("#bouton_compte_rendu_chirurgical_modifier").toggle(false);
+		
+		return false;
+	});
+	
+	//COMPTE RENDU OPERATOIRE INSTRUMENTAL
+	//COMPTE RENDU OPERATOIRE INSTRUMENTAL
+	$("#bouton_compte_rendu_instrumental_valider").toggle(true);
+	$("#bouton_compte_rendu_instrumental_modifier").toggle(false);
+	
+	
+	$("#bouton_compte_rendu_instrumental_valider").click(function(){
+		$("#note_compte_rendu_operatoire_instrumental").attr( 'readonly', true).css({'background':'#f8f8f8'});
+		
+		$("#bouton_compte_rendu_instrumental_valider").toggle(false);
+		$("#bouton_compte_rendu_instrumental_modifier").toggle(true);
+		
+		return false;
+	});
+	
+	$("#bouton_compte_rendu_instrumental_modifier").click(function(){
+		$("#note_compte_rendu_operatoire_instrumental").attr( 'readonly', false).css({'background':'#fff'});
+		
+		$("#bouton_compte_rendu_instrumental_valider").toggle(true);
+		$("#bouton_compte_rendu_instrumental_modifier").toggle(false);
+		
+		return false;
+	});
+	
 });
 
 // *************Autres(Transfert/Hospitalisation/ Rendez-Vous )***************
@@ -599,9 +646,15 @@ $(function(){
 	
     /***LORS DU CLICK SUR 'Terminer' ****/
 	/***LORS DU CLICK SUR 'Terminer' ****/
-	$("#terminer2, #terminer3").click(function() { 
-		if (valid == false){return false;}
+	$("#terminer2, #terminer3").click(function() {
+		
+		if (valid == false){
+			$('#motifsAdmissionConstanteClick').trigger('click');
+			$('#constantesClick').trigger('click');
+			return false;
+		}
 	    var donnees = new Array();
+	    donnees['temoinInterfaceSoumis'] = $('#temoinInterfaceSoumis').val();
 	    donnees['id_cons']    = $("#id_cons").val();  
 	    donnees['terminer'] = 'save';
 	    
@@ -1583,6 +1636,7 @@ $(function(){
 						showMonthAfterYear: false,
 						yearRange: '1990:2025',
 						showAnim : 'bounce',
+						maxDate : 0,
 						changeMonth: true,
 						changeYear: true,
 						yearSuffix: ''}

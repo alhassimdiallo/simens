@@ -17,7 +17,24 @@ $("#anesthesieArchive").toggle(true);
 }
 ?>
 
-<ul>
+
+<style>
+#menuGaucheArchivage{ visibility: hidden }
+</style>
+
+<script>
+$(window).load(function () {
+
+	$('#waitMenuGaucheArchivage').toggle(false);
+	$('#menuGaucheArchivage').fadeIn().css({'visibility':'visible'});
+	 
+});
+</script>
+
+<div id="waitMenuGaucheArchivage" style="color: #cccccc; font-size: 13px;  margin-top: 80px;  margin-left: 60px;" > <span> Chargement ... </span> </div>
+
+
+<ul id="menuGaucheArchivage">
 	
 	<!-- MENU ***MEDECIN DE SERVICE*** -->
 	<!-- MENU ***MEDECIN DE SERVICE*** -->
@@ -151,6 +168,7 @@ $("#anesthesieArchive").toggle(true);
 	</li>
 
 </ul>
+
 
 <script>
 

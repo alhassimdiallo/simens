@@ -481,7 +481,7 @@ class SoinhospitalisationTable {
 		$select->join(array('l'=>'lit'), 'l.id_materiel = hl.id_materiel', array('intitule'));
 		$select->join(array('s'=>'salle'), 's.id_salle = l.id_salle', array('numero_salle'));
 		
-		$select->where(array('hs.date' => $date, 'applique' =>0));
+		$select->where(array('hs.date' => $date, 'applique' =>0, 'c.ARCHIVAGE' => 0 ));
 		$select->order(array('heure' =>'ASC'));
 		
 		$stat = $sql->prepareStatementForSqlObject($select);
@@ -513,7 +513,7 @@ class SoinhospitalisationTable {
 		$select->join(array('l'=>'lit'), 'l.id_materiel = hl.id_materiel', array('intitule'));
 		$select->join(array('s'=>'salle'), 's.id_salle = l.id_salle', array('numero_salle'));
 	
-		$select->where(array('hs.date' => $date, 'applique' =>1));
+		$select->where(array('hs.date' => $date, 'applique' =>1, 'c.ARCHIVAGE' => 0));
 		$select->order(array('heure' =>'ASC'));
 	
 		$stat = $sql->prepareStatementForSqlObject($select);

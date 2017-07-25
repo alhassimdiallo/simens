@@ -23,8 +23,9 @@
     	  });
     }
 
+    var  oTable;
     function initialisation(){
-        var  oTable = $('#patient').dataTable
+           oTable = $('#patient').dataTable
     	( {
     					"sPaginationType": "full_numbers",
     					"aLengthMenu": [5,7,10,15],
@@ -43,6 +44,12 @@
     					   },
 
     					"sAjaxSource": ""+tabUrl[0]+"public/archivage/liste-patient-suivi-ajax", 
+    					
+    					"fnDrawCallback": function() 
+    					{
+    						//markLine();
+    						clickRowHandler();
+    					}
     					
     	}); 
         
@@ -98,31 +105,67 @@
   
     }
     
+    
+
+    function clickRowHandler() 
+    {
+    	var id;
+    	$('#patient tbody tr').contextmenu({
+    		target: '#context-menu',
+    		onItem: function (context, e) {
+    			
+    			if($(e.target).text() == 'Détails' || $(e.target).is('#detailsCTX')){
+    				affichervue(id);
+    			} else 
+    				if($(e.target).text() == 'Appliquer un soin' || $(e.target).is('#appliquerCTX')){
+    					administrerSoin(id);
+    				}
+    			
+    		}
+    	
+    	}).bind('mousedown', function (e) {
+    			var aData = oTable.fnGetData( this );
+    		    id = aData[7];
+    	});
+    	
+    	
+    	
+    	$("#patient tbody tr").bind('dblclick', function (event) {
+    		var aData = oTable.fnGetData( this );
+    		var id = aData[7];
+    		affichervue(id);
+    	});
+    	
+    }
+
+
     /************************************************************************************************************************/
     /************************************************************************************************************************/
     /************************************************************************************************************************/
     function affichervue(id_demande_hospi){ 
     	var id_cons = $("#"+id_demande_hospi).val();
     	var id_personne = $("#"+id_demande_hospi+"idPers").val();
-    	var chemin = tabUrl[0]+'public/archivage/info-patient';
+    	var chemin = tabUrl[0]+'public/archivage/information-patient';
         $.ajax({
             type: 'POST',
             url: chemin ,
             data:{'id_personne':id_personne, 'id_cons':id_cons, 'encours':111, 'id_demande_hospi':id_demande_hospi},
             success: function(data) {
             	$("#titre").replaceWith("<div id='titre2' style='font-family: police2; color: green; font-size: 20px; font-weight: bold; padding-left:20px;'><iS style='font-size: 25px;'>&curren;</iS> INFORMATIONS </div>");
-            	var result = jQuery.parseJSON(data); 
-            	$("#contenu").fadeOut(function(){$("#vue_patient").html(result).fadeIn("fast"); }); 
+            	var result = jQuery.parseJSON(data);
+            	$("#contenu").fadeOut(function(){
+            		$("#vue_patient").html(result).fadeIn("fast"); 
+            	}); 
             	     
             },
             error:function(e){console.log(e);alert("Une erreur interne est survenue!");},
             dataType: "html"
         });
-     }
+    }
+    /************************************************************************************************************************/
+    /************************************************************************************************************************/
+    /************************************************************************************************************************/
     
-    /************************************************************************************************************************/
-    /************************************************************************************************************************/
-    /************************************************************************************************************************/
     function vueSoinAppliquer(x, y){
     	$( "#informations" ).dialog({
     		resizable: false,
@@ -178,7 +221,7 @@
     /*************************************************************************************************************************/
     /*************************************************************************************************************************/
     function listeDesSoins() {
-    	$('#listeSoin').dataTable
+    var oTable = $('#listeSoin').dataTable
      	( {
      					"sPaginationType": "full_numbers",
      					"aLengthMenu": [3,5,7],
@@ -194,16 +237,17 @@
      							"sLast":     ">|"
      							}
      					   },
-     					  "bDestroy": true,
      	});
-    	
     }
     
     function listepatient(){
 	    
-    	$("#terminer").click(function(){
+    	$("#terminerVisualisationHosp").click(function(){
     	$("#titre2").replaceWith("<div id='titre' style='font-family: police2; color: green; font-size: 20px; font-weight: bold; padding-left:20px;'><iS style='font-size: 25px;'>&curren;</iS> LISTE DES PATIENTS </div>");
-	    	$("#vue_patient").fadeOut(function(){$("#contenu").fadeIn("fast"); });
+	    	$("#vue_patient").fadeOut(function(){
+	    		$("#contenu").fadeIn("fast");
+	    		$("#vue_patient").html('');
+	    	});
 	    });
     	
 	    $("#terminerdetailhospi").click(function(){
@@ -244,28 +288,57 @@
     /****** GESTION DES DEPLIANTS DE L'AFFICHAGE DES INFORMATIONS APRES LIBERATION DU PATIENT******/
     
     /**INFO HOSPITALISATION**/
-    function depliantPlus2() {
-    	$('#titre_info_hospitalisation').click(function(){
-    		$("#titre_info_hospitalisation").replaceWith(
-    			"<span id='titre_info_hospitalisation' style='margin-left:-10px; cursor:pointer;'>" +
+    function depliantPlus21() {
+    	$('#titre_info_hospitalisation21').click(function(){
+    		$("#titre_info_hospitalisation21").replaceWith(
+    			"<span id='titre_info_hospitalisation21' style='margin-left:-5px; cursor:pointer;'>" +
     			"<img src='"+tabUrl[0]+"public/img/light/plus.png' /> Infos sur l'hospitalisation "+
     		    "</span>");
-    		animationPliantDepliant2();
-    		$('#info_hospitalisation').animate({
+    		animationPliantDepliant21();
+    		$('#info_hospitalisation21').animate({
     			height : 'toggle'
     		},1000);
     		return false;
     	});
     }
     
-    function animationPliantDepliant2() {
-    	$('#titre_info_hospitalisation').click(function(){
-    		$("#titre_info_hospitalisation").replaceWith(
-    			"<span id='titre_info_hospitalisation' style='margin-left:-10px; cursor:pointer;'>" +
+    function animationPliantDepliant21() {
+    	$('#titre_info_hospitalisation21').click(function(){
+    		$("#titre_info_hospitalisation21").replaceWith(
+    			"<span id='titre_info_hospitalisation21' style='margin-left:-5px; cursor:pointer;'>" +
     			"<img src='"+tabUrl[0]+"public/img/light/minus.png' /> Infos sur l'hospitalisation"+
     		    "</span>");
-    		depliantPlus2();
-    		$('#info_hospitalisation').animate({
+    		depliantPlus21();
+    		$('#info_hospitalisation21').animate({
+    			height : 'toggle'
+    		},1000);
+    		return false;
+    	});
+    }
+    
+    /**INFO DEMANDE**/
+    function depliantPlus41() {
+    	$('#titre_info_demande41').click(function(){
+    		$("#titre_info_demande41").replaceWith(
+    			"<span id='titre_info_demande41' style='margin-left:-5px; cursor:pointer;'>" +
+    			"<img src='"+tabUrl[0]+"public/img/light/plus.png' /> D&eacute;tails des infos sur la demande "+
+    		    "</span>");
+    		animationPliantDepliant41();
+    		$('#info_demande41').animate({
+    			height : 'toggle'
+    		},1000);
+    		return false;
+    	});
+    }
+    
+    function animationPliantDepliant41() {
+    	$('#titre_info_demande41').click(function(){
+    		$("#titre_info_demande41").replaceWith(
+    			"<span id='titre_info_demande41' style='margin-left:-5px; cursor:pointer;'>" +
+    			"<img src='"+tabUrl[0]+"public/img/light/minus.png' /> D&eacute;tails des infos sur la demande "+
+    		    "</span>");
+    		depliantPlus41();
+    		$('#info_demande41').animate({
     			height : 'toggle'
     		},1000);
     		return false;
@@ -276,7 +349,7 @@
     function depliantPlus3() {
     	$('#titre_info_liste').click(function(){
     		$("#titre_info_liste").replaceWith(
-    			"<span id='titre_info_liste' style='margin-left:-10px; cursor:pointer;'>" +
+    			"<span id='titre_info_liste' style='margin-left:-5px; cursor:pointer;'>" +
     			"<img src='"+tabUrl[0]+"public/img/light/minus.png' /> Liste des soins "+
     		    "</span>");
     		animationPliantDepliant3();
@@ -290,7 +363,7 @@
     function animationPliantDepliant3() {
     	$('#titre_info_liste').click(function(){
     		$("#titre_info_liste").replaceWith(
-    			"<span id='titre_info_liste' style='margin-left:-10px; cursor:pointer;'>" +
+    			"<span id='titre_info_liste' style='margin-left:-5px; cursor:pointer;'>" +
     			"<img src='"+tabUrl[0]+"public/img/light/plus.png' /> Liste des soins "+
     		    "</span>");
     		depliantPlus3();
@@ -301,38 +374,9 @@
     	});
     }
     
-    /**INFO DEMANDE**/
-    function depliantPlus4() {
-    	$('#titre_info_demande').click(function(){
-    		$("#titre_info_demande").replaceWith(
-    			"<span id='titre_info_demande' style='margin-left:-10px; cursor:pointer;'>" +
-    			"<img src='"+tabUrl[0]+"public/img/light/plus.png' /> D&eacute;tails des infos sur la demande "+
-    		    "</span>");
-    		animationPliantDepliant4();
-    		$('#info_demande').animate({
-    			height : 'toggle'
-    		},1000);
-    		return false;
-    	});
-    }
-    
-    function animationPliantDepliant4() {
-    	$('#titre_info_demande').click(function(){
-    		$("#titre_info_demande").replaceWith(
-    			"<span id='titre_info_demande' style='margin-left:-10px; cursor:pointer;'>" +
-    			"<img src='"+tabUrl[0]+"public/img/light/minus.png' /> D&eacute;tails des infos sur la demande "+
-    		    "</span>");
-    		depliantPlus4();
-    		$('#info_demande').animate({
-    			height : 'toggle'
-    		},1000);
-    		return false;
-    	});
-    }
-    
-    function initAnimation() {
-    	$('#info_hospitalisation').toggle(false);
-    	$('#info_demande').toggle(false);
+    function initAnimationVue() {
+    	$('#info_hospitalisation21').toggle(false);
+    	$('#info_demande41').toggle(false);
     }
     
     /************************************************************************************************************************/
@@ -390,7 +434,7 @@
     }
    
     function appliquerSoin(id_sh, id_hosp, id_heure) {
-    	ApplicationSoin(id_sh, id_hosp, id_heure);
+    	ApplicationSoin(id_sh, id_hosp, id_heure); 
 		
 		var chemin = tabUrl[0]+'public/archivage/heure-suivante';
     	$.ajax({

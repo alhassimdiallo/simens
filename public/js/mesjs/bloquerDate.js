@@ -57,9 +57,9 @@ function bloquerDate(){
         beforeShowDay: disableSpecificDates,
         dateFormat: 'dd/mm/yy',
         showAnim : 'bounce',
-        minDate : '0',
+        minDate : '1',
         maxDate : '90',
-        yearRange : '2013:2015',
+        yearRange : '2013:2050',
         
     });
 

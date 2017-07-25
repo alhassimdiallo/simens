@@ -17,12 +17,12 @@ $('#styleHospitalisationArchive').css({'font-weight':'bold','color':'white','fon
 
 $(window).load(function () {
 	$('#wait').toggle(false);
-	$('#contenu').fadeIn().css({'visibility':'visible'});
+	$('#toutLeContenu').fadeIn().css({'visibility':'visible'});
 });
 </script>
 
 <style>
-#contenu{ visibility: hidden };
+#toutLeContenu{ visibility: hidden; };
 </style>
 
 <div id="titre" style='font-family: police2; text-decoration: none; color: green; font-size: 20px; font-weight: bold; padding-left:20px;'>
@@ -30,6 +30,8 @@ $(window).load(function () {
 	LISTE DES PATIENTS
 </div>
 <div id="wait" style="color: gray; font-size: 20px; text-align: center; margin-top: 80px;" > <span> Chargement ... </span> </div>
+
+<div id="toutLeContenu"> 
 <div id="contenu"> 
 
             <table id="patient" class="table table-bordered tab_list_mini" >
@@ -90,7 +92,7 @@ $(window).load(function () {
     ?>
     <?php echo $this->formhidden($form->get('code_demande'));?>
 
-    <table id="form_patient" style="margin-left: 195px; width: 80%;">  
+    <table id="form_patient" style="margin-left: 18%; width: 80%;">  
       
       <tr class="comment-form-patient" style="width: 80%;">
          <td style="width: 33%;"> <?php echo $this->formRow($form->get('division'));?></td> 
@@ -101,8 +103,8 @@ $(window).load(function () {
       <tr class="comment-form-patient" style="width: 80%; height: 70px; vertical-align: bottom;">
          <td style="width: 33%;"></td>
          <td style="width: 33%; padding-left: 30px;"> 
-            <?php echo $this->formSubmit($form->get('valider')); ?>
             <?php echo $this->formSubmit($form->get('annuler')); ?>
+            <?php echo $this->formSubmit($form->get('valider')); ?>
          </td> 
          <td style="width: 33%;"></td>
       </tr>
@@ -112,7 +114,18 @@ $(window).load(function () {
     <?php echo $this->form()->closeTag();?>
     
 </div>
+</div>
 
+
+<div id="context-menu">
+    <ul class="dropdown-menu" >
+         <li><a style="cursor: pointer;" ><img id="detailsCTX" style='margin-right: 10px; width: 19px; height: 16px;' src='/simens/public/images_icons/voir2.png'>D&eacute;tails</a></li>
+         <li class="divider2"></li>
+         <li><a style="cursor: pointer;"><img  id="hospitaliserCTX" style='margin-right: 10px; margin-left: 3px; width: 16px; height: 16px;' src='/simens/public/images_icons/details.png'>Hospitaliser</a></li>
+         <li class="divider"></li>
+         <li><a id="quitterCTX"  style="cursor: pointer;">Quitter</a></li>
+    </ul>
+</div>
 
 <script type="text/javascript">
 

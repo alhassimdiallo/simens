@@ -203,12 +203,241 @@ class ConsultationForm extends Form {
 						'id'  => 'examen_donnee5'
 				)
 		) );
+		
 		/**
 		 * ********** EXAMENS COMPLEMENTAIRES (EXAMENS ET ANALYSE) *************
 		 */
 		/**
 		 * ********** EXAMENS COMPLEMENTAIRES (EXAMENS ET ANALYSE) *************
 		 */
+		
+		/* C)))*********ACTES******** */
+		$this->add ( array (
+				'name' => 'doppler_couleur_pulse',
+				'type' => 'Text',
+				'options' => array (
+						'label' => iconv ( 'ISO-8859-1', 'UTF-8', 'Doppler couleur, pulsé, continu, tissulaire:')
+				),
+				'attributes' => array (
+						'readonly' => 'readonly',
+						'id'  => 'doppler_couleur_pulse'
+				)
+		) );
+		
+		$this->add ( array (
+				'name' => 'echographie_de_stress',
+				'type' => 'Text',
+				'options' => array (
+						'label' => iconv ( 'ISO-8859-1', 'UTF-8', 'Echographie de stress:')
+				),
+				'attributes' => array (
+						'readonly' => 'readonly',
+						'id'  => 'echographie_de_stress'
+				)
+		) );
+		
+		$this->add ( array (
+				'name' => 'holter_ecg',
+				'type' => 'Text',
+				'options' => array (
+						'label' => iconv ( 'ISO-8859-1', 'UTF-8', 'Holter ECG:')
+				),
+				'attributes' => array (
+						'readonly' => 'readonly',
+						'id'  => 'holter_ecg'
+				)
+		) );
+		
+		$this->add ( array (
+				'name' => 'holter_tensionnel',
+				'type' => 'Text',
+				'options' => array (
+						'label' => iconv ( 'ISO-8859-1', 'UTF-8', 'Holter tensionnel:')
+				),
+				'attributes' => array (
+						'readonly' => 'readonly',
+						'id'  => 'holter_tensionnel'
+				)
+		) );
+		$this->add ( array (
+				'name' => 'fibroscopie_bronchique',
+				'type' => 'Text',
+				'options' => array (
+						'label' => iconv ( 'ISO-8859-1', 'UTF-8', 'Fibroscopie bronchique:')
+				),
+				'attributes' => array (
+						'readonly' => 'readonly',
+						'id'  => 'fibroscopie_bronchique'
+				)
+		) );
+		
+		$this->add ( array (
+				'name' => 'fibroscopie_gastrique',
+				'type' => 'Text',
+				'options' => array (
+						'label' => iconv ( 'ISO-8859-1', 'UTF-8', 'Fibroscopie gastrique:')
+				),
+				'attributes' => array (
+						'readonly' => 'readonly',
+						'id'  => 'fibroscopie_gastrique'
+				)
+		) );
+		
+		$this->add ( array (
+				'name' => 'colposcopie',
+				'type' => 'Text',
+				'options' => array (
+						'label' => iconv ( 'ISO-8859-1', 'UTF-8', 'Colposcopie:')
+				),
+				'attributes' => array (
+						'readonly' => 'readonly',
+						'id'  => 'colposcopie'
+				)
+		) );
+		
+		$this->add ( array (
+				'name' => 'echographie_gynecologique',
+				'type' => 'Text',
+				'options' => array (
+						'label' => iconv ( 'ISO-8859-1', 'UTF-8', 'Echographie gynécologique:')
+				),
+				'attributes' => array (
+						'readonly' => 'readonly',
+						'id'  => 'echographie_gynecologique'
+				)
+		) );
+		
+		$this->add ( array (
+				'name' => 'echographie_obstetrique',
+				'type' => 'Text',
+				'options' => array (
+						'label' => iconv ( 'ISO-8859-1', 'UTF-8', 'Echographie obstétrique:')
+				),
+				'attributes' => array (
+						'readonly' => 'readonly',
+						'id'  => 'echographie_obstetrique'
+				)
+		) );
+		
+		$this->add ( array (
+				'name' => 'cpn',
+				'type' => 'Text',
+				'options' => array (
+						'label' => iconv ( 'ISO-8859-1', 'UTF-8', 'CPN:')
+				),
+				'attributes' => array (
+						'readonly' => 'readonly',
+						'id'  => 'cpn'
+				)
+		) );
+		
+		$this->add ( array (
+				'name' => 'consultation_senologie',
+				'type' => 'Text',
+				'options' => array (
+						'label' => iconv ( 'ISO-8859-1', 'UTF-8', 'Consultation sénologie:')
+				),
+				'attributes' => array (
+						'readonly' => 'readonly',
+						'id'  => 'consultation_senologie'
+				)
+		) );
+		
+		$this->add ( array (
+				'name' => 'plannification_familiale',
+				'type' => 'Text',
+				'options' => array (
+						'label' => iconv ( 'ISO-8859-1', 'UTF-8', 'Plannification familiale:')
+				),
+				'attributes' => array (
+						'readonly' => 'readonly',
+						'id'  => 'plannification_familiale'
+				)
+		) );
+		
+		$this->add ( array (
+				'name' => 'ecg',
+				'type' => 'Text',
+				'options' => array (
+						'label' => iconv ( 'ISO-8859-1', 'UTF-8', 'ECG:')
+				),
+				'attributes' => array (
+						'readonly' => 'readonly',
+						'id'  => 'ecg'
+				)
+		) );
+		
+		$this->add ( array (
+				'name' => 'eeg',
+				'type' => 'Text',
+				'options' => array (
+						'label' => iconv ( 'ISO-8859-1', 'UTF-8', 'EEG:')
+				),
+				'attributes' => array (
+						'readonly' => 'readonly',
+						'id'  => 'eeg'
+				)
+		) );
+		
+		$this->add ( array (
+				'name' => 'efr',
+				'type' => 'Text',
+				'options' => array (
+						'label' => iconv ( 'ISO-8859-1', 'UTF-8', 'EFR:')
+				),
+				'attributes' => array (
+						'readonly' => 'readonly',
+						'id'  => 'efr'
+				)
+		) );
+		
+		$this->add ( array (
+				'name' => 'emg',
+				'type' => 'Text',
+				'options' => array (
+						'label' => iconv ( 'ISO-8859-1', 'UTF-8', 'EMG:')
+				),
+				'attributes' => array (
+						'readonly' => 'readonly',
+						'id'  => 'emg'
+				)
+		) );
+		
+		$this->add ( array (
+				'name' => 'circoncision',
+				'type' => 'Text',
+				'options' => array (
+						'label' => iconv ( 'ISO-8859-1', 'UTF-8', 'Circoncision:')
+				),
+				'attributes' => array (
+						'readonly' => 'readonly',
+						'id'  => 'circoncision'
+				)
+		) );
+		
+		$this->add ( array (
+				'name' => 'vaccination',
+				'type' => 'Text',
+				'options' => array (
+						'label' => iconv ( 'ISO-8859-1', 'UTF-8', 'Vaccination:')
+				),
+				'attributes' => array (
+						'readonly' => 'readonly',
+						'id'  => 'vaccination'
+				)
+		) );
+		
+		$this->add ( array (
+				'name' => 'soins_infirmiers',
+				'type' => 'Text',
+				'options' => array (
+						'label' => iconv ( 'ISO-8859-1', 'UTF-8', 'Soins infirmiers:')
+				),
+				'attributes' => array (
+						'readonly' => 'readonly',
+						'id'  => 'soins_infirmiers'
+				)
+		) );
 
 		/* A)))*********ANALYSE BIOLOGIQUE******** */
 		$this->add ( array (
@@ -501,11 +730,29 @@ class ConsultationForm extends Form {
 				'name' => 'pressionarterielle',
 				'type' => 'Text',
 				'options' => array (
-						'label' => iconv('ISO-8859-1', 'UTF-8', 'Pression artérielle (mmHg)')
+						//'label' => iconv('ISO-8859-1', 'UTF-8', 'Pression artérielle (mmHg)')
 				),
 				'attributes' => array (
 						'class' => 'tension_only_numeric',
 						'id' => 'pressionarterielle'
+				)
+		) );
+		
+		$this->add ( array (
+				'name' => 'tensionmaximale',
+				'type' => 'Text',
+				'attributes' => array (
+						'class' => 'tension_only_numeric',
+						'id' => 'tensionmaximale'
+				)
+		) );
+		
+		$this->add ( array (
+				'name' => 'tensionminimale',
+				'type' => 'Text',
+				'attributes' => array (
+						'class' => 'tension_only_numeric',
+						'id' => 'tensionminimale'
 				)
 		) );
 		
@@ -1116,7 +1363,16 @@ class ConsultationForm extends Form {
 				'name' => 'autresAM',
 				'type' => 'text',
 				'attributes' => array (
-						'id' => 'autresAM'
+						'id' => 'autresAM',
+						'maxlength' => 13,
+				)
+		) );
+		/*nbCheckbox*/
+		$this->add ( array (
+				'name' => 'nbCheckboxAM',
+				'type' => 'hidden',
+				'attributes' => array (
+						'id' => 'nbCheckboxAM',
 				)
 		) );
 		/*GYNECO-OBSTETRIQUE*/

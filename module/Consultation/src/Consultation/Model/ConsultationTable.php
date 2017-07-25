@@ -49,13 +49,70 @@ class ConsultationTable {
 		return $result;
 	}
 	
+	public function getConsultationDuJour(){
+		$today = (new \DateTime())->format('Y-m-d');
+		$adapter = $this->tableGateway->getAdapter ();
+		$sql = new Sql ( $adapter );
+		$select = $sql->select ();
+		$select->from( array( 'c' => 'consultation' ));
+		$select->where(array('DATEONLY' => $today));
+		return $sql->prepareStatementForSqlObject ( $select )->execute()->current();
+	}
+	/** --------------=============================------------------------------ */
+	public function getConsultationPatientSaufActu($id_pat, $id_cons){
+		$adapter = $this->tableGateway->getAdapter ();
+		$sql = new Sql ( $adapter );
+		$select = $sql->select ();
+		$select->columns( array( '*' ));
+		$select->from( array( 'c' => 'consultation' ));
+		$select->join( array('e1' => 'employe'), 'e1.id_personne = c.ID_MEDECIN' , array('*'));
+		$select->join( array('p1' => 'personne'), 'e1.id_personne = p1.ID_PERSONNE' , array('*'));
+		$select->join( array('s' => 'service'), 's.ID_SERVICE = c.ID_SERVICE' , array('nomService' => 'NOM', 'domaineService' => 'DOMAINE'));
+	
+		//La consultation du jour -- pour éviter d'afficher la consultation du jour
+		$id_cons_du_jour = $this->getConsultationDuJour()['ID_CONS'];
+		
+		//On affiche toutes les consultations sauf celle ouverte
+		$where = new Where();
+		$where->equalTo('c.ID_PATIENT', $id_pat);
+		$where->notEqualTo('c.ID_CONS', $id_cons);
+		$where->notEqualTo('c.ID_CONS', $id_cons_du_jour);
+		$select->where($where);
+		$select->order('DATEONLY DESC');
+	
+		$stat = $sql->prepareStatementForSqlObject ( $select );
+		$result = $stat->execute ();
+	
+		return $result;
+	}
+	
+	public function getInfosSurveillant($id_personne){
+		$adapter = $this->tableGateway->getAdapter ();
+		$sql = new Sql ( $adapter );
+		$select = $sql->select ();
+		$select->columns( array( '*' ));
+		$select->from( array('e1' => 'employe'));
+		$select->join( array('p1' => 'personne'), 'e1.id_personne = p1.ID_PERSONNE' , array('*'));
+	
+		$where = new Where();
+		$where->equalTo('e1.id_personne', $id_personne);
+		$select->where($where);
+	
+		$stat = $sql->prepareStatementForSqlObject ( $select );
+		$result = $stat->execute ();
+	
+		return $result->current();
+	}
+	/** --------------=============================-------------------------------*/
+	
 	public function updateConsultation($values)
 	{
+		
 		$donnees = array(
 				'POIDS' => $values->get ( "poids" )->getValue (), 
 				'TAILLE' => $values->get ( "taille" )->getValue (), 
 				'TEMPERATURE' => $values->get ( "temperature" )->getValue (), 
-				'PRESSION_ARTERIELLE' => $values->get ( "pressionarterielle" )->getValue (), 
+				'PRESSION_ARTERIELLE' => $values->get ( "tensionmaximale" )->getValue ().'/'.$values->get ( "tensionminimale" )->getValue (),
 				'POULS' => $values->get ( "pouls" )->getValue (), 
 				'FREQUENCE_RESPIRATOIRE' => $values->get ( "frequence_respiratoire" )->getValue (), 
 				'GLYCEMIE_CAPILLAIRE' => $values->get ( "glycemie_capillaire" )->getValue (), 
@@ -235,7 +292,6 @@ class ConsultationTable {
 		$stmt = $sql->prepareStatementForSqlObject($select);
 		$result = $stmt->execute();
 		return $result;
-	
 	}
 	
 	//liste des patients Ã  consulter par le medecin dans le service de ce dernier
@@ -393,17 +449,29 @@ class ConsultationTable {
 		));
 		$select->join(array('c' => 'consultation'), 'p.ID_PERSONNE = c.ID_PATIENT', array('Id_cons' => 'ID_CONS', 'Dateonly' => 'DATEONLY', 'Consprise' => 'CONSPRISE', 'date' => 'DATE'));
 		$select->join(array('cons_eff' => 'consultation_effective'), 'cons_eff.ID_CONS = c.ID_CONS' , array('*'));
+		$select->join( array('e1' => 'employe'), 'e1.id_personne = c.ID_MEDECIN' , array('*'));
 		$select->join(array('s' => 'service'), 'c.ID_SERVICE = s.ID_SERVICE', array('Nomservice' => 'NOM'));
 		$where = new Where();
 		$where->equalTo('s.ID_SERVICE', $idService);
 		$where->notEqualTo('DATEONLY', $date);
 		$select->where($where);
 		$select->order('c.DATE DESC');
-		$select->group('c.ID_PATIENT');
+		//$select->group('c.ID_PATIENT');
 	
 		$stmt = $sql->prepareStatementForSqlObject($select);
 		$result = $stmt->execute();
-		return $result;
+		
+		//Recuperation des donnees 
+		$tableauDonnees = array();
+		$tableauCles = array();
+		foreach ($result as $resultat){
+ 			if(!in_array($resultat['Id'], $tableauCles)){
+ 				$tableauCles[] = $resultat['Id']; 
+ 				$tableauDonnees[] = $resultat;
+ 			}
+		}
+		
+		return $tableauDonnees;
 	
 	}
 	
@@ -491,7 +559,7 @@ class ConsultationTable {
  		$i=1;
  		foreach ($liste as $list){
  			if($i == $idLigne){
- 				unlink('C:\wamp\www\simens\public\js\plugins\jPlayer-2.9.2\examples\\'.$list['nom']);
+ 				unlink('C:\wamp\www\simens\public\audios\\'.$list['nom']);
  	
  				$db = $this->tableGateway->getAdapter();
  				$sql = new Sql($db);
@@ -507,6 +575,62 @@ class ConsultationTable {
  			$i++;
  		}
  		return false;
+ 	}
+ 	
+ 	
+ 	//GESTION DES FICHIERS VIDEOS
+ 	//GESTION DES FICHIERS VIDEOS
+ 	//GESTION DES FICHIERS VIDEOS
+ 	public function insererVideo($titre , $nom, $format, $id_cons){
+ 		$db = $this->tableGateway->getAdapter();
+ 		$sql = new Sql($db);
+ 		$sQuery = $sql->insert()
+ 		->into('fichier_video')
+ 		->columns(array('titre', 'nom', 'format', 'id_cons'))
+ 		->values(array('titre' => $titre , 'nom' => $nom, 'format' => $format, 'id_cons'=>$id_cons));
+ 	
+ 		$stat = $sql->prepareStatementForSqlObject($sQuery);
+ 		return $stat->execute();
+ 	}
+ 	
+ 	public function getVideos($id_cons){
+ 		$db = $this->tableGateway->getAdapter();
+ 		$sql = new Sql($db);
+ 		$sQuery = $sql->select()
+ 		->from(array('f' => 'fichier_video'))->columns(array('*'))
+ 		->where(array('id_cons' => $id_cons))
+ 		->order('id DESC');
+ 	
+ 		$stat = $sql->prepareStatementForSqlObject($sQuery);
+ 		$result = $stat->execute();
+ 		return $result;
+ 	}
+ 	
+ 	public function getVideoWithId($id){
+ 		$db = $this->tableGateway->getAdapter();
+ 		$sql = new Sql($db);
+ 		$sQuery = $sql->select()
+ 		->from(array('f' => 'fichier_video'))->columns(array('*'))
+ 		->where(array('id' => $id));
+ 	
+ 		$stat = $sql->prepareStatementForSqlObject($sQuery);
+ 		$result = $stat->execute()->current();
+ 		return $result;
+ 	}
+ 	
+ 	public function supprimerVideo($id){
+
+ 		$laVideo = $this->getVideoWithId($id);
+ 		$result = unlink('C:\wamp\www\simens\public\videos\\'.$laVideo['nom']);
+ 		
+ 		$db = $this->tableGateway->getAdapter();
+ 		$sql = new Sql($db);
+ 		$sQuery = $sql->delete()->from('fichier_video')->where(array('id' => $id));
+
+ 		$stat = $sql->prepareStatementForSqlObject($sQuery);
+ 		$stat->execute();
+ 		
+ 		return $result;
  	}
  	
  	//COMPTE RENDU OPERATOIRE
@@ -648,4 +772,172 @@ class ConsultationTable {
  		$requete = $sql->prepareStatementForSqlObject($sQuery);
  		return $requete->execute()->current();
  	}
+ 	
+ 	public function getTarifDeLacte($idActe){
+ 		$adapter = $this->tableGateway->getAdapter();
+ 		$sql = new Sql($adapter);
+ 		$select = $sql->select();
+ 		$select->from(array('s'=>'actes'));
+ 		$select->columns(array('*'));
+ 		$select->where(array('id' => $idActe));
+ 		$stat = $sql->prepareStatementForSqlObject($select);
+ 		$result = $stat->execute()->current();
+ 		return $result;
+ 	}
+ 	
+ 	//Recupere les antecedents médicaux
+ 	//Recupere les antecedents médicaux
+ 	public function getAntecedentMedicauxParLibelle($libelle){
+ 		$adapter = $this->tableGateway->getAdapter();
+ 		$sql = new Sql($adapter);
+ 		$select = $sql->select();
+ 		$select->from(array('am'=>'ant_medicaux'));
+ 		$select->columns(array('*'));
+ 		$select->where(array('libelle' => $libelle));
+ 		return $sql->prepareStatementForSqlObject($select)->execute()->current();
+ 	}
+ 	
+ 	//Ajout des antécédents médicaux
+ 	//Ajout des antécédents médicaux
+ 	public function addAntecedentMedicaux($data){
+ 		$date = (new \DateTime())->format('Y-m-d H:i:s');
+ 		$db = $this->tableGateway->getAdapter();
+ 		$sql = new Sql($db);
+ 		
+ 		for($i = 0; $i<$data->nbCheckboxAM; $i++){
+ 			$champ = "champTitreLabel_".$i;
+ 			$libelle =  $data->$champ;
+ 			
+ 			if(!$this->getAntecedentMedicauxParLibelle($libelle)){
+ 				$sQuery = $sql->insert()
+ 				->into('ant_medicaux')
+ 				->values(array('libelle' => $libelle, 'date_enregistrement' => $date, 'id_medecin' => $data->med_id_personne));
+ 				$sql->prepareStatementForSqlObject($sQuery)->execute();
+ 			}
+ 			
+ 		}
+ 		
+ 	}
+ 	
+ 	
+ 	//Recupere l'antecedent médical de la personne
+ 	//Recupere l'antecedent médical de la personne
+ 	public function getAntecedentMedicauxPersonneParId($id, $id_patient){
+ 		$adapter = $this->tableGateway->getAdapter();
+ 		$sql = new Sql($adapter);
+ 		$select = $sql->select();
+ 		$select->from(array('amp'=>'ant_medicaux_personne'));
+ 		$select->columns(array('*'));
+ 		$select->where(array('id_ant_medicaux' => $id, 'id_patient' => $id_patient));
+ 		return $sql->prepareStatementForSqlObject($select)->execute()->current();
+ 	}
+ 	
+ 	
+ 	//Recuperer les antecedents médicaux du patient
+ 	//Recuperer les antecedents médicaux du patient
+ 	public function getAntecedentsMedicauxPatient($id_patient){
+ 		$adapter = $this->tableGateway->getAdapter();
+ 		$sql = new Sql($adapter);
+ 		$select = $sql->select();
+ 		$select->columns(array('*'));
+ 		$select->from(array('amp'=>'ant_medicaux_personne'));
+ 		$select->join( array('am' => 'ant_medicaux'), 'am.id = amp.id_ant_medicaux' , array('*'));
+ 		$select->where(array('amp.id_patient' => $id_patient));
+ 		$result = $sql->prepareStatementForSqlObject($select)->execute();
+ 		
+ 		$tableau = array();
+ 		
+ 		foreach ($result as $resul){
+ 			$tableau[] = $resul['libelle'];
+ 		}
+ 		
+ 		return $tableau;
+ 	}
+ 	
+ 	
+ 	//Ajout des antécédents médicaux de la personne
+ 	//Ajout des antécédents médicaux de la personne
+ 	public function addAntecedentMedicauxPersonne($data){
+ 		$date = (new \DateTime())->format('Y-m-d H:i:s');
+ 		$db = $this->tableGateway->getAdapter();
+ 		$sql = new Sql($db);
+ 			
+ 		//Tableau des nouveaux antecedents ajouter
+ 		$tableau = array();
+ 		
+ 		for($i = 0; $i<$data->nbCheckboxAM; $i++){
+ 			$champ = "champTitreLabel_".$i;
+ 			$libelle =  $data->$champ;
+ 			
+ 			//Ajout des nouveaux libelles dans le tableau
+ 			$tableau[] = $libelle;
+ 			
+ 			$antecedent = $this->getAntecedentMedicauxParLibelle($libelle);
+ 			if($antecedent){
+ 				if(!$this->getAntecedentMedicauxPersonneParId($antecedent['id'], $data->id_patient)){
+ 					$sQuery = $sql->insert()
+ 					->into('ant_medicaux_personne')
+ 					->values(array('id_ant_medicaux' => $antecedent['id'], 'id_patient' => $data->id_patient, 'date_enregistrement' => $date, 'id_medecin' => $data->med_id_personne));
+ 					$sql->prepareStatementForSqlObject($sQuery)->execute();
+ 				}
+ 			}
+ 		}
+ 		
+ 		//Tableau de tous les antecedents medicaux du patient avant la mise à jour
+ 		$tableau2 = $this->getAntecedentsMedicauxPatient($data->id_patient);
+ 		
+ 		//var_dump($data->nbCheckboxAM); exit();
+ 		//Suppression des antecedents non sélectionnés
+ 		for($i=0; $i<count($tableau2); $i++){
+ 			if(!in_array($tableau2[$i], $tableau)){
+ 				$id_ant_medicaux = $this->getAntecedentMedicauxParLibelle($tableau2[$i])['id'];
+ 				$sQuery = $sql->delete()
+ 				->from('ant_medicaux_personne')
+ 				->where(array('id_ant_medicaux' => $id_ant_medicaux, 'id_patient' => $data->id_patient));
+ 				$sql->prepareStatementForSqlObject($sQuery)->execute();
+ 			}
+ 		}
+ 			
+ 	}
+ 	
+ 	
+ 	//Recupere les antecedents médicaux de la personne
+ 	//Recupere les antecedents médicaux de la personne
+ 	public function getAntecedentMedicauxPersonneParIdPatient($id_patient){
+ 		$adapter = $this->tableGateway->getAdapter();
+ 		$sql = new Sql($adapter);
+ 		$select = $sql->select();
+ 		$select->columns(array('*'));
+ 		$select->from(array('amp'=>'ant_medicaux_personne'));
+ 		$select->join( array('am' => 'ant_medicaux'), 'am.id = amp.id_ant_medicaux' , array('*'));
+ 		$select->where(array('amp.id_patient' => $id_patient));
+ 		return $sql->prepareStatementForSqlObject($select)->execute();
+ 	}
+ 	
+ 	
+ 	//Recupere les antecedents médicaux 
+ 	//Recupere les antecedents médicaux 
+ 	public function getAntecedentsMedicaux(){
+ 		$adapter = $this->tableGateway->getAdapter();
+ 		$sql = new Sql($adapter);
+ 		$select = $sql->select();
+ 		$select->columns(array('*'));
+ 		$select->from(array('am'=>'ant_medicaux'));
+ 		return $sql->prepareStatementForSqlObject($select)->execute();
+ 	}
+ 	
+ 	
+ 	//Recupere la liste des actes
+ 	//Recupere la liste des actes
+ 	public function getListeDesActes(){
+ 		$adapter = $this->tableGateway->getAdapter();
+ 		$sql = new Sql($adapter);
+ 		$select = $sql->select();
+ 		$select->columns(array('*'));
+ 		$select->from(array('a'=>'actes'));
+ 		return $sql->prepareStatementForSqlObject($select)->execute();
+ 	}
+ 	
+ 	
+ 	
 }

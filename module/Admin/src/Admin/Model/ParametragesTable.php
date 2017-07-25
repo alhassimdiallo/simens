@@ -204,6 +204,48 @@ class ParametragesTable
 		$stat->execute();
 	}
 	
+	/**
+	 * Ajout d'un service
+	 */
+	public function addService($nom, $domaine, $tarif, $id_employe)
+	{
+		$db = $this->tableGateway->getAdapter();
+		$sql = new Sql($db);
+		$sQuery = $sql->insert()
+		->into('service')
+		->values(array(
+				'NOM' => $nom,
+				'DOMAINE' => $domaine,
+				'TARIF' => $tarif,
+				'ID_EMPLOYE' => $id_employe,
+		));
+	
+		$stat = $sql->prepareStatementForSqlObject($sQuery);
+		$stat->execute();
+	}
+	
+	
+	/**
+	 * Mis à jour d'un service
+	 */
+	public function updateService($updateService, $nom, $domaine, $tarif, $id_employe)
+	{
+		$db = $this->tableGateway->getAdapter();
+		$sql = new Sql($db);
+		$sQuery = $sql->update()
+		->table('service')
+		->set(array(
+				'NOM' => $nom,
+				'DOMAINE' => $domaine,
+				'TARIF' => $tarif,
+				'ID_EMPLOYE' => $id_employe,
+		))
+		->where(array('ID_SERVICE' => $updateService));
+	
+		$stat = $sql->prepareStatementForSqlObject($sQuery);
+		$stat->execute();
+	}
+	
 	
 	/**
 	 * Informations d'un hopital
@@ -221,235 +263,365 @@ class ParametragesTable
 		return $stat->execute()->current();
 	}
 	
-	
-// 	const PASSWORD_HASH = 'MY_PASSWORD_HASH_WHICH_SHOULD_BE_SOMETHING_SECURE';
-// 	protected function _encryptPassword($value) {
-// 		for($i = 0; $i < 10; $i ++) {
-// 			$value = md5 ( $value . self::PASSWORD_HASH );
-// 		}
-// 		return $value;
-// 	}
-	
-	
-// 	public function saveDonnees($donnees)
-// 	{
-// 		$date = new \DateTime ("now");
-// 		$formatDate = $date->format ( 'Y-m-d H:i:s' );
-// 		$data = array(
-// 				'username' => $donnees->username,
-// 				'password' => $this->_encryptPassword($donnees->password),
-// 				'role' => $donnees->role,
-// 				'fonction' => $donnees->fonction,
-// 				'id_personne' => $donnees->idPersonne,
-// 		);
-		
-// 		$id = (int)$donnees->id;
-// 		//var_dump($id); exit();
-// 		if($id == 0) {
-// 			$data['date_enregistrement'] = $formatDate;
-// 			$this->tableGateway->insert($data);
-// 		}
-// 		else {
-// 			$data['date_de_modification'] = $formatDate;
-// 			$this->tableGateway->update($data, array('id' => $id));
-// 		}
-// 	}
-	
-// 	public function modifierPassword($donnees)
-// 	{
-// 		$date = new \DateTime ("now");
-// 		$formatDate = $date->format ( 'Y-m-d H:i:s' );
-// 		$data = array(
-// 				'username' => $donnees->username,
-// 				'password' => $this->_encryptPassword($donnees->nouveaupassword),
-// 				'date_de_modification' => $formatDate,
-// 		);
-	
-// 		$this->tableGateway->update($data, array('id' => $donnees->id));
-// 	}
-	
-// 	/**
-// 	 * Encrypts a value by md5 + static token
-// 	 * 10 times
-// 	 */
-// 	public function encryptPassword($value) {
-// 		for($i = 0; $i < 10; $i ++) {
-// 			$value = md5 ( $value . self::PASSWORD_HASH );
-// 		}
-	
-// 		return $value;
-// 	}
-	
-// 	//RÃ©duire la chaine addresse
-// 	function adresseText($Text){
-// 		$chaine = $Text;
-// 		if(strlen($Text)>36){
-// 			$chaine = substr($Text, 0, 36);
-// 			$nb = strrpos($chaine, ' ');
-// 			$chaine = substr($chaine, 0, $nb);
-// 			$chaine .=' ...';
-// 		}
-// 		return $chaine;
-// 	}
-	
-// 	/**
-// 	 * LISTE DE TOUTS LES AGENTS DU PERSONNEL
-// 	 * @param unknown $id
-// 	 * @return string
-// 	 */
-// 	public function getListeAgentPersonnelAjax(){
-	
-// 		$db = $this->tableGateway->getAdapter();
-	
-// 		$aColumns = array('Idpatient','Nom','Prenom','Datenaissance', 'NomService', 'id');
-	
-// 		/* Indexed column (used for fast and accurate table cardinality) */
-// 		$sIndexColumn = "id";
-	
-// 		/*
-// 		 * Paging
-// 		*/
-// 		$sLimit = array();
-// 		if ( isset( $_GET['iDisplayStart'] ) && $_GET['iDisplayLength'] != '-1' )
-// 		{
-// 			$sLimit[0] = $_GET['iDisplayLength'];
-// 			$sLimit[1] = $_GET['iDisplayStart'];
-// 		}
-	
-// 		/*
-// 		 * Ordering
-// 		*/
-// 		if ( isset( $_GET['iSortCol_0'] ) )
-// 		{
-// 			$sOrder = array();
-// 			$j = 0;
-// 			for ( $i=0 ; $i<intval( $_GET['iSortingCols'] ) ; $i++ )
-// 			{
-// 				if ( $_GET[ 'bSortable_'.intval($_GET['iSortCol_'.$i]) ] == "true" )
-// 				{
-// 					$sOrder[$j++] = $aColumns[ intval( $_GET['iSortCol_'.$i] ) ]."
-// 								 	".$_GET['sSortDir_'.$i];
-// 				}
-// 			}
-// 		}
-	
-// 		/*
-// 		 * SQL queries
-// 		*/
-	
-// 		$sql = new Sql($db);
-// 		$sQuery = $sql->select()
-// 		->from(array('e' => 'employe'))->columns(array('*'))
-// 		->join(array('p' => 'personne') ,'p.id_personne = e.id_personne' , array('Nom'=>'NOM','Prenom'=>'PRENOM','Datenaissance'=>'DATE_NAISSANCE','Sexe'=>'SEXE','Adresse'=>'ADRESSE','Nationalite'=>'NATIONALITE_ACTUELLE' , 'id'=>'id_personne','Idpatient'=>'id_personne' ) )
-// 		->join(array('se' => 'service_employe') ,'se.id_employe = p.id_personne' , array() )
-// 		->join(array('s' => 'service') ,'s.ID_SERVICE = se.id_service' , array('NomService' => 'NOM') )
-// 		->order('p.id_personne ASC');
 
-// 		/* Data set length after filtering */
-// 		$stat = $sql->prepareStatementForSqlObject($sQuery);
-// 		$rResultFt = $stat->execute();
-// 		$iFilteredTotal = count($rResultFt);
+	/**
+	 * Informations d'un service
+	 */
+	public function getInfosService($id)
+	{
+		$db = $this->tableGateway->getAdapter();
+		$sql = new Sql($db);
+		$sQuery = $sql->select()
+		->from(array('s' => 'service'))->columns(array('*'))
+		->where(array('s.ID_SERVICE' => $id));
+		$stat = $sql->prepareStatementForSqlObject($sQuery);
+		return $stat->execute()->current();
+	}
 	
-// 		$rResult = $rResultFt;
+	public function prixMill($prix) {
+		$str="";
+		$long =strlen($prix)-1;
 	
-// 		$output = array(
-// 				//"sEcho" => intval($_GET['sEcho']),
-// 				//"iTotalRecords" => $iTotal,
-// 				"iTotalDisplayRecords" => $iFilteredTotal,
-// 				"aaData" => array()
-// 		);
+		for($i = $long ; $i>=0; $i--)
+		{
+		$j=$long -$i;
+		if( ($j%3 == 0) && $j!=0)
+		{ $str= " ".$str;   }
+		$p= $prix[$i];
 	
-// 		/*
-// 		 * $Control pour convertir la date en franï¿½ais
-// 		*/
-// 		$Control = new DateHelper();
+		$str = $p.$str;
+		}
+		return($str);
+	}
 	
-// 		/*
-// 		 * ADRESSE URL RELATIF
-// 		*/
-// 		$baseUrl = $_SERVER['REQUEST_URI'];
-// 		$tabURI  = explode('public', $baseUrl);
 	
-// 		/*
-// 		 * Prï¿½parer la liste
-// 		*/
-// 		foreach ( $rResult as $aRow )
-// 		{
-// 			$row = array();
-// 			for ( $i=0 ; $i<count($aColumns) ; $i++ )
-// 			{
-// 				if ( $aColumns[$i] != ' ' )
-// 				{
-// 					/* General output */
-// 					if ($aColumns[$i] == 'Nom'){
-// 						$row[] = "<khass id='nomMaj'>".$aRow[ $aColumns[$i]]."</khass>";
-// 					}
-	
-// 					else if ($aColumns[$i] == 'Datenaissance') {
-// 						$row[] = $Control->convertDate($aRow[ $aColumns[$i] ]);
-// 					}
-	
-// 					else if ($aColumns[$i] == 'Adresse') {
-// 						$row[] = $this->adresseText($aRow[ $aColumns[$i] ]);
-// 					}
-	
-// 					else if ($aColumns[$i] == 'id') {
-// 						$html ="<infoBulleVue> <a href='javascript:visualiser(".$aRow[ $aColumns[$i] ].")' >";
-// 						$html .="<img style='margin-left: 5%; margin-right: 15%;' src='".$tabURI[0]."public/images_icons/voir2.png' title='d&eacute;tails'></a> </infoBulleVue>";
-	
-// 						$html .= "<infoBulleVue> <a href='javascript:nouvelUtilisateur(".$aRow[ $aColumns[$i] ].")' >";
-// 						$html .="<img style='display: inline; margin-right: 5%;' src='".$tabURI[0]."public/images_icons/transfert_droite.png' title='suivant'></a> </infoBulleVue>";
-	
-// 						$row[] = $html;
-// 					}
-	
-// 					else {
-// 						$row[] = $aRow[ $aColumns[$i] ];
-// 					}
-	
-// 				}
-// 			}
-// 			$output['aaData'][] = $row;
-// 		}
-// 		return $output;
-// 	}
-	
-// 	public function getAgentPersonnel($id)
-// 	{
-// 		$db = $this->tableGateway->getAdapter();
-// 		$sql = new Sql($db);
-// 		$sQuery = $sql->select()
-// 		->from(array('pers' => 'personne'))->columns(array('*'))
-// 		->where(array('id_personne' => $id));
-		
-// 		$stat = $sql->prepareStatementForSqlObject($sQuery);
-// 		$Resultat = $stat->execute()->current();
-		
-// 		return $Resultat;
-// 	}
-	
-// 	public function getPhoto($id) {
-// 		$donneesAgent =  $this->getAgentPersonnel ( $id );
-	
-// 		$nom = null;
-// 		if($donneesAgent){$nom = $donneesAgent['PHOTO'];}
-// 		if ($nom) {
-// 			return $nom . '.jpg';
-// 		} else {
-// 			return 'identite.jpg';
-// 		}
-// 	}
-	
-// 	public function getServiceAgent($id)
-// 	{
-// 		$db = $this->tableGateway->getAdapter();
-// 		$sql = new Sql($db);
-// 		$sQuery = $sql->select()
-// 		->from(array('e' => 'employe'))->columns(array('*'))
-// 		->join(array('se' => 'service_employe') ,'se.id_employe = e.id_personne' , array() )
-// 		->join(array('s' => 'service') ,'s.ID_SERVICE = se.id_service' , array('NomService' => 'NOM' ,'IdService' => 'ID_SERVICE') )
-// 		->where(array('e.id_personne' => $id));
-// 		$stat = $sql->prepareStatementForSqlObject($sQuery);
-// 		return  $stat->execute()->current();
-// 	}
+    public function getListeService()
+    {
+    	$db = $this->tableGateway->getAdapter();
+    	
+    	$aColumns = array('Nom','Domaine','Tarif', 'Id');
+    	
+    	/* Indexed column (used for fast and accurate table cardinality) */
+    	$sIndexColumn = "id";
+    	
+    	/*
+    	 * Paging
+    	*/
+    	$sLimit = array();
+    	if ( isset( $_GET['iDisplayStart'] ) && $_GET['iDisplayLength'] != '-1' )
+    	{
+    		$sLimit[0] = $_GET['iDisplayLength'];
+    		$sLimit[1] = $_GET['iDisplayStart'];
+    	}
+    	
+    	/*
+    	 * Ordering
+    	*/
+    	if ( isset( $_GET['iSortCol_0'] ) )
+    	{
+    		$sOrder = array();
+    		$j = 0;
+    		for ( $i=0 ; $i<intval( $_GET['iSortingCols'] ) ; $i++ )
+    		{
+    			if ( $_GET[ 'bSortable_'.intval($_GET['iSortCol_'.$i]) ] == "true" )
+    			{
+    				$sOrder[$j++] = $aColumns[ intval( $_GET['iSortCol_'.$i] ) ]."
+								 	".$_GET['sSortDir_'.$i];
+    			}
+    		}
+    	}
+    	
+    	/*
+    	 * SQL queries
+    	*/
+    	$sql = new Sql($db);
+    	$sQuery = $sql->select()
+    	->from(array('s' => 'service'))->columns(array('Nom'=>'NOM','Domaine'=>'DOMAINE','Tarif'=>'TARIF','Id'=>'ID_SERVICE'))
+    	->order('s.ID_SERVICE DESC');
+    	
+    	
+    	/* Data set length after filtering */
+    	$stat = $sql->prepareStatementForSqlObject($sQuery);
+    	$rResultFt = $stat->execute();
+    	$iFilteredTotal = count($rResultFt);
+    	
+    	$rResult = $rResultFt;
+    	
+    	$output = array(
+    			"iTotalDisplayRecords" => $iFilteredTotal,
+    			"aaData" => array()
+    	);
+    	
+    	/*
+    	 * $Control pour convertir la date en franï¿½ais
+    	*/
+    	$Control = new DateHelper();
+    	
+    	/*
+    	 * ADRESSE URL RELATIF
+    	*/
+    	$baseUrl = $_SERVER['REQUEST_URI'];
+    	$tabURI  = explode('public', $baseUrl);
+    	
+    	/*
+    	 * Prï¿½parer la liste
+    	*/
+    	foreach ( $rResult as $aRow )
+    	{
+    		$row = array();
+    		for ( $i=0 ; $i<count($aColumns) ; $i++ )
+    		{
+    			if ( $aColumns[$i] != ' ')
+    			{
+    				/* General output */
+    				if ($aColumns[$i] == 'Id') {
+    					$html  ="<a style='float: left; padding-right: 10%;' href='javascript:visualiserDetailsService(".$aRow[ $aColumns[$i] ].")'>";
+    					$html .="<img style='display: inline; ' src='".$tabURI[0]."public/images_icons/voir2.png' title='dÃ©tails'></a>";
+    	
+    					$html  .="<a style='float: left; padding-right: 10%;' href='javascript:modifierService(".$aRow[ $aColumns[$i] ].")'>";
+    					$html .="<img style='display: inline;' src='".$tabURI[0]."public/images_icons/pencil_16.png' title='modifier'></a>";
+    	
+    					$html  .="<a id='service_".$aRow[ $aColumns[$i] ]."' style='float: left;' href='javascript:supprimerService(".$aRow[ $aColumns[$i] ].")'>";
+    					$html .="<img style='display: inline; width: 15px; height: 15px;' src='".$tabURI[0]."public/images_icons/sup2.png' title='supprimer'></a>";
+    					$html .="<input id='".$aRow[ $aColumns[$i] ]."'   type='hidden' value='".$aRow[ 'Id' ]."'>";
+    	
+    					$row[] = $html;
+    				}
+    				else 
+    					if ($aColumns[$i] == 'Tarif') {
+    						$row[] = "<div style='width: 100%; height: 10px;'><span style='float: right;'>".$this->prixMill( $aRow[ $aColumns[$i] ] )."</span></div>";
+    					}
+    	
+    				else {
+    					$row[] = $aRow[ $aColumns[$i] ];
+    				}
+    			}
+    		}
+    	
+    		$output['aaData'][] = $row;
+    	}
+    	
+    	
+    	return $output;
+    	
+    }
+    
+    public function existeServiceEmploye($id) {
+    	$db = $this->tableGateway->getAdapter();
+    	$sql = new Sql($db);
+    	$sQuery = $sql->select()
+    	->from('service_employe')
+    	->where(array('id_service' => $id));
+    	
+    	return $sql->prepareStatementForSqlObject($sQuery)->execute()->current();
+    }
+    
+    public function supprimerService($id) {
+    	
+    	if(!$this->existeServiceEmploye($id)){ //Cela veut dire personne n'est encore affecter dans ce service
+    		$db = $this->tableGateway->getAdapter();
+    		$sql = new Sql($db);
+    		$sQuery = $sql->delete()
+    		->from('service')
+    		->where(array('ID_SERVICE' => $id));
+    		$sql->prepareStatementForSqlObject($sQuery)->execute();
+    		return 1;
+    	}
+    	return 0;
+    	
+    }
+    
+    
+    public function getListeActes()
+    {
+    	$db = $this->tableGateway->getAdapter();
+    	 
+    	$aColumns = array('Designation','Tarif', 'Id');
+    	 
+    	/* Indexed column (used for fast and accurate table cardinality) */
+    	$sIndexColumn = "id";
+    	 
+    	/*
+    	 * Paging
+    	*/
+    	$sLimit = array();
+    	if ( isset( $_GET['iDisplayStart'] ) && $_GET['iDisplayLength'] != '-1' )
+    	{
+    		$sLimit[0] = $_GET['iDisplayLength'];
+    		$sLimit[1] = $_GET['iDisplayStart'];
+    	}
+    	 
+    	/*
+    	 * Ordering
+    	*/
+    	if ( isset( $_GET['iSortCol_0'] ) )
+    	{
+    		$sOrder = array();
+    		$j = 0;
+    		for ( $i=0 ; $i<intval( $_GET['iSortingCols'] ) ; $i++ )
+    		{
+    			if ( $_GET[ 'bSortable_'.intval($_GET['iSortCol_'.$i]) ] == "true" )
+    			{
+    				$sOrder[$j++] = $aColumns[ intval( $_GET['iSortCol_'.$i] ) ]."
+								 	".$_GET['sSortDir_'.$i];
+    			}
+    		}
+    	}
+    	 
+    	/*
+    	 * SQL queries
+    	*/
+    	$sql = new Sql($db);
+    	$sQuery = $sql->select()
+    	->from(array('a' => 'actes'))->columns(array('Designation'=>'designation','Tarif'=>'tarif','Id'=>'id'))
+    	->order('a.id DESC');
+    	 
+    	 
+    	/* Data set length after filtering */
+    	$stat = $sql->prepareStatementForSqlObject($sQuery);
+    	$rResultFt = $stat->execute();
+    	$iFilteredTotal = count($rResultFt);
+    	 
+    	$rResult = $rResultFt;
+    	 
+    	$output = array(
+    			"iTotalDisplayRecords" => $iFilteredTotal,
+    			"aaData" => array()
+    	);
+    	 
+    	/*
+    	 * $Control pour convertir la date en franï¿½ais
+    	*/
+    	$Control = new DateHelper();
+    	 
+    	/*
+    	 * ADRESSE URL RELATIF
+    	*/
+    	$baseUrl = $_SERVER['REQUEST_URI'];
+    	$tabURI  = explode('public', $baseUrl);
+    	 
+    	/*
+    	 * Prï¿½parer la liste
+    	*/
+    	foreach ( $rResult as $aRow )
+    	{
+    		$row = array();
+    		for ( $i=0 ; $i<count($aColumns) ; $i++ )
+    		{
+    			if ( $aColumns[$i] != ' ')
+    			{
+    				/* General output */
+    				if ($aColumns[$i] == 'Id') {
+    					$html  ="<a style='float: left; padding-right: 15%;' href='javascript:visualiserDetailsActe(".$aRow[ $aColumns[$i] ].")'>";
+    					$html .="<img style='display: inline; ' src='".$tabURI[0]."public/images_icons/voir2.png' title='dÃ©tails'></a>";
+    					 
+    					$html  .="<a style='float: left; padding-right: 15%;' href='javascript:modifierActe(".$aRow[ $aColumns[$i] ].")'>";
+    					$html .="<img style='display: inline;' src='".$tabURI[0]."public/images_icons/pencil_16.png' title='modifier'></a>";
+    					 
+    					$html  .="<a id='acte_".$aRow[ $aColumns[$i] ]."' style='float: left;' href='javascript:supprimerActe(".$aRow[ $aColumns[$i] ].")'>";
+    					$html .="<img style='display: inline; width: 15px; height: 15px;' src='".$tabURI[0]."public/images_icons/sup2.png' title='supprimer'></a>";
+    
+    					$html .="<input id='".$aRow[ $aColumns[$i] ]."'   type='hidden' value='".$aRow[ 'Id' ]."'>";
+    					 
+    					$row[] = $html;
+    				}
+    				else
+    				if ($aColumns[$i] == 'Tarif') {
+    					$row[] = "<div style='width: 100%; height: 10px;'><span style='float: right;'>".$this->prixMill( $aRow[ $aColumns[$i] ] )."</span></div>";
+    				}
+    				 
+    				else {
+    					$row[] = $aRow[ $aColumns[$i] ];
+    				}
+    			}
+    		}
+    		 
+    		$output['aaData'][] = $row;
+    	}
+    	 
+    	 
+    	return $output;
+    	 
+    }
+    
+    /**
+     * Informations d'un acte
+     */
+    public function getInfosActe($id)
+    {
+    	$db = $this->tableGateway->getAdapter();
+    	$sql = new Sql($db);
+    	$sQuery = $sql->select()
+    	->from(array('a' => 'actes'))->columns(array('*'))
+    	->where(array('a.id' => $id));
+    	$stat = $sql->prepareStatementForSqlObject($sQuery);
+    	return $stat->execute()->current();
+    }
+    
+    /**
+     * Ajout d'un acte
+     */
+    public function addActe($designation, $tarif, $id_employe)
+    {
+    	$db = $this->tableGateway->getAdapter();
+    	$sql = new Sql($db);
+    	$sQuery = $sql->insert()
+    	->into('actes')
+    	->values(array(
+    			'designation' => $designation,
+    			'tarif' => $tarif,
+    			'id_employe' => $id_employe,
+    	));
+    
+    	$stat = $sql->prepareStatementForSqlObject($sQuery);
+    	$stat->execute();
+    }
+    
+    /**
+     * Mis à jour d'un acte
+     */
+    public function updateActe($updateActe, $designation, $tarif, $id_employe)
+    {
+    	$today = (new \DateTime ())->format ( 'Y-m-d H:i:s' );
+    	
+    	$db = $this->tableGateway->getAdapter();
+    	$sql = new Sql($db);
+    	$sQuery = $sql->update()
+    	->table('actes')
+    	->set(array(
+    			'designation' => $designation,
+    			'tarif' => $tarif,
+    			'date_modification' => $today,
+    			'id_employe' => $id_employe,
+    	))
+    	->where(array('id' => $updateActe));
+    
+    	$stat = $sql->prepareStatementForSqlObject($sQuery);
+    	$stat->execute();
+    }
+    
+    public function existeDemandeActe($id) {
+    	$db = $this->tableGateway->getAdapter();
+    	$sql = new Sql($db);
+    	$sQuery = $sql->select()
+    	->from('demande_acte')
+    	->where(array('idActe' => $id));
+    	 
+    	return $sql->prepareStatementForSqlObject($sQuery)->execute()->current();
+    }
+    
+    public function supprimerActe($id) {
+    	 
+    	if(!$this->existeDemandeActe($id)){ //Cela veut dire cet acte n'existe pas dans les demandes 
+    		$db = $this->tableGateway->getAdapter();
+    		$sql = new Sql($db);
+    		$sQuery = $sql->delete()
+    		->from('actes')
+    		->where(array('id' => $id));
+    		$sql->prepareStatementForSqlObject($sQuery)->execute();
+    		return 1;
+    	}
+    	return 0;
+    	 
+    }
 }

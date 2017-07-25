@@ -12,17 +12,6 @@ class AdmissionForm extends Form{
 		//$this->serviceTable = $serviceTable;
 		parent::__construct ();
 
-		/*******************************************************************/
-		/*** INSTANCIATION POUR LA RECUPERATION DE LA LISTE DES SERVICES ***/
-		/*******************************************************************/
-		//$service = new ServiceTable();
-// 		$laliste_service = $this->serviceTable->listeService();
-// 		$afficheTous = array(""=>'Tous');
-// 		$tab_service = array_merge($afficheTous , $laliste_service);
-
-		/*******************************************************************/
-		/*******************************************************************/
-
 		$this->add ( array (
 				'name' => 'id_patient',
 				'type' => 'Hidden',
@@ -49,11 +38,19 @@ class AdmissionForm extends Form{
 		) );
 
 		$this->add ( array (
-				'name' => 'montant',
+				'name' => 'montant_avec_majoration',
 				'type' => 'Text',
 				'options' => array (
-						'label' => iconv('ISO-8859-1', 'UTF-8','Montant')
+						'label' => iconv('ISO-8859-1', 'UTF-8','Tarif (frs)')
 				),
+				'attributes' => array (
+						'id' => 'montant_avec_majoration',
+				)
+		) );
+		
+		$this->add ( array (
+				'name' => 'montant',
+				'type' => 'Hidden',
 				'attributes' => array (
 						'id' => 'montant',
 				)
@@ -63,7 +60,7 @@ class AdmissionForm extends Form{
 				'name' => 'numero',
 				'type' => 'Text',
 				'options' => array (
-						'label' => iconv('ISO-8859-1', 'UTF-8','Numero facture')
+						'label' => iconv('ISO-8859-1', 'UTF-8','Numéro facture')
 				),
 				'attributes' => array (
 						'id' => 'numero'
@@ -81,5 +78,50 @@ class AdmissionForm extends Form{
 						'id' => 'liste_service',
 				)
 		) );
+		
+		$this->add(array(
+				'name' => 'type_facturation',
+				'type' => 'Zend\Form\Element\radio',
+				'options' => array (
+						'value_options' => array(
+								1 => 'Normal',
+								2 => iconv ( 'ISO-8859-1', 'UTF-8','Prise en charge') ,
+						),
+				),
+				'attributes' => array(
+						'id' => 'type_facturation',
+						'required' => true,
+				),
+		));
+		
+		$this->add(array(
+				'name' => 'organisme',
+				'type' => 'textarea',
+				'options' => array (
+						'label' => iconv('ISO-8859-1', 'UTF-8','Organisme')
+				),
+				'attributes' => array(
+						'id' => 'organisme',
+				),
+		));
+		
+		$this->add(array(
+				'name' => 'taux',
+				'type' => 'Select',
+				'options' => array (
+						'label' => iconv('ISO-8859-1', 'UTF-8','Taux (%)'),
+						'value_options' => array(
+								'' => '00',
+								5  => '05',
+								10 => '10',
+						),
+				),
+				'attributes' => array(
+						'registerInArrrayValidator' => true,
+						'onchange' => 'getTarif(this.value)',
+						'id' => 'taux',
+				),
+		));
+		
 	}
 }

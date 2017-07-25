@@ -62,7 +62,19 @@ $(window).load(function () {
        initialisation();
       </script>
 
-     </div>
+      
+      
+<div id="context-menu">
+    <ul class="dropdown-menu" >
+         <li><a style="cursor: pointer;" ><img id="visualiserCTX" style='margin-right: 10px; width: 19px; height: 16px;' src='/simens/public/images_icons/voir2.png'>Visualiser</a></li>
+         <li class="divider2"></li>
+         <li><a style="cursor: pointer;"><img  id="suivantCTX" style='margin-right: 10px; width: 19px; height: 16px;' src='/simens/public/images_icons/transfert_droite.png'>Suivant</a></li>
+         <li class="divider"></li>
+         <li><a id="quitterCTX"  style="cursor: pointer;">Quitter</a></li>
+    </ul>
+</div>
+
+</div>
 
 <!-- POP UP pour Confirmation Suppression -->
                             <div id="confirmation" title="Informations" style="display:none;">
@@ -122,11 +134,11 @@ $(window).load(function () {
 		       <div style='width: 20%;'>
                   <div id="terminer_annuler">
                     <div class="block" id="thoughtbot">
-                       <button type="submit" id="termineradmissio" style=" height:35px; ">Terminer</button>
-                    </div>
-
-                    <div class="block" id="thoughtbot">
                        <button name="annuler" id="annuler" style=" height:35px; ">Annuler</button>
+                    </div>
+                    
+                    <div class="block" id="thoughtbot">
+                       <button type="submit" id="termineradmissio" style=" height:35px; ">Terminer</button>
                     </div>
                   </div>
                 </div>
@@ -144,5 +156,15 @@ function ajouterPatient(){
     $(location).attr("href",vart);
     return false;
 }
+
+$('#termineradmissio').click(function(){
+	if($('#date').val() == ""){
+		return true;
+	} else {
+	   $('#service').attr('disabled',false);
+	   $('#service').css({'font-weight':'bold','color':'gray','font-family': 'Times  New Roman','font-size':'14px'});
+	   return true;
+	}
+});
 </script>
 

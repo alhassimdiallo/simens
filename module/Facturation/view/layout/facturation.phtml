@@ -15,21 +15,27 @@
  echo $this->headLink()->prependStylesheet($this->basePath().'/css/matrix-media.css');
  echo $this->headLink()->prependStylesheet($this->basePath().'/font-awesome/css/font-awesome.css');
  echo $this->headLink()->prependStylesheet($this->basePath().'/css/tooltipster.css');
- echo $this->headLink()->appendStylesheet($this->basePath().'/css/smoothness/jquery-ui.css');
-
-  $this->headScript()->appendFile($this->basePath().'/js/jquery.min.js');
-  $this->headScript()->appendFile($this->basePath().'/js/jquery.tooltipster.min.js');
-  $this->headScript()->appendFile($this->basePath().'/js/bootstrap.min.js');
-  $this->headScript()->appendFile($this->basePath().'/js/jquery.uniform.js');
-  $this->headScript()->appendFile($this->basePath().'/js/select2.min.js');
-  $this->headScript()->appendFile($this->basePath().'/js/jquery.dataTables.min.js');
-  $this->headScript()->appendFile($this->basePath().'/js/jquery-ui.js');
+ echo $this->headLink()->prependStylesheet($this->basePath().'/css/smoothness/jquery-ui.css');
+ echo $this->headLink()->prependStylesheet($this->basePath().'/js/w2ui/w2ui-1.4.3.min.css');
+ 
+ $this->headScript()->appendFile($this->basePath().'/js/jquery.min.js');
+ $this->headScript()->appendFile($this->basePath().'/js/jquery.tooltipster.min.js');
+ $this->headScript()->appendFile($this->basePath().'/js/bootstrap.min.js');
+ $this->headScript()->appendFile($this->basePath().'/js/jquery.uniform.js');
+ $this->headScript()->appendFile($this->basePath().'/js/select2.min.js');
+ $this->headScript()->appendFile($this->basePath().'/js/jquery.dataTables.min.js');
+ $this->headScript()->appendFile($this->basePath().'/js/jquery-ui.js');
+ $this->headScript()->appendFile($this->basePath().'/js/plugins/contextMenu/bootstrap-contextmenu.js');
+ $this->headScript()->appendFile($this->basePath().'/js/w2ui/w2ui-1.4.3.min.js');
   
-  $this->headScript()->appendFile($this->basePath().'/js/jquery.maskedinput.js');
-  $this->headScript()->appendFile($this->basePath().'/js/controle_saisie/controle_saisie.js');
+ $this->headScript()->appendFile($this->basePath().'/js/jquery.maskedinput.js');
+ $this->headScript()->appendFile($this->basePath().'/js/controle_saisie/controle_saisie.js');
 
- echo $this->headTitle($this->pageTitle);?>
-		<?php echo $this->headScript();?>
+ echo $this->headTitle($this->pageTitle);
+ echo $this->headScript();
+ 
+ ?>
+
 <head>
 </head>
 
@@ -77,7 +83,7 @@ if($sexe == 'Masculin'){$civilite = 'M';}
  </div>
 </div>
 
-<!--Menu de droite-->
+<!--Menu de gauche-->
 <div id="sidebar">
   <?php echo $this->partial('layout/menugauche'); ?>
 </div>
@@ -99,47 +105,34 @@ if($sexe == 'Masculin'){$civilite = 'M';}
 </body>
 </html>
 
+
 <style>
-.my-custom-theme {
-
-    border-top-left-radius: 5px;
-    border-top-right-radius: 5px;
-    border-bottom-right-radius: 5px;
-    border-bottom-left-radius: 5px;
-    background-color: #ffffff;
-    background-image: none;
-    background-repeat: repeat;
-    background-attachment: scroll;
-    background-position: 0% 0%;
-    background-clip: border-box;
-    background-origin: padding-box;
-    background-size: auto auto;
-    box-shadow: 0px 0px 14px rgba(0, 0, 0, 0.9);
-    color: #2c2c2c;
-    font-family: 'Arial',sans-serif;
-    font-size: 14px;
-    line-height: 16px;
-    padding-top: 5px;
-    /*padding-right: 8px;*/
-    padding-bottom: 5px;
-    /*padding-left: 10px; */
-    font-weight: 400;
-    text-align: center;
-    weight: bold;
+.ui-tooltip {
+	padding: 8px;
+	position: absolute;
+	z-index: 9999;
+	max-width: 300px;
+	-webkit-box-shadow: 0 0 5px #aaa;
+	box-shadow: 0 0 5px #aaa;
 }
 
-.my-custom-theme .tooltipster-content {
-    font-family: Arial, sans-serif;
-    font-size: 17px;
-    line-height: 16px;
-    padding: 8px 10px;
+body .ui-tooltip {
+	border-width: 2px;
 }
 
-td {
-	font-family: Times  New Roman;
-	font-size : 17px;
-}
+
+ #bodbod { 
+ 	min-width: 1345px;
+ 	overflow-x:scroll;  
+ } 
+
+ #user-nav { 
+ 	min-width: 1100px;
+ 	 
+ } 
+ 
 </style>
+
 
 
 <script>
@@ -147,25 +140,25 @@ var base_url = window.location.toString();
 var tabUrl = base_url.split("public");
 
 $(document).ready(function() {
-	   $('img').tooltipster({
-		   animation: 'grow',
-		   delay: 100,
-		   theme: '.my-custom-theme',
-		   touchDevices: false,
-		   trigger: 'hover',
-		   position: 'bottom'
-		});
+	$('a,img,hass').tooltip({
+        animation: true,
+        html: true,
+        placement: 'bottom',
+        show: {
+            effect: "slideDown",
+            delay: 250
+          }
+    });
 
-
-	   $('#modifierPassword').click(function(){
-	        var role = "<?php echo $user['role'];?>";
-	        var id = 0;
-	        if(role == 'facturation'){id = 3;}
-	        if(role == 'etat_civil' ){id = 9;}
-	        
-	    	vart=tabUrl[0]+'public/admin/modifier-password/'+id;
-	        $(location).attr("href",vart);
-	    });
+	$('#modifierPassword').click(function(){
+        var role = "<?php echo $user['role'];?>";
+        var id = 0;
+        if(role == 'facturation'){id = 3;}
+        if(role == 'etat_civil' ){id = 9;}
+        
+    	vart=tabUrl[0]+'public/admin/modifier-password/'+id;
+        $(location).attr("href",vart);
+    });
 
 });
 </script>

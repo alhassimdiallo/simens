@@ -189,7 +189,7 @@ class PatientTable {
 
 		$db = $this->tableGateway->getAdapter();
 
-		$aColumns = array('Nom','Prenom','Datenaissance','Sexe', 'Adresse', 'Nationalite', 'id');
+		$aColumns = array('Nom','Prenom','Datenaissance','Sexe', 'Adresse', 'Nationalite', 'id', 'id2');
 
 		/* Indexed column (used for fast and accurate table cardinality) */
 		$sIndexColumn = "id";
@@ -227,7 +227,7 @@ class PatientTable {
 		$sql = new Sql($db);
 		$sQuery = $sql->select()
 	    ->from(array('pat' => 'patient'))->columns(array('archive' =>'ARCHIVAGE'))
-		->join(array('p' => 'personne'), 'pat.id_personne = p.id_personne' , array('Nom'=>'NOM','Prenom'=>'PRENOM','Datenaissance'=>'DATE_NAISSANCE','Sexe'=>'SEXE','Adresse'=>'ADRESSE','Nationalite'=>'NATIONALITE_ACTUELLE','Taille'=>'TAILLE','id'=>'ID_PERSONNE'))
+		->join(array('p' => 'personne'), 'pat.id_personne = p.id_personne' , array('Nom'=>'NOM','Prenom'=>'PRENOM','Datenaissance'=>'DATE_NAISSANCE','Sexe'=>'SEXE','Adresse'=>'ADRESSE','Nationalite'=>'NATIONALITE_ACTUELLE','Taille'=>'TAILLE','id'=>'ID_PERSONNE','id2'=>'ID_PERSONNE'))
 		->order('pat.id_personne DESC');
 		/* Data set length after filtering */
 		$stat = $sql->prepareStatementForSqlObject($sQuery);
@@ -270,7 +270,10 @@ class PatientTable {
 					}
 
 				    else if ($aColumns[$i] == 'Datenaissance') {
-						$row[] = $Control->convertDate($aRow[ $aColumns[$i] ]);
+
+				    	$date_naissance = $aRow[ $aColumns[$i] ];
+				    	if($date_naissance){ $row[] = $Control->convertDate($aRow[ $aColumns[$i] ]); }else{ $row[] = null;}
+				    	
 					}
 
 					else if ($aColumns[$i] == 'Adresse') {

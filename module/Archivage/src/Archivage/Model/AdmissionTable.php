@@ -86,4 +86,13 @@ class AdmissionTable {
 		}
 		return $row;
 	}
+	
+	public function getLastAdmission() {
+		$db = $this->tableGateway->getAdapter();
+		$sql = new Sql($db);
+		$sQuery = $sql->select('admission')
+		->order('id_admission DESC');
+		$requete = $sql->prepareStatementForSqlObject($sQuery);
+		return $requete->execute()->current();
+	}
 }

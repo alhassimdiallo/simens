@@ -6,32 +6,45 @@
 <?php echo $this->headScript()->appendFile($this->basepath().'/js/personnel/jsModifierPersonnel.js');?>
 
 <?php $today = new \DateTime ( 'now' );
-      $date_enregistrement = $today->format ( 'Y-m-d' ); 
+      $date_enregistrement = $today->format ( 'Y-m-d H:i:s' ); 
 ?>
 <script type="text/javascript">
 controle_saisie();
+
+$(window).load(function () {
+	$('#wait').toggle(false);
+	$('#contenuInterface').fadeIn().css({'visibility':'visible'});
+});
 </script>
+
+<style>
+#contenuInterface{ visibility: hidden };
+</style>
+
+
 
 <?php
 $form = $this->form;
 $form->setAttribute ( 'action', $this->url ( 'personnel', array ('action' => 'modifier-dossier', 'val' => $this->id_personne) ));
 $form->setAttribute ('enctype','multipart/form-data');
+$form->setAttribute ('method','POST');
 $this->form->prepare ();
 echo $this->form ()->openTag ( $form );?>
 
 
 <?php echo $this->formhidden($this->form->get('id_personne')); ?>
-<?php echo $this->formhidden($this->form->get('date_enregistrement')); ?>
-<script type="text/javascript">
-$('#date_enregistrement').val('<?php echo $date_enregistrement;?>');
-</script>
+
+<div id="wait" style="color: gray; font-size: 20px; text-align: center; margin-top: 80px;" > <span> Chargement ... </span> </div>
+
+<div id="contenuInterface"> 
+
 <div id="accordions">
 <!--**************************************-->                              
 
 <!--========== PREMIER DEPLIANT ========-->                              
                           
 <!--**************************************--> 
-     <div style='width: 140px; font-family: police2; height: 20px; color: green; font-size: 20px; font-weight: bold;'>Etat civil</div>
+     <div id='depliant1' style='width: 140px; font-family: police2; color: green; font-size: 20px; font-weight: bold;'>Etat civil</div>
      <div>
 
          <div class="photo_patient" id='photo'>
@@ -44,9 +57,9 @@ $('#date_enregistrement').val('<?php echo $date_enregistrement;?>');
 		<table id="form_patient" style="float: left;">
 
 			<tr class="comment-form-patient">
-				<td style="width: 25%;"> <?php echo $this->formRow($this->form->get('civilite'))?></td>
-				<td style="width: 25%;"> <?php echo $this->formRow($this->form->get('lieu_naissance'));?></td>
-				<td style="width: 25%;"> <?php echo $this->formRow($this->form->get('email'));?></td>
+				<td style="width: 33%;"> <?php echo $this->formRow($this->form->get('sexe'))?></td>
+				<td style="width: 33%;"> <?php echo $this->formRow($this->form->get('lieu_naissance'));?></td>
+				<td style="width: 33%;"> <?php echo $this->formRow($this->form->get('email'));?></td>
 
 			</tr>
 
@@ -65,9 +78,16 @@ $('#date_enregistrement').val('<?php echo $date_enregistrement;?>');
 			<tr class="comment-form-patient">
 				<td> <?php echo $this->formRow($this->form->get('date_naissance'));?></td>
 				<td> <?php echo $this->formRow($this->form->get('adresse'));?></td>
-				<td> <?php echo $this->formRow($this->form->get('sexe'));?></td>
+				<td> </td>
 			</tr>
 
+			<tr>
+			  <td>
+			    <div style="height: 10px; width: 100%; "></div>
+			  </td>
+			  
+			</tr>
+			
 		</table>
 	  </div>
 		
@@ -101,7 +121,7 @@ $('#date_enregistrement').val('<?php echo $date_enregistrement;?>');
 <!--========== DEUXIEME DEPLIANT ========-->                              
                           
 <!--**************************************--> 
-     <div style='height: 20px; font-family: police2;  color: green; font-size: 20px; font-weight: bold;'>Compléments informations</div>
+     <div id='depliant2' style='font-family: police2;  color: green; font-size: 20px; font-weight: bold;'>Compléments informations</div>
      <div style="max-height:240px;">
      <div style=" padding-bottom:0px; margin-bottom: 5px; border-bottom: 2px solid green; margin-left: 0px;"></div>
          <table id="form_patient" style="float: left;">  
@@ -191,7 +211,7 @@ $('#date_enregistrement').val('<?php echo $date_enregistrement;?>');
 <!--========== TROISIEME DEPLIANT ========-->                              
                           
 <!--**************************************--> 
-     <div style='height: 20px; font-family: police2;  color: green; font-size: 20px; font-weight: bold;'>Affectation</div>
+     <div id='depliant3' style='font-family: police2;  color: green; font-size: 20px; font-weight: bold;'>Affectation</div>
      <div style="max-height:200px;">
      <div style=" padding-bottom:0px; margin-bottom: 5px; border-bottom: 2px solid green; margin-left: 0px;"></div>
         
@@ -217,20 +237,20 @@ $('#date_enregistrement').val('<?php echo $date_enregistrement;?>');
                  </div>
      </div>
   </div>	
-  
+</div>
 <!--***********************************************************************************************-->                              
 
 <!--========================== LES BOUTONS "TERMINER" ET "ANNULER" =================================-->                              
                           
 <!--***********************************************************************************************--> 
-         <table>
-         <tr>
-           <td style="background-color:#eeeeee;">
-              <div> <button type='submit' name="terminer" id="terminer" style=" margin-left:400px; margin-top: 20px; font-family: police2;font-size: 18px; font-weight: bold;"> Terminer </button> </div>
+        <table style="width: 100%; ">
+         <tr style="width: 100%;">
+           <td style="background-color: #eeeeee; width: 50%;"> 
+              <div style="float: right; "> <button  id="annuler" style="margin-top: 20px; font-family: police2; font-size: 18px; font-weight: bold;"> Annuler </button> </div>
            </td>
-           <td style="background-color:#eeeeee;"> 
-              <div> <button  name="annuler" id="annuler" style=" margin-right:340px; margin-top: 20px; font-family: police2;font-size: 18px; font-weight: bold;"> Annuler </button> </div>
-           </td> 
+           <td style="background-color: #eeeeee; width: 50%;">
+              <div style="float: left; ">  <button  id="terminer" style="margin-top: 20px; font-family: police2; font-size: 18px; font-weight: bold;"> Terminer </button> </div>
+           </td>
          </tr>     
        </table>
 
@@ -287,35 +307,35 @@ $("#modifier_champ_affectation").toggle(false);
 
 /***************************************************/
 /***COMPLEMENT MEDECIN*****/
-<?php if($this->type_personnel == 'Médecin'){ ?>
+<?php if($this->type_personnel == 1){ ?>
          $('.complement_medecin').toggle(true);
          $('#vider_champ2').toggle(true);
          $("#bouton_valider_donnees").toggle(true); 
          $('#type_personnel').val(1);   
-         getChamps(0);
+         getChamps(1);
          
 <?php } ?>
 /***COMPLEMENT MEDICO-TECHNIQUE***/
-<?php if($this->type_personnel == 'Médico-technique'){ ?>
+<?php if($this->type_personnel == 2){ ?>
          $('.complement_medico-technique').toggle(true); 
          $("#bouton_valider_donnees_medico").toggle(true);
          $("#vider_champ_medico").toggle(true);
          $('#type_personnel').val(2);   
-         getChamps(0);
+         getChamps(2);
 <?php } else?>
 
 /***COMPLEMENT MEDICO-TECHNIQUE***/
-<?php if($this->type_personnel == 'Logistique'){ ?>
+<?php if($this->type_personnel == 3){ ?>
          $(".complement_logistique").toggle(true);
          $("#bouton_valider_donnees_logistique").toggle(true);
          $("#vider_champ_logistique").toggle(true);
          $('#type_personnel').val(3);   
-         getChamps(0);
+         getChamps(3);
 <?php }?>
 
  /***POUR LE MENU GAUCHE dans -elementgauche.phtml***/
 $('#plus_dossier_personnel').toggle(true); 
-$("#dossier_personnel").replaceWith("<li id='dossier_personnel' style='background:#4a5765;'><a href=''><span style='margin-left:0px; color: #ffffff; font-weight:bold; font-size:18px; font-family:Times New Roman;'> <img style='display: inline;' src='/simens/public/images_icons/moins-vert.PNG' alt='Liste' /> Dossiers du personnel </span></a></li>");
+$("#dossier_personnel").replaceWith("<li id='dossier_personnel' style='background:#4a5765;'><a href=''><span style='margin-left:0px; color: #ffffff; font-weight:bold; font-size:18px; font-family:Times New Roman;'> <img style='display: inline;' src='/simens/public/images_icons/moin-green2.png' /> Dossiers du personnel </span></a></li>");
 dep_dossier_personnel1();
-$('#nouveau_style').css({'font-weight':'bold','color':'white','font-size':'22px'});
+$('#liste_dossier_personnel_style').css({'font-weight':'bold','color':'white','font-size':'22px'});
 </script>

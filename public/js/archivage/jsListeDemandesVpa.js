@@ -23,8 +23,9 @@
     	  });
     }
     
+    var  oTable;
     function initialisation(){
-        var  oTable = $('#patient').dataTable
+           oTable = $('#patient').dataTable
     	( {
     					"sPaginationType": "full_numbers",
     					"aLengthMenu": [5,7,10,15],
@@ -43,7 +44,12 @@
     					   },
 
     					"sAjaxSource": ""+tabUrl[0]+"public/archivage/liste-demandes-vpa-ajax", 
-    					
+
+    					"fnDrawCallback": function() 
+    					{
+    						//markLine();
+    						clickRowHandler();
+    					}
     	}); 
         
         var asInitVals = new Array();
@@ -97,6 +103,36 @@
 	});
       
     }
+  
+
+    function clickRowHandler() 
+    {
+    	var id;
+    	var idVpa;
+    	$('#patient tbody tr').contextmenu({
+    		target: '#context-menu',
+    		onItem: function (context, e) {
+    			
+    			if( $(e.target).text() == 'Détails' || $(e.target).is('#detailsCTX') ){
+    				details(id, idVpa);
+    			} 
+    			
+    		}
+    	
+    	}).bind('mousedown', function (e) {
+    			var aData = oTable.fnGetData( this );
+    		    id = aData[7];
+    		    idVpa = aData[8];
+    	});
+    	
+    	$("#patient tbody tr").bind('dblclick', function (event) {
+    		var aData = oTable.fnGetData( this );
+    		id = aData[7];
+    		idVpa = aData[8];
+		    details(id, idVpa);
+    	});
+    	
+    }
     
     /************************************************************************************************************************/
     /************************************************************************************************************************/
@@ -146,9 +182,9 @@
     /*** PARTIE RECHERCHE ***/
     /*** PARTIE RECHERCHE ***/
     /*** PARTIE RECHERCHE ***/
-    
+    var  oTable2;
     function initialisationRecherche(){
-        var  oTable = $('#patient').dataTable
+           oTable2 = $('#patient').dataTable
     	( {
     					"sPaginationType": "full_numbers",
     					"aLengthMenu": [5,7,10,15],
@@ -167,6 +203,12 @@
     					   },
 
     					"sAjaxSource": ""+tabUrl[0]+"public/archivage/liste-recherche-vpa-ajax", 
+
+    					"fnDrawCallback": function() 
+    					{
+    						//markLine();
+    						clickRowHandler2();
+    					}
     					
     	}); 
         
@@ -175,18 +217,18 @@
    	//le filtre du select
    	$('#filter_statut').change(function() 
    	{					
-   		oTable.fnFilter( this.value );
+   		oTable2.fnFilter( this.value );
    	});
 
    	//le filtre du select du type personnel
 	$('#type_personnel').change(function() 
 	{					
-		oTable.fnFilter( this.value );
+		oTable2.fnFilter( this.value );
 	});
    	
    	$("tfoot input").keyup( function () {
    		/* Filter on the column (the index) of this element */
-   		oTable.fnFilter( this.value, $("tfoot input").index(this) );
+   		oTable2.fnFilter( this.value, $("tfoot input").index(this) );
    	} );
    	
    	/*
@@ -221,6 +263,39 @@
 	});
       
     }
+    
+
+
+    function clickRowHandler2() 
+    {
+    	var id;
+    	var idVpa;
+    	$('#patient tbody tr').contextmenu({
+    		target: '#context-menu',
+    		onItem: function (context, e) {
+    			
+    			if( $(e.target).text() == 'Détails' || $(e.target).is('#detailsCTX') ){
+    				vuedetails(id, idVpa);
+    			} 
+    			
+    		}
+    	
+    	}).bind('mousedown', function (e) {
+    			var aData = oTable2.fnGetData( this );
+    		    id = aData[7];
+    		    idVpa = aData[8];
+    	});
+    	
+    	$("#patient tbody tr").bind('dblclick', function (event) {
+    		var aData = oTable2.fnGetData( this );
+    		id = aData[7];
+    		idVpa = aData[8];
+    		vuedetails(id, idVpa);
+    	});
+    	
+    }
+    
+    
     
     function vuedetails(id_personne, idVpa){
     	var id_cons = $("#"+idVpa).val();

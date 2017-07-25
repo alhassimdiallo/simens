@@ -84,4 +84,71 @@ class OrdonConsommableTable{
 		
 		return $result;
 	}
+	
+	
+	/**
+	 * Ajouter des medicaments dans la base de données
+	 */
+	public function addMedicaments($medicament){
+		$db = $this->tableGateway->getAdapter();
+		$sql = new Sql($db);
+		$sQuery = $sql->insert()
+		->into('consommable')
+		->values(array('INTITULE' => $medicament));
+		$requete = $sql->prepareStatementForSqlObject($sQuery);
+		return $requete->execute()->getGeneratedValue();
+	}
+	
+	public function existeFormes($libelleForme){
+		$adapter = $this->tableGateway->getAdapter ();
+		$sql = new Sql ( $adapter );
+		$select = $sql->select ();
+		$select->columns( array('*'));
+		$select->from( array( 'fm' => 'forme_medicament' ));
+		$select->where ( array( 'fm.libelleForme' => $libelleForme));
+	
+		$stat = $sql->prepareStatementForSqlObject ( $select );
+		return $stat->execute ()->current();
+	}
+	
+	/**
+	 * Ajouter des formes
+	 */
+	public function addFormes($libelleForme){
+		if( $this->existeFormes($libelleForme) == false ){
+			$db = $this->tableGateway->getAdapter();
+			$sql = new Sql($db);
+			$sQuery = $sql->insert()
+			->into('forme_medicament')
+			->values(array('libelleForme' => $libelleForme));
+			$sql->prepareStatementForSqlObject($sQuery)->execute();
+		}
+	}
+	
+	
+	public function existeQuantites($libelleQuantite){
+		$adapter = $this->tableGateway->getAdapter ();
+		$sql = new Sql ( $adapter );
+		$select = $sql->select ();
+		$select->columns( array('*'));
+		$select->from( array( 'qm' => 'quantite_medicament' ));
+		$select->where ( array( 'qm.libelleQuantite' => $libelleQuantite));
+	
+		$stat = $sql->prepareStatementForSqlObject ( $select );
+		return $stat->execute ()->current();
+	}
+	
+	/**
+	 * Ajouter des formes
+	 */
+	public function addQuantites($libelleQuantite){
+		if( $this->existeQuantites($libelleQuantite) == false ){
+			$db = $this->tableGateway->getAdapter();
+			$sql = new Sql($db);
+			$sQuery = $sql->insert()
+			->into('quantite_medicament')
+			->values(array('libelleQuantite' => $libelleQuantite));
+			$sql->prepareStatementForSqlObject($sQuery)->execute();
+		}
+	}
 }

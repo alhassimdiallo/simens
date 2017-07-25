@@ -9,11 +9,12 @@
  * @NOTE: In practice, this file will typically be INCLUDED in your source
  * control, so do not include passwords or other sensitive information in this
  * file.
+ * Test Al Hassim
  */
 return array (
 		'db' => array (
 				'driver' => 'Pdo',
-				'dsn' => 'mysql:dbname=simenss;host=localhost',
+				'dsn' => 'mysql:dbname=simensp;host=localhost',
 				'driver_options' => array (
 						PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES \'UTF8\''
 				)

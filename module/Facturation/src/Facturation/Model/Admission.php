@@ -8,7 +8,10 @@ class Admission {
 	public $date_cons;
 	public $montant;
 	public $numero;
-	public $note;
+	public $montant_avec_majoration;
+	public $taux_majoration;
+	public $id_type_facturation;
+	public $organisme;
 	public $id_employe;
 	public $date_enregistrement;
 	public $date_archivage;
@@ -25,7 +28,10 @@ class Admission {
 		$this->numero = (! empty ( $data ['numero'] )) ? $data ['numero'] : null;
 		$this->id_employe = (! empty ( $data ['id_employe'] )) ? $data ['id_employe'] : null; 	
 		$this->date_enregistrement = (! empty ( $data ['date_enregistrement'] )) ? $data ['date_enregistrement'] : null;
-		$this->note = (! empty ( $data ['note'] )) ? $data ['note'] : null;
+		$this->montant_avec_majoration = (! empty ( $data ['montant_avec_majoration'] )) ? $data ['montant_avec_majoration'] : null;
+		$this->id_type_facturation = (! empty ( $data ['id_type_facturation'] )) ? $data ['id_type_facturation'] : null;
+		$this->taux_majoration = (! empty ( $data ['taux_majoration'] )) ? $data ['taux_majoration'] : null;
+		$this->organisme = (! empty ( $data ['organisme'] )) ? $data ['organisme'] : null;
 		$this->date_archivage = (! empty ( $data ['date_archivage'] )) ? $data ['date_archivage'] : null;
 		$this->heure_archivage = (! empty ( $data ['heure_archivage'] )) ? $data ['heure_archivage'] : null;
 		$this->cons_archive_applique = (! empty ( $data ['cons_archive_applique'] )) ? $data ['cons_archive_applique'] : null;

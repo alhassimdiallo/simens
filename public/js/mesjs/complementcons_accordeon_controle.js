@@ -1,3 +1,5 @@
+ var base_url = window.location.toString();
+ var tabUrl = base_url.split("public");
 
   $(function(){
 	$( "#accordionsssss").accordion();
@@ -99,7 +101,7 @@ $(function(){
 	var intervention_prevue = $("#intervention_prevue");
 	var observation = $("#observation");
 	
-	$("#chirurgicalImpression").click(function(){
+	$("#chirurgical1").click(function(){
 		diagnostic_traitement_chirurgical.attr( 'readonly', true).css({'background':'#f8f8f8'});
 		intervention_prevue.attr( 'readonly', true).css({'background':'#f8f8f8'});
 		observation.attr( 'readonly', true).css({'background':'#f8f8f8'});
@@ -266,15 +268,15 @@ $(function(){
 	var motif_transfert = $("#motif_transfert");
 	var hopital_accueil = $("#hopital_accueil");
 	var service_accueil = $("#service_accueil");
-	$("#transfert").click(function(){
-		motif_transfert.attr( 'readonly', true).css({'background':'#f8f8f8'});
-		$("#hopital_accueil_tampon").val(hopital_accueil.val());
-		hopital_accueil.attr( 'disabled', true).css({'background':'#f8f8f8'});
-		$("#service_accueil_tampon").val(service_accueil.val());
-		service_accueil.attr( 'disabled', true).css({'background':'#f8f8f8'});
-		$("#bouton_transfert_modifier").toggle(true);  //on affiche le bouton permettant de modifier les champs
-	    $("#bouton_transfert_valider").toggle(false); //on cache le bouton permettant de valider les champs
-	});
+//	$("#transfert").click(function(){ 
+//		motif_transfert.attr( 'readonly', true).css({'background':'#f8f8f8'});
+//		$("#hopital_accueil_tampon").val(hopital_accueil.val());
+//		//hopital_accueil.attr( 'disabled', true).css({'background':'#f8f8f8'});
+//		$("#service_accueil_tampon").val(service_accueil.val());
+//		//service_accueil.attr( 'disabled', true).css({'background':'#f8f8f8'});
+//		$("#bouton_transfert_modifier").toggle(true);  //on affiche le bouton permettant de modifier les champs
+//	    $("#bouton_transfert_valider").toggle(false); //on cache le bouton permettant de valider les champs
+//	});
 
 	$( "bouton_valider_transfert" ).button();
 	$( "bouton_modifier_transfert" ).button();
@@ -319,12 +321,12 @@ $(function(){
 $(function(){
 	var motif_hospitalisation = $("#motif_hospitalisation");
 	var date_fin_hospitalisation = $("#date_fin_hospitalisation_prevue");
-	$("#hospitalisation").click(function(){
-		motif_hospitalisation.attr( 'disabled', true).css({'background':'#f8f8f8'});
-		date_fin_hospitalisation.attr( 'disabled', true).css({'background':'#f8f8f8'});
-		$("#bouton_hospi_modifier").toggle(true);
-		$("#bouton_hospi_valider").toggle(false);	
-	});
+//	$("#hospitalisation").click(function(){
+//		motif_hospitalisation.attr( 'disabled', true).css({'background':'#f8f8f8'});
+//		date_fin_hospitalisation.attr( 'disabled', true).css({'background':'#f8f8f8'});
+//		$("#bouton_hospi_modifier").toggle(true);
+//		$("#bouton_hospi_valider").toggle(false);	
+//	});
 	
 	$("#annulerhospitalisation").click(function(){
 		motif_hospitalisation.val("");
@@ -430,7 +432,7 @@ $(function(){
 /***BOITE DE DIALOG POUR LA CONFIRMATION DE SUPPRESSION**/
 /***BOITE DE DIALOG POUR LA CONFIRMATION DE SUPPRESSION**/
 
-	var theHREF = "/simens/public/consultation/consultation-medecin";
+	var theHREF = tabUrl[0]+"public/consultation/consultation-medecin";
 	function confirmation(){
 		
  		$( "#confirmation2" ).dialog({
@@ -465,6 +467,8 @@ $(function(){
 	var temoinPoids = 0;
 	var temoinTemperature = 0;
 	var temoinPouls = 0;
+	var temoinTensionMaximale = 0;
+	var temoinTensionMinimale = 0;
 		
 	var valid = true;  // VARIABLE GLOBALE utilisï¿½e dans 'VALIDER LES DONNEES DU TABLEAU DES CONSTANTES'
 	/****** ======================================================================= *******/
@@ -479,21 +483,21 @@ $(function(){
 	    	$("#glycemie_capillaire").mask("9,99");
 	    });
 	    
-	    $("#taille").blur(function(){
-	    	var valeur = $('#taille').val();
-	    	if(isNaN(valeur/1) || valeur > 250 || valeur == ""){
-				valeur = null;
-				$("#taille").css("border-color","#FF0000");
-	            $("#erreur_taille").fadeIn().text("Max: 250cm").css({"color":"#ff5b5b","padding":" 0 10px 0 10px","margin-top":"-18px","font-size":"13px","font-style":"italic"});
-	            temoinTaille = 1;
-	    	} 
-	    	else{
-	    		$("#taille").css("border-color","");
-				$("#erreur_taille").fadeOut();
-				temoinTaille = 0;
-	    	}
-	    	return false;
-	    });
+//	    $("#taille").blur(function(){
+//	    	var valeur = $('#taille').val();
+//	    	if(isNaN(valeur/1) || valeur > 250 || valeur == ""){
+//				valeur = null;
+//				$("#taille").css("border-color","#FF0000");
+//	            $("#erreur_taille").fadeIn().text("Max: 250cm").css({"color":"#ff5b5b","padding":" 0 10px 0 10px","margin-top":"-18px","font-size":"13px","font-style":"italic"});
+//	            temoinTaille = 1;
+//	    	} 
+//	    	else{
+//	    		$("#taille").css("border-color","");
+//				$("#erreur_taille").fadeOut();
+//				temoinTaille = 0;
+//	    	}
+//	    	return false;
+//	    });
 	    
 	    $("#poids").blur(function(){
 	    	var valeur = $('#poids').val();
@@ -526,30 +530,42 @@ $(function(){
 	    	return false;
 	    });
 	    
+//	    $("#pouls").blur(function(){
+//	    	var valeur = $('#pouls').val();
+//			if(isNaN(valeur/1) || valeur > 150 || valeur == ""){
+//				$("#pouls").css("border-color","#FF0000");
+//				$("#erreur_pouls").fadeIn().text("Max: 150 battements").css({"color":"#ff5b5b","padding":" 0 10px 0 10px","margin-top":"-18px","font-size":"13px","font-style":"italic"});
+//				temoinPouls = 4;
+//			}else{
+//				$("#pouls").css("border-color","");
+//				$("#erreur_pouls").fadeOut();
+//				temoinPouls = 0;
+//			}
+//	    });
 	    
-	    $("#pressionarterielle").blur(function(){
-	    	if( $("#pressionarterielle").val() == "___/___" || $("#pressionarterielle").val() == ""){
-	    		$("#pressionarterielle").val('');
-	    		$("#pressionarterielle").mask("299/299");
-	    		$("#pressionarterielle").css("border-color","#FF0000");
-	    		$("#erreur_pressionarterielle").fadeIn().text("300mmHg / 300mmHg").css({"color":"#ff5b5b","padding":" 0 10px 0 10px","margin-top":"-18px","font-size":"13px","font-style":"italic"});
-	    	} else{
-	    		$("#pressionarterielle").css("border-color","");
-	    		$("#erreur_pressionarterielle").fadeOut();
-	    	}
-	    	return false;
+	    $("#tensionmaximale").blur(function(){
+	    	var valeur = $('#tensionmaximale').val();
+			if(isNaN(valeur/1) || valeur > 300 || valeur == ""){
+				$("#tensionmaximale").css("border-color","#FF0000");
+	    		$("#erreur_tensionmaximale").fadeIn().text("300mmHg").css({"color":"#ff5b5b","padding":" 0 10px 0 10px","margin-top":"-18px","font-size":"13px","font-style":"italic"});
+				temoinTensionMaximale = 5;
+			}else{
+				$("#tensionmaximale").css("border-color","");
+				$("#erreur_tensionmaximale").fadeOut();
+				temoinTensionMaximale = 0;
+			}
 	    });
 	    
-	    $("#pouls").blur(function(){
-	    	var valeur = $('#pouls').val();
-			if(isNaN(valeur/1) || valeur > 150 || valeur == ""){
-				$("#pouls").css("border-color","#FF0000");
-				$("#erreur_pouls").fadeIn().text("Max: 150 battements").css({"color":"#ff5b5b","padding":" 0 10px 0 10px","margin-top":"-18px","font-size":"13px","font-style":"italic"});
-				temoinPouls = 4;
+	    $("#tensionminimale").blur(function(){
+	    	var valeur = $('#tensionminimale').val();
+			if(isNaN(valeur/1) || valeur > 200 || valeur == ""){
+				$("#tensionminimale").css("border-color","#FF0000");
+	    		$("#erreur_tensionminimale").fadeIn().text("200mmHg").css({"color":"#ff5b5b","padding":" 0 10px 0 105px","margin-top":"-18px","font-size":"13px","font-style":"italic"});
+				temoinTensionMinimale = 6;
 			}else{
-				$("#pouls").css("border-color","");
-				$("#erreur_pouls").fadeOut();
-				temoinPouls = 0;
+				$("#tensionminimale").css("border-color","");
+				$("#erreur_tensionminimale").fadeOut();
+				temoinTensionMinimale = 0;
 			}
 	    });
 	}
@@ -560,16 +576,16 @@ $(function(){
 
      $("#terminer,#bouton_constantes_valider, #terminer2, #terminer3").click(function(){
 
-	     	valid = true;
-	         if( $("#taille").val() == "" || temoinTaille == 1){
-	             $("#taille").css("border-color","#FF0000");
-	             $("#erreur_taille").fadeIn().text("Max: 250cm").css({"color":"#ff5b5b","padding":" 0 10px 0 10px","margin-top":"-18px","font-size":"13px","font-style":"italic"});
-	             valid = false;
-	         }
-	         else{
-	         	$("#taille").css("border-color","");
-	         	$("#erreur_taille").fadeOut();
-	         }
+	     	 valid = true;
+//	         if( $("#taille").val() == "" || temoinTaille == 1){
+//	             $("#taille").css("border-color","#FF0000");
+//	             $("#erreur_taille").fadeIn().text("Max: 250cm").css({"color":"#ff5b5b","padding":" 0 10px 0 10px","margin-top":"-18px","font-size":"13px","font-style":"italic"});
+//	             valid = false;
+//	         }
+//	         else{
+//	         	$("#taille").css("border-color","");
+//	         	$("#erreur_taille").fadeOut();
+//	         }
 	         
 	         if( $("#poids").val() == "" || temoinPoids == 2){
 	         	 $("#poids").css("border-color","#FF0000");
@@ -591,24 +607,34 @@ $(function(){
 	         	$("#erreur_temperature").fadeOut();
 	         }
 	         
-	         if( $("#pouls").val() == "" || temoinPouls == 4){
-	         	 $("#pouls").css("border-color","#FF0000");
-	             $("#erreur_pouls").fadeIn().text("Max: 150 battements").css({"color":"#ff5b5b","padding":" 0 10px 0 10px","margin-top":"-18px","font-size":"13px","font-style":"italic"});
+//	         if( $("#pouls").val() == "" || temoinPouls == 4){
+//	         	 $("#pouls").css("border-color","#FF0000");
+//	             $("#erreur_pouls").fadeIn().text("Max: 150 battements").css({"color":"#ff5b5b","padding":" 0 10px 0 10px","margin-top":"-18px","font-size":"13px","font-style":"italic"});
+//	             valid = false;
+//	         }
+//	         else{
+//	         	 $("#pouls").css("border-color", "");
+//	             $("#erreur_pouls").fadeOut();
+//	         }
+	         
+	         if( $("#tensionmaximale").val() == "" || temoinTensionMaximale == 5){
+	         	 $("#tensionmaximale").css("border-color","#FF0000");
+		    	 $("#erreur_tensionmaximale").fadeIn().text("300mmHg").css({"color":"#ff5b5b","padding":" 0 10px 0 10px","margin-top":"-18px","font-size":"13px","font-style":"italic"});
 	             valid = false;
 	         }
 	         else{
-	         	 $("#pouls").css("border-color", "");
-	             $("#erreur_pouls").fadeOut();
+	         	 $("#tensionmaximale").css("border-color", "");
+	             $("#erreur_tensionmaximale").fadeOut();
 	         }
 	         
-	         if( $("#pressionarterielle").val() == ""){
-	        	 $("#pressionarterielle").css("border-color","#FF0000");
-	        	 $("#erreur_pressionarterielle").fadeIn().text("300mmHg / 300mmHg").css({"color":"#ff5b5b","padding":" 0 10px 0 10px","margin-top":"-18px","font-size":"13px","font-style":"italic"});
-	        	 valid = false;
+	         if( $("#tensionminimale").val() == "" || temoinTensionMinimale == 6 ){
+	         	 $("#tensionminimale").css("border-color","#FF0000");
+		    	 $("#erreur_tensionminimale").fadeIn().text("200mmHg").css({"color":"#ff5b5b","padding":" 0 10px 0 105px","margin-top":"-18px","font-size":"13px","font-style":"italic"});
+	             valid = false;
 	         }
 	         else{
-	        	 $("#pressionarterielle").css("border-color", "");
-	        	 $("#erreur_pressionarterielle").fadeOut();
+	         	 $("#tensionminimale").css("border-color", "");
+	             $("#erreur_tensionminimale").fadeOut();
 	         }
 	         
 	         return false;
@@ -619,11 +645,15 @@ $(function(){
 	//Method envoi POST pour updatecomplementconsultation
 	//Method envoi POST pour updatecomplementconsultation
 	function updateexecuterRequetePost(donnees) {
-		// Le formulaire monFormulaire existe deja dans la page
+		
 	    var formulaire = document.createElement("form");
 	 
-	    formulaire.setAttribute("action","/simens/public/consultation/update-complement-consultation"); 
+	    formulaire.setAttribute("action",tabUrl[0]+"public/consultation/update-complement-consultation"); 
 	    formulaire.setAttribute("method","POST"); 
+	    
+	    // Ajout du formulaire à la page
+	    document.body.appendChild(formulaire);
+	     
 	    for( donnee in donnees){
 	     // Ajout dynamique de champs dans le formulaire
 	        var champ = document.createElement("input");
@@ -632,7 +662,7 @@ $(function(){
 	        champ.setAttribute("value", donnees[donnee]);
 	        formulaire.appendChild(champ);
 	    }
-        
+	   
 	    // Envoi de la requete
 	    formulaire.submit();
 	    // Suppression du formulaire
@@ -642,9 +672,14 @@ $(function(){
     /***LORS DU CLICK SUR 'Terminer' ****/
 	/***LORS DU CLICK SUR 'Terminer' ****/
 	$("#terminer2, #terminer3").click(function() {
-		if (valid == false){return false;}
-		//return true;
-		//event.preventDefault(); 
+		if (valid == false){ 
+			$('#motifsAdmissionConstanteClick').trigger('click');
+			$('#constantesClick').trigger('click');
+			return false;
+		}
+		
+		$('#bouton_Acte_valider_demande button, #bouton_ExamenBio_valider_demande button, #bouton_morpho_valider_demande button').trigger('click');
+		
 	    var donnees = new Array();
 	    donnees['id_cons']    = $("#id_cons").val();
 	    donnees['terminer'] = 'save';
@@ -756,7 +791,8 @@ $(function(){
 		donnees['poids'] = $("#poids").val();
 		donnees['taille'] = $("#taille").val();
 		donnees['temperature'] = $("#temperature").val();
-		donnees['pressionarterielle'] = $("#pressionarterielle").val();
+		donnees['tensionmaximale'] = $("#tensionmaximale").val();
+		donnees['tensionminimale'] = $("#tensionminimale").val();
 		donnees['pouls'] = $("#pouls").val();
 		donnees['frequence_respiratoire'] = $("#frequence_respiratoire").val();
 		donnees['glycemie_capillaire'] = $("#glycemie_capillaire").val();
@@ -812,7 +848,7 @@ $(function(){
 		donnees['DiabeteAM'] = $("#DiabeteAM:checked").val(); 
 		if(!donnees['DiabeteAM']){ donnees['DiabeteAM'] = 0;}
 		/*Hta*/
-		donnees['htaAM'] = $("#htaAM:checked").val(); 
+		donnees['htaAM'] = $("#htaAM:checked").val();
 		if(!donnees['htaAM']){ donnees['htaAM'] = 0;}
 		/*Drepanocytose*/
 		donnees['drepanocytoseAM'] = $("#drepanocytoseAM:checked").val(); 
@@ -824,6 +860,32 @@ $(function(){
 		donnees['asthmeAM'] = $("#asthmeAM:checked").val(); 
 		if(!donnees['asthmeAM']){ donnees['asthmeAM'] = 0;}
 		
+		/*Ajout automatique des antecedents medicaux*/
+		var $nbCheckboxAM = ($('#nbCheckboxAM').val())+1;
+		var $nbCheck = 0;
+		var $ligne;
+		var $reste = ( $nbCheckboxAM - 1 ) % 5;
+  		var $nbElement = parseInt( ( $nbCheckboxAM - 1 ) / 5 ); 
+  		if($reste != 0){ $ligne = $nbElement + 1; }
+  		else { $ligne = $nbElement; }
+  		
+  		var k=0;
+  		var i;
+		for(var j=1 ; j<=$ligne ; j++){
+			for( i=0 ; i<5 ; i++){
+				var $champValider = $('#champValider_'+j+'_'+i+':checked').val();
+				if($champValider == 'on'){
+					donnees['champValider_'+k] = 1;
+					donnees['champTitreLabel_'+k] = $('#champTitreLabel_'+j+'_'+i).val();
+					k++;
+					$nbCheck++;
+				}
+			}
+			i=0; 
+		}
+		
+		donnees['nbCheckboxAM'] = $nbCheck;
+
 		//GYNECO-OBSTETRIQUE
 		/*Menarche*/
 		donnees['MenarcheGO'] = $("#MenarcheGO:checked").val(); 
@@ -1552,7 +1614,8 @@ $(function(){
 	  	var glycemie_capillaire = $('#glycemie_capillaire');
 	  	var pouls = $('#pouls');
 	  	var frequence_respiratoire = $('#frequence_respiratoire');
-	  	var pressionarterielle = $("#pressionarterielle");
+	  	var tensionmaximale = $("#tensionmaximale");
+	  	var tensionminimale = $("#tensionminimale");
 	  	
 		  //Au debut on cache le bouton modifier et on affiche le bouton valider
 	  	$( "#bouton_constantes_valider" ).toggle(true);
@@ -1567,7 +1630,8 @@ $(function(){
 	  	glycemie_capillaire.attr( 'readonly', false).css({'background':'#fff'});
 	  	pouls.attr( 'readonly', false).css({'background':'#fff'});
 	  	frequence_respiratoire.attr( 'readonly', false).css({'background':'#fff'});
-	  	pressionarterielle.attr( 'readonly', false ).css({'background':'#fff'});
+	  	tensionmaximale.attr( 'readonly', false ).css({'background':'#fff'});
+	  	tensionminimale.attr( 'readonly', false ).css({'background':'#fff'});
 
 	  	$( "#bouton_constantes_valider" ).click(function(){
 	  		if(valid == true){
@@ -1579,7 +1643,8 @@ $(function(){
 		   		glycemie_capillaire.attr( 'readonly', true).css({'background':'#f8f8f8'});
 		   		pouls.attr( 'readonly', true).css({'background':'#f8f8f8'});
 		   		frequence_respiratoire.attr( 'readonly', true).css({'background':'#f8f8f8'});
-		   		pressionarterielle.attr( 'readonly', true ).css({'background':'#f8f8f8'});
+		   		tensionmaximale.attr( 'readonly', true ).css({'background':'#f8f8f8'});
+		   		tensionminimale.attr( 'readonly', true ).css({'background':'#f8f8f8'});
 		   		
 	  		    $("#bouton_constantes_modifier").toggle(true);  //on affiche le bouton permettant de modifier les champs
 	  		    $("#bouton_constantes_valider").toggle(false); //on cache le bouton permettant de valider les champs
@@ -1596,14 +1661,15 @@ $(function(){
 	  		glycemie_capillaire.attr( 'readonly', false).css({'background':'#fff'});
 	  		pouls.attr( 'readonly', false).css({'background':'#fff'});
 	  		frequence_respiratoire.attr( 'readonly', false).css({'background':'#fff'});
-	  		pressionarterielle.attr( 'readonly', false ).css({'background':'#fff'});
+	  		tensionmaximale.attr( 'readonly', false ).css({'background':'#fff'});
+	  		tensionminimale.attr( 'readonly', false ).css({'background':'#fff'});
 	  		
 	  	 	$("#bouton_constantes_modifier").toggle(false);   //on cache le bouton permettant de modifier les champs
 	  	 	$("#bouton_constantes_valider").toggle(true);    //on affiche le bouton permettant de valider les champs
 	  	 	return  false;
 	  	});
 
-	  	$('#dateDebAlcoolique input, #dateFinAlcoolique input, #dateDebFumeur input, #dateFinFumeur input, #dateDebDroguer input, #dateFinDroguer input, #date_fin_hospitalisation_prevue').datepicker(
+	  	$('#dateDebAlcoolique input, #dateFinAlcoolique input, #dateDebFumeur input, #dateFinFumeur input, #dateDebDroguer input, #dateFinDroguer input').datepicker(
 				$.datepicker.regional['fr'] = {
 						closeText: 'Fermer',
 						changeYear: true,
@@ -1629,3 +1695,203 @@ $(function(){
 						changeYear: true,
 						yearSuffix: ''}
 		);
+	  	
+	  	
+	  	$('#date_fin_hospitalisation_prevue').datepicker(
+				$.datepicker.regional['fr'] = {
+						closeText: 'Fermer',
+						changeYear: true,
+						yearRange: 'c-80:c',
+						prevText: '&#x3c;PrÃ©c',
+						nextText: 'Suiv&#x3e;',
+						currentText: 'Courant',
+						monthNames: ['Janvier','Fevrier','Mars','Avril','Mai','Juin',
+						'Juillet','Aout','Septembre','Octobre','Novembre','Decembre'],
+						monthNamesShort: ['Jan','Fev','Mar','Avr','Mai','Jun',
+						'Jul','Aout','Sep','Oct','Nov','Dec'],
+						dayNames: ['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'],
+						dayNamesShort: ['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'],
+						dayNamesMin: ['Di','Lu','Ma','Me','Je','Ve','Sa'],
+						weekHeader: 'Sm',
+						dateFormat: 'dd/mm/yy',
+						firstDay: 1,
+						isRTL: false,
+						minDate: 1,
+						showMonthAfterYear: false,
+						yearRange: '1990:2025',
+						showAnim : 'bounce',
+						changeMonth: true,
+						changeYear: true,
+						yearSuffix: '',
+				}
+		);
+	  	
+	  	//===================================================================================================================
+	  	//===================================================================================================================
+	  	//===================================================================================================================
+	  	//===================================================================================================================
+	  	//===================================================================================================================
+	  	//===================================================================================================================
+	  	//===================================================================================================================
+	  	//===================================================================================================================
+	  	//===================================================================================================================
+	  	//===================================================================================================================
+	  	//===================================================================================================================
+	  	//===================================================================================================================
+	  	//===================================================================================================================
+	  	//===================================================================================================================
+	  	//===================================================================================================================
+	  	//===================================================================================================================
+	  	//===================================================================================================================
+	  	//===================================================================================================================
+	  	var itab = 1;
+	  	var ligne = 0; 
+	  	var tableau = [];
+	  	
+	  	function ajouterToutLabelAntecedentsMedicaux(tableau_){
+	  		for(var l = 1; l <= ligne; l++){
+	  			if( l == 1 ){
+		  			$("#labelDesAntecedentsMedicaux_"+1).html("").css({'height' : '0px'});
+		  			itab = 1;
+	  			} else {
+		  			$("#labelDesAntecedentsMedicaux_"+l).remove();
+	  			}
+	  		}
+	  		
+	  		var tab = [];
+	  		var j = 1;
+	  		
+	  		for(var i=1 ; i<tableau_.length ; i++){
+	  			if( tableau_[i] ){
+	  				tab[j++] = tableau_[i];
+	  				itab++;
+	  				ajouterLabelAntecedentsMedicaux(tableau_[i]);
+	  			}
+	  		}
+
+	  		tableau = tab;
+	  		itab = j;
+	  		$('#nbCheckboxAM').val(itab);
+
+	  		stopPropagation();
+	  	}
+	  	
+	  	
+	  	//Ajouter des labels au click sur ajouter
+	  	//Ajouter des labels au click sur ajouter
+	  	//Ajouter des labels au click sur ajouter
+	  	var scriptLabel = "";
+	  	function ajouterLabelAntecedentsMedicaux(nomLabel){
+	  		
+	  		if(!nomLabel){ stopPropagation(); }
+	  		
+	  		var reste = ( itab - 1 ) % 5; 
+	  		var nbElement = parseInt( ( itab - 1 ) / 5 ); 
+	  		if(reste != 0){ ligne = nbElement + 1; }
+	  		else { ligne = nbElement; }
+	  		
+	  		var i = 0;
+	  		if(ligne == 1){
+		  		i = $("#labelDesAntecedentsMedicaux_"+ligne+" td").length;
+	  		} else {
+	  			if(reste == 1){
+		  			$("#labelDesAntecedentsMedicaux_"+(ligne-1)).after(
+	            			"<tr id='labelDesAntecedentsMedicaux_"+ligne+"' style='width:100%; '>"+
+	            			"</tr>");
+	  			}
+	  			i = $("#labelDesAntecedentsMedicaux_"+ligne+" td").length;
+	  		}
+	  		
+	  		scriptLabel = 
+  				"<td id='BUcheckbox' class='label_"+ligne+"_"+i+"' style='width: 20%; '> "+
+                "<div > "+
+                " <label style='width: 90%; height:30px; text-align:right; font-family: time new romans; font-size: 18px;'> "+
+                "    <span style='padding-left: -10px;'> "+
+                "       <a href='javascript:supprimerLabelAM("+ligne+","+i+");' ><img class='imageSupprimerAsthmeAM' style='cursor: pointer; float: right; margin-right: -10px; width:10px; height: 10px;' src='"+tabUrl[0]+"public/images_icons/sup.png' /></a> "+ 
+                "       <img class='imageValider_"+ligne+"_"+i+"'  style='cursor: pointer; margin-left: -15px;' src='"+tabUrl[0]+"public/images_icons/tick-icon2.png' /> "+  
+                "    </span> "+
+                nomLabel +"  <input type='checkbox' checked='${this.checked}' name='champValider_"+ligne+"_"+i+"' id='champValider_"+ligne+"_"+i+"' > "+
+                " <input type='hidden'  id='champTitreLabel_"+ligne+"_"+i+"' value='"+nomLabel+"' > "+
+                " </label> "+
+                "</div> "+
+                "</td> "+
+                
+                "<script>"+
+                "$('#champValider_"+ligne+"_"+i+"').click(function(){"+
+	  			"var boutons = $('#champValider_"+ligne+"_"+i+"');"+
+	  			"if( boutons[0].checked){ $('.imageValider_"+ligne+"_"+i+"').toggle(true);  }"+
+	  			"if(!boutons[0].checked){ $('.imageValider_"+ligne+"_"+i+"').toggle(false); }"+
+	  		    "});"+
+	  		    "</script>"
+                ;
+	  		
+	  		if( i == 0 ){
+	  			//AJOUTER ELEMENT SUIVANT
+	            $("#labelDesAntecedentsMedicaux_"+ligne).html(scriptLabel);
+	            $("#labelDesAntecedentsMedicaux_"+ligne).css({'height' : '50px'});
+	  	    } else if( i < 5 ){
+	  	    	//AJOUTER ELEMENT SUIVANT
+	            $("#labelDesAntecedentsMedicaux_"+ligne+" .label_"+ligne+"_"+(i-1)).after(scriptLabel);
+	  	    }
+	  		
+	  	}
+
+	  	//Ajouter un label --- Ajouter un label
+	  	//Ajouter un label --- Ajouter un label
+	  	//Ajouter un label --- Ajouter un label
+
+	  	$('#imgIconeAjouterLabel').click(function(){
+	  		if(!$('#autresAM').val()){ stopPropagation(); }
+	  		else{
+	  			tableau[itab++] = $('#autresAM').val();
+	  			ajouterLabelAntecedentsMedicaux($('#autresAM').val());
+	  			$('#nbCheckboxAM').val(itab);
+	  			$('#autresAM').val("");
+	  		}
+	  		stopPropagation();
+	  	});
+	  	
+	  	
+	  	//Supprimer un label ajouter --- Supprimer un label ajouter
+	  	//Supprimer un label ajouter --- Supprimer un label ajouter
+	  	//Supprimer un label ajouter --- Supprimer un label ajouter
+	  	function supprimerLabelAM(ligne, i){
+	  		
+	  		var pos = ((ligne - 1)*5)+i;
+	  		var indiceTableau = pos+1; 
+	  		tableau[indiceTableau] = "";
+	  		
+	  		$("#labelDesAntecedentsMedicaux_"+ligne+" .label_"+ligne+"_"+i).fadeOut(
+	  			function(){	ajouterToutLabelAntecedentsMedicaux(tableau); }
+	  		);
+		  	
+	  	}
+        
+	  	//Ajout de l'auto-completion sur le champ autre
+	    //Ajout de l'auto-completion sur le champ autre
+	  	
+	  	function autocompletionAntecedent(myArrayMedicament){
+		  	$( "#imageIconeAjouterLabel label input" ).autocomplete({
+			  	  source: myArrayMedicament
+			    });
+	  	}
+	  	
+	  	
+	  	function affichageAntecedentsMedicauxDuPatient(nbElement, tableau_){
+	  		for(var i=1 ; i<=nbElement ; i++){
+	  			itab++;
+	  			ajouterLabelAntecedentsMedicaux(tableau_[i]);
+	  		}
+	  		tableau = tableau_;
+	  	}
+	  	
+	    //===================================================================================================================
+	  	//===================================================================================================================
+	  	//===================================================================================================================
+	  	//===================================================================================================================
+	  	//===================================================================================================================
+	  	//===================================================================================================================
+	  	//===================================================================================================================
+	  	//===================================================================================================================
+	  	
+	  	

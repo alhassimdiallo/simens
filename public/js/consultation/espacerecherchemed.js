@@ -107,7 +107,7 @@ function calendrier(){
     					firstDay: 1,
     					isRTL: false,
     					showMonthAfterYear: false,
-    					yearRange: '1990:2015',
+    					yearRange: '1910:2035',
     					showAnim : 'bounce',
     					changeMonth: true,
     					changeYear: true,

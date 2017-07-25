@@ -22,12 +22,12 @@ $('#style3HospitalisationArchive').css({'font-weight':'bold','color':'white','fo
 <script type="text/javascript">
 $(window).load(function () {
 	$('#wait').toggle(false);
-	$('#contenu').fadeIn().css({'visibility':'visible'});
+	$('#toutLeContenu').fadeIn().css({'visibility':'visible'});
 });
 </script>
 
 <style>
-#contenu{ visibility: hidden };
+#toutLeContenu{ visibility: hidden; };
 </style>
 
 <div id="titre" style='font-family: police2; text-decoration: none; color: green; font-size: 20px; font-weight: bold; padding-left:20px;'>
@@ -35,13 +35,15 @@ $(window).load(function () {
 	LISTE DES PATIENTS
 </div>
 <div id="wait" style="color: gray; font-size: 20px; text-align: center; margin-top: 80px;" > <span> Chargement ... </span> </div>
+
+<div id="toutLeContenu"> 
 <div id="contenu"> 
 
             <table id="patient" class="table table-bordered tab_list_mini" >
 				<thead>
 					<tr style="height: 50px; width:100%;">
 						<th id="nom" style='cursor: pointer;'>Nom</th>
-						<th id="prenom" style='cursor: pointer;'>Prenom</th>
+						<th id="prenom" style='cursor: pointer;'>Pr&eacute;nom</th>
 						<th id="date" style='cursor: pointer;'>Date. naiss</th>
 						<th id="sexe" style='cursor: pointer;'>Sexe</th>
 						<th id="adresse" style='cursor: pointer;'>Date & Heure D&eacute;but</th>
@@ -85,6 +87,7 @@ $(window).load(function () {
 <div id="vue_detail_hospi_patient">
 
 </div>
+</div>
 
 <!--***********************************************************************************************-->                              
 
@@ -102,7 +105,7 @@ $(window).load(function () {
         
 <!--***********************************************************************************************-->                              
 
-<!--==========================POP UP pour Afficher les détails =================================-->                              
+<!--============================ POP UP pour Afficher les détails =================================-->                              
                           
 <!--***********************************************************************************************-->  
         <div id="application_soin" title="Ajouter une note" style="display:none;">
@@ -120,6 +123,20 @@ $(window).load(function () {
              </div>
         
         </div>
+
+        
+        
+<div id="context-menu">
+    <ul class="dropdown-menu" >
+         <li><a style="cursor: pointer;" ><img id="detailsCTX" style='margin-right: 10px; width: 19px; height: 16px;' src='/simens/public/images_icons/voir.png'>D&eacute;tails</a></li>
+         <li class="divider2"></li>
+         <li><a style="cursor: pointer;"><img  id="appliquerCTX" style='margin-right: 10px; margin-left: -3px; ' src='/simens/public/img/dark/blu-ray.png'>Appliquer un soin</a></li>
+         <li class="divider"></li>
+         <li><a id="quitterCTX"  style="cursor: pointer;">Quitter</a></li>
+    </ul>
+</div>
+
+
 
 <script type="text/javascript">
 function FaireClignoterImage (){

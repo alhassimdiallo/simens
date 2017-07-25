@@ -42,14 +42,14 @@ echo $this->headScript()->appendFile($this->basepath().'/js/consultation/jsEncou
   background: #eaecea;
 }
 
-#contenuHospitalisation{ visibility: hidden }
+#contenuHospitalisation, #titre{ visibility: hidden; }
 </style>
 
 <script>
 $(window).load(function () {
 
 	$('#wait').toggle(false);
-	$('#contenuHospitalisation').fadeIn().css({'visibility':'visible'});
+	$('#contenuHospitalisation, #titre').fadeIn().css({'visibility':'visible'});
 	 
 });
 </script>
@@ -58,6 +58,7 @@ $(window).load(function () {
 	<iS style='font-size: 25px;'>&curren;</iS>
 	LISTE DES PATIENTS
 </div>
+
 <div id="wait" style="color: gray; font-size: 20px; text-align: center; margin-top: 80px;" > <span> Chargement ... </span> </div>
 
 <div id="contenuHospitalisation">
@@ -105,6 +106,20 @@ $(window).load(function () {
 				</tfoot>
 			</table>
 </div>
+
+
+<div id="context-menu">
+    <ul class="dropdown-menu" >
+         <li><a style="cursor: pointer;" ><img id="detailsCTX" style='margin-right: 10px; margin-left: -3px; width: 19px; height: 16px;' src='/simens/public/images_icons/voir.png'>D&eacute;tails</a></li>
+         <li class="divider2"></li>
+         <li class="lien1"><a style="cursor: pointer;"><img  id="administrerCTX" style='margin-right: 10px;  width: 16px; height: 16px;' src='/simens/public/images_icons/details.png'>Administrer</a></li>
+         <li class="divider2"></li>
+         <li class="lien1"><a style="cursor: pointer;" ><img id="libererCTX" style='margin-right: 10px; width: 16px; height: 16px;' src='/simens/public/images_icons/edit_item_btn.png'>Lib&eacute;rer</a></li>
+         <li class="divider"></li>
+         <li><a id="quitterCTX"  style="cursor: pointer;">Quitter</a></li>
+    </ul>
+</div>
+
 
 <div id="vue_patient">
 

@@ -26,14 +26,11 @@
 	                	     nb = result;
 	                	     $("#"+cle).parent().parent().fadeOut(function(){
 		                	 	 $("#"+cle).empty();
-		                	    	 //vart=tabUrl[0]+'public/facturation/liste-patient';
-			                         //$(location).attr("href",vart);
 		                	 });
 	                },
 	                error:function(e){console.log(e);alert("Une erreur interne est survenue!");},
 	                dataType: "html"
 	            });
-	    	    // return false;
 	        },
 	        "Annuler": function() {
                 $(this).dialog( "close" );
@@ -43,7 +40,6 @@
     }
     
     function envoyer(id){
-     //e.preventDefault();
    	 confirmation(id);
      $("#confirmation").dialog('open');
    	}
@@ -91,3 +87,48 @@
 	} );
 
     }
+    
+
+    function clickRowHandler() 
+    {
+    	var id;
+    	$('#patient tbody tr').contextmenu({
+    		target: '#context-menu',
+    		onItem: function (context, e) {
+    			
+    			if($(e.target).text() == 'Visualiser' || $(e.target).is('#visualiserCTX')){
+    				visualiser(id);
+    			} else 
+    				if($(e.target).text() == 'Modifier' || $(e.target).is('#modifierCTX')){
+    					modifier(id);
+    				}
+    			
+    		}
+    	
+    	}).bind('mousedown', function (e) {
+    			var aData = oTable.fnGetData( this );
+    		    id = aData[7];
+    	});
+    	
+    	
+    	
+    	$("#patient tbody tr").bind('dblclick', function (event) {
+    		var aData = oTable.fnGetData( this );
+    		var id = aData[7];
+    		visualiser(id);
+    	});
+    	
+    }
+
+    
+    function visualiser(id){
+    	vart=tabUrl[0]+'public/facturation/info-patient/id_patient/'+id;
+        $(location).attr("href",vart);
+    }
+    
+    function modifier(id){
+    	vart=tabUrl[0]+'public/facturation/modifier/id_patient/'+id;
+        $(location).attr("href",vart);
+    }
+    
+    

@@ -57,7 +57,8 @@
 	var glycemie_capillaire = $('#glycemie_capillaire');
 	var pouls = $('#pouls');
 	var frequence_respiratoire = $('#frequence_respiratoire');
-	var pressionarterielle = $("#pressionarterielle");
+	var tensionmaximale = $("#tensionmaximale");
+	var tensionminimale = $("#tensionminimale");
 		  
 	poids.attr( 'disabled', true ).css({'background':'#f8f8f8'});    
 	taille.attr( 'disabled', true ).css({'background':'#f8f8f8'});
@@ -65,7 +66,8 @@
 	glycemie_capillaire.attr( 'disabled', true).css({'background':'#f8f8f8'});
 	pouls.attr( 'disabled', true).css({'background':'#f8f8f8'});
 	frequence_respiratoire.attr( 'disabled', true).css({'background':'#f8f8f8'});
-	pressionarterielle.attr( 'disabled', true ).css({'background':'#f8f8f8'});
+	tensionmaximale.attr( 'disabled', true ).css({'background':'#f8f8f8'});
+	tensionminimale.attr( 'disabled', true ).css({'background':'#f8f8f8'});
 		   		
 	$("#bouton_constantes_modifier").toggle(false);  
 	$("#bouton_constantes_valider").toggle(false); 
@@ -891,3 +893,106 @@ setTimeout(function(){
 	$('#BUcheckbox input[name=croixcorpscetonique]').click(function(){
 		//corpscetoniqueOption();
 	});
+	
+	
+	
+	
+	//===================================================================================================================
+  	//===================================================================================================================
+  	//===================================================================================================================
+  	//===================================================================================================================
+  	//===================================================================================================================
+  	//===================================================================================================================
+  	//===================================================================================================================
+  	//===================================================================================================================
+  	//===================================================================================================================
+  	//===================================================================================================================
+  	//===================================================================================================================
+  	//===================================================================================================================
+  	//===================================================================================================================
+  	//===================================================================================================================
+  	//===================================================================================================================
+  	//===================================================================================================================
+  	//===================================================================================================================
+  	var itab = 1;
+  	var ligne = 0; 
+  	var tableau = [];
+  	
+  	//Ajouter des labels au click sur ajouter
+  	//Ajouter des labels au click sur ajouter
+  	//Ajouter des labels au click sur ajouter
+  	var scriptLabel = "";
+  	function ajouterLabelAntecedentsMedicaux(nomLabel){
+  		
+  		if(!nomLabel){ stopPropagation(); }
+  		
+  		var reste = ( itab - 1 ) % 5; 
+  		var nbElement = parseInt( ( itab - 1 ) / 5 ); 
+  		if(reste != 0){ ligne = nbElement + 1; }
+  		else { ligne = nbElement; }
+  		
+  		var i = 0;
+  		if(ligne == 1){
+	  		i = $("#labelDesAntecedentsMedicaux_"+ligne+" td").length;
+  		} else {
+  			if(reste == 1){
+	  			$("#labelDesAntecedentsMedicaux_"+(ligne-1)).after(
+            			"<tr id='labelDesAntecedentsMedicaux_"+ligne+"' style='width:100%; '>"+
+            			"</tr>");
+  			}
+  			i = $("#labelDesAntecedentsMedicaux_"+ligne+" td").length;
+  		}
+  		
+  		scriptLabel = 
+				"<td id='BUcheckbox' class='label_"+ligne+"_"+i+"' style='width: 20%; '> "+
+            "<div > "+
+            " <label style='width: 90%; height:30px; text-align:right; font-family: time new romans; font-size: 18px;'> "+
+            "    <span style='padding-left: -10px;'> "+
+            "       <a href='javascript:supprimerLabelAM("+ligne+","+i+");' ></a> "+ 
+            "       <img class='imageValider_"+ligne+"_"+i+"'  style='cursor: pointer; margin-left: -15px;' src='"+tabUrl[0]+"public/images_icons/tick-icon2.png' /> "+  
+            "    </span> "+
+            nomLabel +"  <input type='checkbox' disabled='true' checked='${this.checked}' name='champValider_"+ligne+"_"+i+"' id='champValider_"+ligne+"_"+i+"' > "+
+            " <input type='hidden'  id='champTitreLabel_"+ligne+"_"+i+"' value='"+nomLabel+"' > "+
+            " </label> "+
+            "</div> "+
+            "</td> "+
+            
+            "<script>"+
+            "$('#champValider_"+ligne+"_"+i+"').click(function(){"+
+  			"var boutons = $('#champValider_"+ligne+"_"+i+"');"+
+  			"if( boutons[0].checked){ $('.imageValider_"+ligne+"_"+i+"').toggle(true);  }"+
+  			"if(!boutons[0].checked){ $('.imageValider_"+ligne+"_"+i+"').toggle(false); }"+
+  		    "});"+
+  		    "</script>"
+            ;
+  		
+  		if( i == 0 ){
+  			//AJOUTER ELEMENT SUIVANT
+            $("#labelDesAntecedentsMedicaux_"+ligne).html(scriptLabel);
+            $("#labelDesAntecedentsMedicaux_"+ligne).css({'height' : '50px'});
+  	    } else if( i < 5 ){
+  	    	//AJOUTER ELEMENT SUIVANT
+            $("#labelDesAntecedentsMedicaux_"+ligne+" .label_"+ligne+"_"+(i-1)).after(scriptLabel);
+  	    }
+  		
+  	}
+
+  	
+  	function affichageAntecedentsMedicauxDuPatient(nbElement, tableau_){
+  		for(var i=1 ; i<=nbElement ; i++){
+  			itab++;
+  			ajouterLabelAntecedentsMedicaux(tableau_[i]);
+  		}
+  		tableau = tableau_;
+  	}
+  	
+    //===================================================================================================================
+  	//===================================================================================================================
+  	//===================================================================================================================
+  	//===================================================================================================================
+  	//===================================================================================================================
+  	//===================================================================================================================
+  	//===================================================================================================================
+  	//===================================================================================================================
+  	
+  	

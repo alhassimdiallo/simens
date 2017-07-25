@@ -51,7 +51,7 @@ class ConsultationTable {
 		$select = $sql->select ();
 		$select->columns( array( '*' ));
 		$select->from( array( 'c' => 'consultation' ));
-		$select->join( array('e1' => 'employe'), 'e1.id_personne = c.ID_MEDECIN' , array());
+		$select->join( array('e1' => 'employe'), 'e1.id_personne = c.ID_MEDECIN' , array('*'));
 		$select->join( array('p1' => 'personne'), 'e1.id_personne = p1.ID_PERSONNE' , array('*'));
 		$select->join( array('s' => 'service'), 's.ID_SERVICE = c.ID_SERVICE' , array('nomService' => 'NOM', 'domaineService' => 'DOMAINE'));
 	
@@ -66,6 +66,24 @@ class ConsultationTable {
 		$result = $stat->execute ();
 	
 		return $result;
+	}
+	
+	public function getInfosSurveillant($id_personne){
+		$adapter = $this->tableGateway->getAdapter ();
+		$sql = new Sql ( $adapter );
+		$select = $sql->select ();
+		$select->columns( array( '*' ));
+		$select->from( array('e1' => 'employe'));
+		$select->join( array('p1' => 'personne'), 'e1.id_personne = p1.ID_PERSONNE' , array('*'));
+	
+		$where = new Where();
+		$where->equalTo('e1.id_personne', $id_personne);
+		$select->where($where);
+	
+		$stat = $sql->prepareStatementForSqlObject ( $select );
+		$result = $stat->execute ();
+	
+		return $result->current();
 	}
 	
 	public function updateConsultation($values)
@@ -104,7 +122,6 @@ class ConsultationTable {
 		$this->tableGateway->getAdapter()->getDriver()->getConnection()->beginTransaction();
 		
 		try {
-			$result = $this->tableGateway->delete(array('ID_CONS' => $values->get ( "id_cons" )->getValue ()));
 			
 			$dataconsultation = array(
 					'ID_CONS'=> $values->get ( "id_cons" )->getValue (), 
@@ -274,4 +291,306 @@ class ConsultationTable {
 		return $result;
 	}
 	
+	//GESTION DES FICHIER MP3
+	//GESTION DES FICHIER MP3
+	//GESTION DES FICHIER MP3
+	public function insererMp3($titre , $nom, $id_cons, $type){
+		$db = $this->tableGateway->getAdapter();
+		$sql = new Sql($db);
+		$sQuery = $sql->insert()
+		->into('fichier_mp3')
+		->columns(array('titre', 'nom', 'id_cons', 'type'))
+		->values(array('titre' => $titre , 'nom' => $nom, 'id_cons'=>$id_cons, 'type'=>$type));
+	
+		$stat = $sql->prepareStatementForSqlObject($sQuery);
+		return $stat->execute();
+	}
+	
+	public function getMp3($id_cons, $type){
+		$db = $this->tableGateway->getAdapter();
+		$sql = new Sql($db);
+		$sQuery = $sql->select()
+		->from(array('f' => 'fichier_mp3'))->columns(array('*'))
+		->where(array('id_cons' => $id_cons, 'type' => $type))
+		->order('id DESC');
+	
+		$stat = $sql->prepareStatementForSqlObject($sQuery);
+		$result = $stat->execute();
+		return $result;
+	}
+	
+	public function supprimerMp3($idLigne, $id_cons, $type){
+		$liste = $this->getMp3($id_cons, $type);
+	
+		$i=1;
+		foreach ($liste as $list){
+			if($i == $idLigne){
+				unlink('C:\wamp\www\simens\public\audios\\'.$list['nom']);
+	
+				$db = $this->tableGateway->getAdapter();
+				$sql = new Sql($db);
+				$sQuery = $sql->delete()
+				->from('fichier_mp3')
+				->where(array('id' => $list['id']));
+	
+				$stat = $sql->prepareStatementForSqlObject($sQuery);
+				$stat->execute();
+	
+				return true;
+			}
+			$i++;
+		}
+		return false;
+	}
+	
+	//GESTION DES FICHIERS VIDEOS
+	//GESTION DES FICHIERS VIDEOS
+	//GESTION DES FICHIERS VIDEOS
+	public function insererVideo($titre , $nom, $format, $id_cons){
+		$db = $this->tableGateway->getAdapter();
+		$sql = new Sql($db);
+		$sQuery = $sql->insert()
+		->into('fichier_video')
+		->columns(array('titre', 'nom', 'format', 'id_cons'))
+		->values(array('titre' => $titre , 'nom' => $nom, 'format' => $format, 'id_cons'=>$id_cons));
+	
+		$stat = $sql->prepareStatementForSqlObject($sQuery);
+		return $stat->execute();
+	}
+	
+	public function getVideos($id_cons){
+		$db = $this->tableGateway->getAdapter();
+		$sql = new Sql($db);
+		$sQuery = $sql->select()
+		->from(array('f' => 'fichier_video'))->columns(array('*'))
+		->where(array('id_cons' => $id_cons))
+		->order('id DESC');
+	
+		$stat = $sql->prepareStatementForSqlObject($sQuery);
+		$result = $stat->execute();
+		return $result;
+	}
+	
+	public function getVideoWithId($id){
+		$db = $this->tableGateway->getAdapter();
+		$sql = new Sql($db);
+		$sQuery = $sql->select()
+		->from(array('f' => 'fichier_video'))->columns(array('*'))
+		->where(array('id' => $id));
+	
+		$stat = $sql->prepareStatementForSqlObject($sQuery);
+		$result = $stat->execute()->current();
+		return $result;
+	}
+	
+	public function supprimerVideo($id){
+	
+		$laVideo = $this->getVideoWithId($id);
+		$result = unlink('C:\wamp\www\simens\public\videos\\'.$laVideo['nom']);
+			
+		$db = $this->tableGateway->getAdapter();
+		$sql = new Sql($db);
+		$sQuery = $sql->delete()->from('fichier_video')->where(array('id' => $id));
+	
+		$stat = $sql->prepareStatementForSqlObject($sQuery);
+		$stat->execute();
+			
+		return $result;
+	}
+	
+	//GESTION DES EXAMENS DU JOUR LORS D'UNE HOSPITALISATION
+	//GESTION DES EXAMENS DU JOUR LORS D'UNE HOSPITALISATION
+	public function addConsultationExamenDuJour($codeExamen, $values , $IdDuService , $idMedecin){
+		$this->tableGateway->getAdapter()->getDriver()->getConnection()->beginTransaction();
+		$date = new \DateTime();
+		$aujourdhui = $date->format('Y-m-d H:i:s');
+		$dateonly = $date->format('Y-m-d');
+			
+		try {
+			$dataconsultation = array(
+					'ID_CONS'=> $codeExamen,
+					'ID_MEDECIN'=> $idMedecin,
+					'ID_PATIENT'=> $values->id_personne,
+					'DATE'=> $aujourdhui,
+					'POIDS' => $values->poids,
+					'TAILLE' => $values->taille,
+					'TEMPERATURE' => $values->temperature,
+					'PRESSION_ARTERIELLE' => $values->pressionarterielle,
+					'POULS' => $values->pouls,
+					'FREQUENCE_RESPIRATOIRE' => $values->frequence_respiratoire,
+					'GLYCEMIE_CAPILLAIRE' => $values->glycemie_capillaire,
+					'DATEONLY' => $dateonly,
+					'ID_SERVICE' => $IdDuService
+			);
+	
+			$this->tableGateway->insert($dataconsultation);
+	
+			$this->tableGateway->getAdapter()->getDriver()->getConnection()->commit();
+		} catch (\Exception $e) {
+			$this->tableGateway->getAdapter()->getDriver()->getConnection()->rollback();
+		}
+	}
+	
+	public function addExamenDuJour($id_cons, $id_hosp){
+		$db = $this->tableGateway->getAdapter();
+		$sql = new Sql($db);
+		$sQuery = $sql->insert()
+		->into('examen_du_jour')
+		->values(array('ID_CONS' => $id_cons, 'ID_HOSP' => $id_hosp));
+		$requete = $sql->prepareStatementForSqlObject($sQuery);
+		$requete->execute();
+	}
+	
+	public function getExamenDuJour($id_hosp){
+		$db = $this->tableGateway->getAdapter();
+		$sql = new Sql($db);
+		$sQuery = $sql->select()
+		->from(array('e' => 'examen_du_jour'))
+		->join(array('c' => 'consultation'), 'c.ID_CONS = e.ID_CONS' , array('*'))
+		->join(array('p' => 'personne'), 'p.ID_PERSONNE = c.ID_MEDECIN' , array('NomMedecin' => 'NOM', 'PrenomMedecin' => 'PRENOM'))
+		->where(array('ID_HOSP' => $id_hosp))
+		->order('DATE DESC');
+		$requete = $sql->prepareStatementForSqlObject($sQuery);
+		return $requete->execute();
+	}
+	
+	public function supprimerExamenDuJour($id_examen_jour){
+		$db = $this->tableGateway->getAdapter();
+		$sql = new Sql($db);
+		$sQuery = $sql->select()
+		->from(array('e' => 'examen_du_jour'))
+		->where(array('ID_EXAMEN_JOUR' => $id_examen_jour));
+			
+		$requete = $sql->prepareStatementForSqlObject($sQuery);
+		$result = $requete->execute()->current();
+			
+		$db2 = $this->tableGateway->getAdapter();
+		$sql2 = new Sql($db2);
+		$sQuery2 = $sql2->delete()
+		->from('consultation')
+		->where(array('ID_CONS' => $result['ID_CONS']));
+	
+		$requete2 = $sql2->prepareStatementForSqlObject($sQuery2);
+		$requete2->execute();
+			
+		return $result['ID_HOSP'];
+	}
+	
+	public function getExamenDuJourParIdExamenJour($id_examen_jour){
+		$db = $this->tableGateway->getAdapter();
+		$sql = new Sql($db);
+		$sQuery = $sql->select()
+		->from(array('e' => 'examen_du_jour'))
+		->join(array('c' => 'consultation'), 'c.ID_CONS = e.ID_CONS' , array('*'))
+		->join(array('p' => 'personne'), 'p.ID_PERSONNE = c.ID_MEDECIN' , array('NomMedecin' => 'NOM', 'PrenomMedecin' => 'PRENOM'))
+		->where(array('ID_EXAMEN_JOUR' => $id_examen_jour));
+		$requete = $sql->prepareStatementForSqlObject($sQuery);
+		return $requete->execute()->current();
+	}
+	
+	public function getConsultationExamenJour($id_cons){
+		$db = $this->tableGateway->getAdapter();
+		$sql = new Sql($db);
+		$sQuery = $sql->select()
+		->from(array('c' => 'consultation'))
+		->where(array('ID_CONS' => $id_cons));
+		$requete = $sql->prepareStatementForSqlObject($sQuery);
+		return $requete->execute()->current();
+	}
+	
+	
+	/*Heure suivante*/
+	/*Heure suivante*/
+	public function getHeureSuivante($id_sh)
+	{
+		$adapter = $this->tableGateway->getAdapter();
+		$sql = new Sql($adapter);
+		$select = $sql->select();
+		$select->from('heures_soins');
+		$select->where(array('id_sh' => $id_sh, 'applique' => 0));
+		$select->order(array('date ASC','heure ASC'));
+	
+		$stat = $sql->prepareStatementForSqlObject($select);
+		$result = $stat->execute()->current();
+			
+		return $result;
+	}
+	
+	/*Heure precedente*/
+	/*Heure precedente*/
+	public function getHeurePrecedente($id_sh)
+	{
+		$today = new \DateTime();
+		$date = $today->format ( 'Y-m-d' );
+		$heure = $today->format ( 'H:i:s' );
+	
+		$adapter = $this->tableGateway->getAdapter();
+		$sql = new Sql($adapter);
+		$select = $sql->select();
+		$select->from('heures_soins');
+		$select->where(array('id_sh' => $id_sh, 'applique' => 0, 'date' => $date, 'heure < ?' => $heure));
+		$select->order('heure DESC');
+	
+		$stat = $sql->prepareStatementForSqlObject($select);
+		$result = $stat->execute()->current();
+			
+		return $result;
+	}
+	
+	public function getHeuresPourAujourdhui($id_sh)
+	{
+		$today = new \DateTime();
+		$date = $today->format ( 'Y-m-d' );
+	
+		$adapter = $this->tableGateway->getAdapter();
+		$sql = new Sql($adapter);
+		$select = $sql->select();
+		$select->from('heures_soins');
+		$select->where(array('id_sh'=>$id_sh, 'date'=>$date));
+		$select->order('id_heure ASC');
+	
+		$stat = $sql->prepareStatementForSqlObject($select);
+		$result = $stat->execute();
+			
+		$tab = array();
+		foreach ($result as $resultat){
+			$tab[] = $resultat['heure'];
+		}
+		return $tab;
+	}
+	
+	public function getToutesHeuresPourAujourdhui($id_sh)
+	{
+		$today = new \DateTime();
+		$date = $today->format ( 'Y-m-d' );
+	
+		$adapter = $this->tableGateway->getAdapter();
+		$sql = new Sql($adapter);
+		$select = $sql->select();
+		$select->from('heures_soins');
+		$select->where(array('id_sh' => $id_sh, 'date' => $date));
+		$select->order('id_heure ASC');
+	
+		$stat = $sql->prepareStatementForSqlObject($select);
+		$result = $stat->execute();
+			
+		return $result;
+	}
+	
+	public function getHeureAppliqueePourAujourdhui($id_sh, $heure)
+	{
+		$today = new \DateTime();
+		$date = $today->format ( 'Y-m-d' );
+	
+		$adapter = $this->tableGateway->getAdapter();
+		$sql = new Sql($adapter);
+		$select = $sql->select();
+		$select->from('heures_soins');
+		$select->where(array('id_sh' => $id_sh, 'date' => $date, 'heure' => $heure));
+	
+		$stat = $sql->prepareStatementForSqlObject($select);
+		$result = $stat->execute()->current();
+			
+		return $result;
+	}
 }

@@ -27,7 +27,7 @@ function controle_saisie(){
 	
 	//Necessite l'utilisation du fichier 'jquery.maskedinput.js'
 	jQuery(function($){
-		   $("#TELEPHONE").mask("(999) 99-999-99-99");
+		   $("#TELEPHONE, #telephone").mask("99 999 99 99");
 	});
 	
 	jQuery(function($){

@@ -27,6 +27,7 @@ $this->headScript()->appendFile($this->basePath().'/js/jquery-ui.js');
 
 $this->headScript()->appendFile($this->basePath().'/js/jquery.maskedinput.js');
 $this->headScript()->appendFile($this->basePath().'/js/controle_saisie/controle_saisie.js');
+$this->headScript()->appendFile($this->basePath().'/js/plugins/contextMenu/bootstrap-contextmenu.js');
 
 ?>
 
@@ -132,6 +133,16 @@ body .ui-tooltip {
 minus{
 	text-transform : lowercase;
 }
+
+#bodbod { 
+ 	min-width: 1345px;
+ 	overflow-x:scroll;  
+ } 
+
+ #user-nav { 
+ 	min-width: 1100px;
+ 	 
+ } 
 </style>
 
 <script>

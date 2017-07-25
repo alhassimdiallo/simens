@@ -14,10 +14,24 @@ return array(
         		'etat_civil' => 'guest',
         		'archivage' => 'guest',
         		
+        		//***Polyclinique
+        		//***Polyclinique
+        		'cardiologue' => 'guest',
+        		'gynecologue' => 'guest',
+        		'pediatre' => 'guest',
+        		'psychiatre' => 'guest',
+        		'pneumologue' => 'guest',
+        		'orl' => 'guest',
+        		'kinesiterapeute' => 'guest',
+        		'sage_femme' => 'guest',
+        		//***************
+        		//***************
+
+        		
         		'surveillant' => 'guest',
         		'medecin'     => 'surveillant',
-        		
         		'superAdmin'  => 'medecin'
+        		
         ),
     		
 
@@ -54,6 +68,19 @@ return array(
     								'get-infos-modification-hopital' => 'superAdmin',
     								
     								'gestion-des-batiments' => 'superAdmin',
+    								'gestion-des-services' => 'superAdmin',
+    								'liste-services-ajax' => 'superAdmin',
+    								'get-infos-service' => 'superAdmin',
+    								'get-infos-modification-service' => 'superAdmin',
+    								'ajouter-service' => 'superAdmin',
+    								'supprimer-service' => 'superAdmin',
+    								
+    								'gestion-des-actes' => 'superAdmin',
+    								'liste-actes-ajax' => 'superAdmin',
+    								'get-infos-acte' => 'superAdmin',
+    								'get-infos-modification-acte' => 'superAdmin',
+    								'ajouter-acte' => 'superAdmin',
+    								'supprimer-acte'  => 'superAdmin',
     								
     						),
     						
@@ -112,6 +139,18 @@ return array(
     								'supprimer-admission' => 'facturation',
     								'enregistrer-deces' => 'facturation',
     								
+    								'impression-pdf' => 'facturation',
+    								'impression-facture' => 'facturation',
+    								
+    								'liste-actes' => 'facturation',
+    								'liste-actes-impayes-ajax' => 'facturation',
+    								'liste-actes-payes-ajax' => 'facturation',
+    								
+    								'vue-patient' => 'facturation',
+    								'liste-actes-impayes' => 'facturation',
+    								'acte-paye' => 'facturation',
+    								'impression-facture-acte' => 'facturation',
+    								
     						),
     						
     						
@@ -137,7 +176,7 @@ return array(
     								'maj-complement-consultation' => 'medecin',
     								'visualisation-consultation' => 'medecin',
     								'visualisation-hospitalisation' => 'medecin',
-    								'liste-soins-visualisation-hosp' => 'medecin',
+    								'liste-soins-visualisation-hosp' => 'medecin', 
     								
     								'imagesExamensMorphologiques' => 'medecin',
     								'supprimerImage' => 'medecin', 
@@ -170,11 +209,15 @@ return array(
     								'afficher-mp3' => 'medecin',
     								'supprimer-mp3' => 'medecin',
     								'inserer-bd-mp3' => 'medecin',
-    								'afficher-video' => 'medecin',
     								
+    								'afficher-video' => 'medecin',
+    								'ajouter-video' => 'medecin',
+    								'inserer-bd-video' => 'medecin',
+    								'supprimer-video' => 'medecin',
     								/**PDF**/
     								'impression-Pdf' => 'medecin',
-    								
+    								'tarifacte' => 'medecin',
+    								'demande-acte' => 'medecin',
     						),
     						
     						
@@ -183,34 +226,34 @@ return array(
     						 */
     						
     						'Personnel\Controller\Personnel' => array(
-    								'liste-personnel' => 'admin',
-    								'liste-personnel-ajax' => 'admin',
-    								'info-personnel' => 'admin',
-    								'supprimer' => 'admin',
-    								'modifier-dossier' => 'admin',
-    								'dossier-personnel' => 'admin',
+    								'liste-personnel' => array('admin','superAdmin'),
+    								'liste-personnel-ajax' => array('admin','superAdmin'),
+    								'info-personnel' => array('admin','superAdmin'),
+    								'supprimer' => array('admin','superAdmin'),
+    								'modifier-dossier' => array('admin','superAdmin'),
+    								'dossier-personnel' => array('admin','superAdmin'),
     								
-    								'transfert' => 'admin',
-    								'liste-personnel-transfert-ajax' => 'admin',
-    								'popup-agent-personnel' => 'admin',
-    								'vue-agent-personnel' => 'admin',
-    								'services' => 'admin',
+    								'transfert' => array('admin','superAdmin'),
+    								'liste-personnel-transfert-ajax' => array('admin','superAdmin'),
+    								'popup-agent-personnel' => array('admin','superAdmin'),
+    								'vue-agent-personnel' => array('admin','superAdmin'),
+    								'services' => array('admin','superAdmin'),
     								
-    								'liste-transfert' => 'admin',
-    								'liste-transfert-ajax' => 'admin',
-    								'supprimer-transfert' => 'admin',
+    								'liste-transfert' => array('admin','superAdmin'),
+    								'liste-transfert-ajax' => array('admin','superAdmin'),
+    								'supprimer-transfert' => array('admin','superAdmin'),
     								
-    								'intervention' => 'admin',
-    								'liste-personnel-intervention-ajax' => 'admin',
-    								'liste-intervention' => 'admin',
-    								'liste-intervention-ajax' => 'admin',
-    								'supprimer-transfert' => 'admin',
-    								'info-personnel-intervention' => 'admin',
-    								'vue-intervention-agent' => 'admin',
-    								'supprimer-intervention' => 'admin',
-    								'supprimer-une-intervention' => 'admin',
-    								'save-intervention' => 'admin',
-    								'modifier-intervention-agent' =>'admin',
+    								'intervention' => array('admin','superAdmin'),
+    								'liste-personnel-intervention-ajax' => array('admin','superAdmin'),
+    								'liste-intervention' => array('admin','superAdmin'),
+    								'liste-intervention-ajax' => array('admin','superAdmin'),
+    								'supprimer-transfert' => array('admin','superAdmin'),
+    								'info-personnel-intervention' => array('admin','superAdmin'),
+    								'vue-intervention-agent' => array('admin','superAdmin'),
+    								'supprimer-intervention' => array('admin','superAdmin'),
+    								'supprimer-une-intervention' => array('admin','superAdmin'),
+    								'save-intervention' => array('admin','superAdmin'),
+    								'modifier-intervention-agent' => array('admin','superAdmin'),
     						),
     						
     						/***
@@ -264,6 +307,10 @@ return array(
     								'liste-examens-effectues-morpho' => 'radiologie',
     								'liste-recherche-examens-effectues-morpho-ajax' => 'radiologie',
     								'ajouter-examen' => 'radiologie',
+    								'afficher-video' => 'radiologie',
+    								'ajouter-video' => 'radiologie',
+    								'inserer-bd-video' => 'radiologie',
+    								'supprimer-video' => 'radiologie',
     								
     								
     								
@@ -298,6 +345,8 @@ return array(
     								'etat-lit' => 'major',
     								'information-patient' => 'major',
     								'info-lit-salle-batiment' => 'major',
+    								
+    								
      						),
     						
     						
@@ -325,6 +374,14 @@ return array(
     								'update-complement-consultation' => array('archivage','medecin'), 
     								'visualisation-consultation' => array('archivage','medecin'),
     								'visualiser-consultation' => array('archivage','medecin'),
+    								'ajouter-mp3' => array('archivage','medecin'),
+    								'afficher-mp3' => array('archivage','medecin'),
+    								'supprimer-mp3' => array('archivage','medecin'),
+    								'inserer-bd-mp3' => array('archivage','medecin'),
+    								'afficher-video' => array('archivage','medecin'),
+    								'ajouter-video' => array('archivage','medecin'),
+    								'inserer-bd-video' => array('archivage','medecin'),
+    								'supprimer-video' => array('archivage','medecin'),
     								
     								/*Facturation*/
     								'ajouter' => array('archivage','medecin'),
@@ -364,6 +421,10 @@ return array(
     								'detail-info-liberation-patient' => array('archivage','medecin'),
     								'liste-demande-hospi-ajax' => array('archivage','medecin'),
     								'liberer-patient' => array('archivage','medecin'),
+    								'liste-examen-du-jour' => array('archivage','medecin'),
+    								'modifier-soin' => array('archivage','medecin'),
+    								'supprimer-soin' => array('archivage','medecin'),
+    								'information-patient' => array('archivage','medecin'),
     								
     								/*Radiologie*/
     								'liste-resultats-radiologie' => array('archivage','medecin'),

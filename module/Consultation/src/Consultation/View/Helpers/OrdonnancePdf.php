@@ -30,6 +30,7 @@ class OrdonnancePdf
 	protected $_idPersonne;
 	protected $_Medicaments;
 	protected $_DonneesPatient;
+	protected $_Service;
 	
 	public function __construct()
 	{
@@ -66,39 +67,46 @@ class OrdonnancePdf
 	}
 	
 	public function setEnTete(){
-		$imageHeader = ZendPdf\Image::imageWithPath('C:\wamp\www\simens\public\img\logo_vert.png');
-		$this->_page->drawImage($imageHeader, 425,
-				$this->_pageHeight - 75,
-				565,//largeur
-				787);//hauteur
+		$baseUrl = $_SERVER['SCRIPT_FILENAME'];
+		$tabURI  = explode('public', $baseUrl);
+		
+		$imageHeader = ZendPdf\Image::imageWithPath($tabURI[0].'public/img/polycliniquelogo.png');
+		$this->_page->drawImage($imageHeader, 445, //-x
+				$this->_pageHeight - 130, //-y
+				528, //+x
+				787); //+y
 		
 		$this->_page->setFont($this->_newTime, 10);
 		$this->_page->drawText('République du Sénégal',
 				$this->_leftMargin,
 				$this->_pageHeight - 50);
 		$this->_page->setFont($this->_newTime, 10);
-		$this->_page->drawText('Ministère de la santé et de la prévention',
+		$this->_page->drawText('Ministère de la santé et de l\'action sociale',
 				$this->_leftMargin,
 				$this->_pageHeight - 65);
 		$this->_page->setFont($this->_newTime, 10);
-		$this->_page->drawText('Hopital Régional de Saint-Louis',
+		$this->_page->drawText('Polyclinique de l\'UGB de Saint-Louis',
 				$this->_leftMargin,
 				$this->_pageHeight - 80);
 		$this->_page->setFont($this->_newTime, 10);
-		$this->_page->drawText('Service Orthopédie et traumathologie',
+		$this->_page->drawText('Service: '.iconv ('UTF-8' ,'ISO-8859-1' ,$this->_Service),
 				$this->_leftMargin,
 				$this->_pageHeight - 95);
-		$font = ZendPdf\Font::fontWithName(ZendPdf\Font::FONT_HELVETICA_OBLIQUE);
+		$font = ZendPdf\Font::fontWithName(ZendPdf\Font::FONT_TIMES_ROMAN);
 		$this->_page->setFont($font, 8);
 		$today = new \DateTime ();
 		$dateNow = $today->format ( 'd/m/Y' );
-		$this->_page->drawText('Saint-Louis le ' . $dateNow,
+		$this->_page->drawText('Saint-Louis le, ' . $dateNow,
 				450,
 				$this->_pageHeight - 50);
 	}
 	
 	public function setDonneesPatient($donneesPatient){
 		$this->_DonneesPatient = $donneesPatient;
+	}
+	
+	public function setService($service){
+		$this->_Service = $service;
 	}
 	
 	public function setMedicaments($tab){
@@ -126,7 +134,7 @@ class OrdonnancePdf
 		$debut_ts = strtotime($debut);
 		$fin_ts = strtotime($fin);
 		$diff = $fin_ts - $debut_ts;
-		return round($diff / $nbSecondes);
+		return (int)($diff / $nbSecondes);
 	}
 	
 	protected  function getNoteMedicaments(){
@@ -163,32 +171,43 @@ class OrdonnancePdf
 		$value = $this->_DonneesPatient;
 			//-----------------------------------------------
 			$this->_page->setFont($this->_newTimeGras, 9);
-			$this->_page->drawText('NOM :',
-					$this->_leftMargin+175,
+			$this->_page->drawText('PRENOM & NOM :',
+					$this->_leftMargin+123,
 					$this->_yPosition);
-			$this->_page->setFont($this->_newTime, 9);
-			$this->_page->drawText(iconv ('UTF-8' ,'ISO-8859-1' , $value['NOM']),
-					$this->_leftMargin+210,
-					$this->_yPosition);
-			//-----------------------------------------------
-			$this->_yPosition -= 15;// allez a ligne suivante
-		    //----------------------------------------------
-			$this->_page->setFont($this->_newTimeGras, 9);
-			$this->_page->drawText('PRENOM :',
-					$this->_leftMargin+156,
-					$this->_yPosition);
-			$this->_page->setFont($this->_newTime, 9);
-			$this->_page->drawText(iconv ('UTF-8' ,'ISO-8859-1' , $value['PRENOM']),
+			$this->_page->setFont($this->_newTime, 10);
+			$this->_page->drawText(iconv ('UTF-8' ,'ISO-8859-1' , $value['PRENOM'].'  '.$value['NOM']),
 					$this->_leftMargin+210,
 					$this->_yPosition);
 // 			//-----------------------------------------------
+// 			$this->_yPosition -= 15;// allez a ligne suivante
+// 		    //----------------------------------------------
+// 			$this->_page->setFont($this->_newTimeGras, 9);
+// 			$this->_page->drawText('PRENOM :',
+// 					$this->_leftMargin+156,
+// 					$this->_yPosition);
+// 			$this->_page->setFont($this->_newTime, 9);
+// 			$this->_page->drawText(iconv ('UTF-8' ,'ISO-8859-1' , $value['PRENOM']),
+// 					$this->_leftMargin+210,
+// 					$this->_yPosition);
+			//-----------------------------------------------
+			$this->_yPosition -= 15;// allez a ligne suivante
+			//----------------------------------------------
+			$this->_page->setFont($this->_newTimeGras, 9);
+			$this->_page->drawText('SEXE :',
+					$this->_leftMargin+173,
+					$this->_yPosition);
+			$this->_page->setFont($this->_newTime, 10);
+			$this->_page->drawText(iconv ('UTF-8' ,'ISO-8859-1' , $value['SEXE']),
+					$this->_leftMargin+210,
+					$this->_yPosition);
+ 			//-----------------------------------------------
     		$this->_yPosition -= 15;// allez a ligne suivante
-// 			//----- -----------------------------------------
+ 			//----- -----------------------------------------
 			$this->_page->setFont($this->_newTimeGras, 9);
 			$this->_page->drawText('DATE DE NAISSANCE :',
 					$this->_leftMargin+102,
 					$this->_yPosition);
-			$this->_page->setFont($this->_newTime, 9);
+			$this->_page->setFont($this->_newTime, 10);
 			
 			$today = new \DateTime(); 
 			$date_actu = $today->format('Y-m-d');
@@ -197,7 +216,6 @@ class OrdonnancePdf
 			$this->_page->drawText($dateNaissance."  (".$this->nbAnnees($value['DATE_NAISSANCE'],$date_actu)." ans)",
 					$this->_leftMargin+210,
 					$this->_yPosition);
- 			//-----------------------------------------------
 			//-----------------------------------------------
 			$this->_yPosition -= 15;// allez a ligne suivante
 			//----------------------------------------------
@@ -205,7 +223,7 @@ class OrdonnancePdf
 			$this->_page->drawText('ADRESSE :',
 					$this->_leftMargin+155,
 					$this->_yPosition);
-			$this->_page->setFont($this->_newTime, 9);
+			$this->_page->setFont($this->_newTime, 10);
 			$this->_page->drawText(iconv ('UTF-8' ,'ISO-8859-1' , $value['ADRESSE']),
 					$this->_leftMargin+210,
 					$this->_yPosition);

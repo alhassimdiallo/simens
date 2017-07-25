@@ -227,7 +227,7 @@ class DemandeTable {
 	
 		$db = $this->tableGateway->getAdapter();
 	
-		$aColumns = array('Nom','Prenom','Datenaissance','Sexe', 'Datedemande', 'medecinDemandeur' , 'id');
+		$aColumns = array('Nom','Prenom','Datenaissance','Sexe', 'Datedemande', 'medecinDemandeur' , 'id' , 'id2' , 'idDemande');
 	
 		/* Indexed column (used for fast and accurate table cardinality) */
 		$sIndexColumn = "id";
@@ -265,7 +265,7 @@ class DemandeTable {
 		$sql = new Sql($db);
 		$sQuery = $sql->select()
 		->from(array('pat' => 'patient'))->columns(array())
-		->join(array('pers' => 'personne'), 'pers.ID_PERSONNE = pat.ID_PERSONNE', array('Nom'=>'NOM','Prenom'=>'PRENOM','Datenaissance'=>'DATE_NAISSANCE','Sexe'=>'SEXE','Adresse'=>'ADRESSE','id'=>'ID_PERSONNE'))
+		->join(array('pers' => 'personne'), 'pers.ID_PERSONNE = pat.ID_PERSONNE', array('Nom'=>'NOM','Prenom'=>'PRENOM','Datenaissance'=>'DATE_NAISSANCE','Sexe'=>'SEXE','Adresse'=>'ADRESSE','id'=>'ID_PERSONNE','id2'=>'ID_PERSONNE'))
 		->join(array('cons' => 'consultation'), 'cons.ID_PATIENT = pat.ID_PERSONNE', array('Datedemande'=>'DATE', 'Idcons'=>'ID_CONS', 'Archivage' => 'ARCHIVAGE'))
 		->join(array('d' => 'demande'), 'd.idCons = cons.ID_CONS' , array('*'))
 		->join(array('med' => 'personne'), 'med.ID_PERSONNE = cons.ID_MEDECIN', array('NomMedecin' =>'NOM', 'PrenomMedecin' => 'PRENOM'))
@@ -337,7 +337,7 @@ class DemandeTable {
 					else if ($aColumns[$i] == 'id') {
 	
 						$html  ="<infoBulleVue><a href='javascript:listeExamensBio(". $aRow[ $aColumns[$i] ] .",". $aRow[ 'idDemande' ] .")'>";
-						$html .="<img src='".$tabURI[0]."public/images_icons/voir2.png' title='détails'></a><infoBulleVue>";
+						$html .="<img src='".$tabURI[0]."public/images_icons/voir2.png' title='Détails'></a><infoBulleVue>";
 	
 						if($this->VerifierDemandeExamenBioSatisfaite($aRow[ 'Idcons' ]) == true ) {
 							$html .="<infoBulleVue><a>";
@@ -383,7 +383,7 @@ class DemandeTable {
 	
 		$db = $this->tableGateway->getAdapter();
 	
-		$aColumns = array('Nom','Prenom','Datenaissance','Sexe', 'Datedemande', 'medecinDemandeur' , 'id');
+		$aColumns = array('Nom','Prenom','Datenaissance','Sexe', 'Datedemande', 'medecinDemandeur' , 'id' , 'id2' , 'idDemande');
 	
 		/* Indexed column (used for fast and accurate table cardinality) */
 		$sIndexColumn = "id";
@@ -421,7 +421,7 @@ class DemandeTable {
 		$sql = new Sql($db);
 		$sQuery = $sql->select()
 		->from(array('pat' => 'patient'))->columns(array())
-		->join(array('pers' => 'personne'), 'pers.ID_PERSONNE = pat.ID_PERSONNE', array('Nom'=>'NOM','Prenom'=>'PRENOM','Datenaissance'=>'DATE_NAISSANCE','Sexe'=>'SEXE','Adresse'=>'ADRESSE','id'=>'ID_PERSONNE'))
+		->join(array('pers' => 'personne'), 'pers.ID_PERSONNE = pat.ID_PERSONNE', array('Nom'=>'NOM','Prenom'=>'PRENOM','Datenaissance'=>'DATE_NAISSANCE','Sexe'=>'SEXE','Adresse'=>'ADRESSE','id'=>'ID_PERSONNE','id2'=>'ID_PERSONNE'))
 		->join(array('cons' => 'consultation'), 'cons.ID_PATIENT = pat.ID_PERSONNE', array('Datedemande'=>'DATE', 'Idcons'=>'ID_CONS', 'Archivage' => 'ARCHIVAGE'))
 		->join(array('d' => 'demande'), 'd.idCons = cons.ID_CONS' , array('*'))
 		->join(array('med' => 'personne'), 'med.ID_PERSONNE = cons.ID_MEDECIN', array('NomMedecin' =>'NOM', 'PrenomMedecin' => 'PRENOM'))
@@ -490,7 +490,7 @@ class DemandeTable {
 						else if ($aColumns[$i] == 'id') {
 	
 							$html  ="<infoBulleVue><a href='javascript:listeExamensBio(". $aRow[ $aColumns[$i] ] .",". $aRow[ 'idDemande' ] .")'>";
-							$html .="<img src='".$tabURI[0]."public/images_icons/voir2.png' title='détails'></a><infoBulleVue>";
+							$html .="<img src='".$tabURI[0]."public/images_icons/voir2.png' title='Détails'></a><infoBulleVue>";
 	
 							if($this->VerifierDemandeExamenBioSatisfaite($aRow[ 'Idcons' ]) == true ) {
 								$html .="<infoBulleVue><a>";
@@ -685,7 +685,7 @@ class DemandeTable {
 	
 		$db = $this->tableGateway->getAdapter();
 	
-		$aColumns = array('Nom','Prenom','Datenaissance','Sexe', 'Datedemande', 'medecinDemandeur' , 'id');
+		$aColumns = array('Nom', 'Prenom', 'Datenaissance', 'Sexe', 'Datedemande', 'medecinDemandeur', 'id', 'id2', 'idDemande');
 	
 		/* Indexed column (used for fast and accurate table cardinality) */
 		$sIndexColumn = "id";
@@ -723,7 +723,7 @@ class DemandeTable {
 		$sql = new Sql($db);
 		$sQuery = $sql->select()
 		->from(array('pat' => 'patient'))->columns(array())
-		->join(array('pers' => 'personne'), 'pers.ID_PERSONNE = pat.ID_PERSONNE', array('Nom'=>'NOM','Prenom'=>'PRENOM','Datenaissance'=>'DATE_NAISSANCE','Sexe'=>'SEXE','Adresse'=>'ADRESSE','id'=>'ID_PERSONNE'))
+		->join(array('pers' => 'personne'), 'pers.ID_PERSONNE = pat.ID_PERSONNE', array('Nom'=>'NOM','Prenom'=>'PRENOM','Datenaissance'=>'DATE_NAISSANCE','Sexe'=>'SEXE','Adresse'=>'ADRESSE','id'=>'ID_PERSONNE','id2'=>'ID_PERSONNE'))
 		->join(array('cons' => 'consultation'), 'cons.ID_PATIENT = pat.ID_PERSONNE', array('Datedemande'=>'DATE', 'Idcons'=>'ID_CONS', 'Archivage' => 'ARCHIVAGE'))
 		->join(array('d' => 'demande'), 'd.idCons = cons.ID_CONS' , array('*'))
 		->join(array('med' => 'personne'), 'med.ID_PERSONNE = cons.ID_MEDECIN', array('NomMedecin' =>'NOM', 'PrenomMedecin' => 'PRENOM'))
@@ -795,7 +795,7 @@ class DemandeTable {
 						else if ($aColumns[$i] == 'id') {
 	
 							$html  ="<infoBulleVue><a href='javascript:listeExamensMorpho(". $aRow[ $aColumns[$i] ] .",". $aRow[ 'idDemande' ] .")'>";
-							$html .="<img src='".$tabURI[0]."public/images_icons/voir2.png' title='détails'></a><infoBulleVue>";
+							$html .="<img src='".$tabURI[0]."public/images_icons/voir2.png' title='Détails'></a><infoBulleVue>";
 	
 							if($this->VerifierDemandeExamenMorphoSatisfaite($aRow[ 'Idcons' ]) == true ) {
 								$html .="<infoBulleVue><a>";
@@ -850,7 +850,7 @@ class DemandeTable {
 	
 		$db = $this->tableGateway->getAdapter();
 	
-		$aColumns = array('Nom','Prenom','Datenaissance','Sexe', 'Datedemande', 'medecinDemandeur' , 'id');
+		$aColumns = array('Nom','Prenom','Datenaissance','Sexe', 'Datedemande', 'medecinDemandeur' , 'id' , 'id2' , 'idVpa');
 	
 		/* Indexed column (used for fast and accurate table cardinality) */
 		$sIndexColumn = "id";
@@ -900,7 +900,7 @@ class DemandeTable {
 		$sql = new Sql($db);
 		$sQuery = $sql->select()
 		->from(array('pat' => 'patient'))->columns(array())
-		->join(array('pers' => 'personne'), 'pers.ID_PERSONNE = pat.ID_PERSONNE', array('Nom'=>'NOM','Prenom'=>'PRENOM','Datenaissance'=>'DATE_NAISSANCE','Sexe'=>'SEXE','Adresse'=>'ADRESSE','id'=>'ID_PERSONNE'))
+		->join(array('pers' => 'personne'), 'pers.ID_PERSONNE = pat.ID_PERSONNE', array('Nom'=>'NOM','Prenom'=>'PRENOM','Datenaissance'=>'DATE_NAISSANCE','Sexe'=>'SEXE','Adresse'=>'ADRESSE','id'=>'ID_PERSONNE','id2'=>'ID_PERSONNE'))
 		->join(array('cons' => 'consultation'), 'cons.ID_PATIENT = pat.ID_PERSONNE', array('Datedemande'=>'DATE', 'Idcons'=>'ID_CONS', 'Archivage' => 'ARCHIVAGE'))
 		->join(array('med' => 'personne'), 'med.ID_PERSONNE = cons.ID_MEDECIN', array('NomMedecin' =>'NOM', 'PrenomMedecin' => 'PRENOM'))
 		->join(array('d' => 'demande_visite_preanesthesique'), 'd.ID_CONS = cons.ID_CONS' , array('*'))
@@ -967,7 +967,7 @@ class DemandeTable {
 						else if ($aColumns[$i] == 'id') {
 	
 							$html  ="<infoBulleVue><a style='padding-left: 20px;' href='javascript:details(". $aRow[ $aColumns[$i] ] .",". $aRow[ 'idVpa' ] .")'>";
-							$html .="<img src='".$tabURI[0]."public/images_icons/details.png' title='détails'></a><infoBulleVue>";
+							$html .="<img src='".$tabURI[0]."public/images_icons/details.png' title='Détails'></a><infoBulleVue>";
 	
 	
 							$html .="<input id='".$aRow[ 'idVpa' ]."'  type='hidden' value='".$aRow[ 'Idcons' ]."'>";
@@ -1027,7 +1027,7 @@ class DemandeTable {
 	
 		$db = $this->tableGateway->getAdapter();
 	
-		$aColumns = array('Nom','Prenom','Datenaissance','Sexe', 'Datedemande', 'medecinDemandeur' , 'id');
+		$aColumns = array('Nom','Prenom','Datenaissance','Sexe', 'Datedemande', 'medecinDemandeur' , 'id' , 'id2' , 'idVpa');
 	
 		/* Indexed column (used for fast and accurate table cardinality) */
 		$sIndexColumn = "id";
@@ -1077,7 +1077,7 @@ class DemandeTable {
 		$sql = new Sql($db);
 		$sQuery = $sql->select()
 		->from(array('pat' => 'patient'))->columns(array())
-		->join(array('pers' => 'personne'), 'pers.ID_PERSONNE = pat.ID_PERSONNE', array('Nom'=>'NOM','Prenom'=>'PRENOM','Datenaissance'=>'DATE_NAISSANCE','Sexe'=>'SEXE','Adresse'=>'ADRESSE','id'=>'ID_PERSONNE'))
+		->join(array('pers' => 'personne'), 'pers.ID_PERSONNE = pat.ID_PERSONNE', array('Nom'=>'NOM','Prenom'=>'PRENOM','Datenaissance'=>'DATE_NAISSANCE','Sexe'=>'SEXE','Adresse'=>'ADRESSE','id'=>'ID_PERSONNE','id2'=>'ID_PERSONNE'))
 		->join(array('cons' => 'consultation'), 'cons.ID_PATIENT = pat.ID_PERSONNE', array('Datedemande'=>'DATE', 'Idcons'=>'ID_CONS', 'Archivage' => 'ARCHIVAGE'))
 		->join(array('med' => 'personne'), 'med.ID_PERSONNE = cons.ID_MEDECIN', array('NomMedecin' =>'NOM', 'PrenomMedecin' => 'PRENOM'))
 		->join(array('d' => 'demande_visite_preanesthesique'), 'd.ID_CONS = cons.ID_CONS' , array('*'))

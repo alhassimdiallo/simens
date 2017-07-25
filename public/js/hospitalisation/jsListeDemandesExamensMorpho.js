@@ -116,11 +116,11 @@
         $.ajax({
             type: 'POST',
             url: chemin ,
-            data:{'id_personne':id_personne, 'id_cons':id_cons, 'encours':111, 'id':id},
+            data:{'id_personne':id_personne, 'id_cons':id_cons, 'examensMorpho':2, 'encours':111, 'id':id},
             success: function(data) {
            	         
             	$("#titre").replaceWith("<div id='titre2' style='font-family: police2; color: green; font-size: 20px; font-weight: bold; padding-left:20px;'><iS style='font-size: 25px;'>&curren;</iS> D&Eacute;TAILS DES R&Eacute;SULTATS DES EXAMENS </div>");
-            	var result = jQuery.parseJSON(data);
+            	var result = jQuery.parseJSON(data); 
             	if(indice == 1){
             		result = result+"<script>" +
             			            "getimagesExamensMorphologiques(); " +
@@ -172,7 +172,6 @@
     	    		error:function(e){console.log(e);alert("Une erreur interne est survenue!");},
     	    		dataType: "html"
     	    	});
-    			
     	    	
     		},
             
@@ -266,6 +265,7 @@
     	    				$('.imageRadio').toggle(false);
     	    				$('.imageEchographie').toggle(false);
     	    				$('.imageFibroscopie').toggle(false);
+    	    				AppelLecteurVideo_Scanner();
     	    			}
     	    			if($('#typeExamen_tmp').val() == 12){
     	    				$("#libelleInformation5").replaceWith("<td colspan='3' id='libelleInformation5'> <i style='color: green; font-family: time new romans; font-size: 17px;'> Imagerie (FIBROSCOPIE) </i> </td>");
@@ -286,6 +286,25 @@
     		dataType: "html"
     	});
     	
+    }
+    
+    function AppelLecteurVideo_Scanner(){
+
+    	var $id_cons = $('#Examen_id_cons').val();
+    	
+    	var chemin = tabUrl[0]+'public/hospitalisation/afficher-video';
+    	$.ajax({
+    		url: chemin ,
+    		type: 'POST',
+    		data: {'id_cons': $id_cons, 'ajoutVid': 0}, //ajoutVid: afficher l'icone permettant d'ajoutter des videos
+    		success: function (response) { 
+    			// La réponse du serveur
+    			var result = jQuery.parseJSON(response); 
+    			$('#tabs-2').empty(); 
+    			$('#tabs-2').html(result);
+    		}
+    	});
+        
     }
     
     /*************************************************************************************************************************/
@@ -309,7 +328,7 @@
      							}
      					   },
      					  "bDestroy": true,
-     	});
+     	} );
     	
     }
     
@@ -487,7 +506,7 @@
     	    		    		data:({'id_cons':id_cons}),
     	    		    		success: function(data) {    
     	    		    			var result = jQuery.parseJSON(data);
-    	    		    			$("#info_liste").fadeOut(function(){$("#info_liste").html(result).fadeIn("fast"); });
+    	    		    			$("#info_liste_table").fadeOut(function(){$("#info_liste_table").html(result).fadeIn("fast"); });
     	    		    			
     	    		    			$('#technique_utilise').val('');
     	    		    			$('#resultat').val('');
@@ -628,7 +647,7 @@
     	    		    		data:({'id_cons':id_cons}),
     	    		    		success: function(data) {    
     	    		    			var result = jQuery.parseJSON(data);
-    	    		    			$("#info_liste").fadeOut(function(){$("#info_liste").html(result).fadeIn("fast"); });
+    	    		    			$("#info_liste_table").fadeOut(function(){$("#info_liste_table").html(result).fadeIn("fast"); });
     	    		    			
     	    		    			$('#technique_utilise').val('');
     	    		    			$('#resultat').val('');
@@ -714,6 +733,7 @@
     				$('.imageRadio').toggle(false);
     				$('.imageEchographie').toggle(false);
     				$('.imageFibroscopie').toggle(false);
+    				AppelLecteurVideoScanner();
     			}
     			if($('#typeExamen_tmp').val() == 12){
     				$("#libelleInformation5").replaceWith("<td colspan='3' id='libelleInformation5'> <i style='color: green; font-family: time new romans; font-size: 17px;'> Imagerie (FIBROSCOPIE) </i> </td>");
@@ -731,6 +751,25 @@
     		error:function(e){console.log(e);alert("Une erreur interne est survenue!");},
     		dataType: "html"
     	});
+    }
+    
+    function AppelLecteurVideoScanner(){
+
+    	var $id_cons = $('#Examen_id_cons').val();
+    	
+    	var chemin = tabUrl[0]+'public/hospitalisation/afficher-video';
+    	$.ajax({
+    		url: chemin ,
+    		type: 'POST',
+    		data: {'id_cons': $id_cons, 'ajoutVid': 1}, //ajoutVid: afficher l'icone permettant d'ajoutter des videos
+    		success: function (response) { 
+    			// La réponse du serveur
+    			var result = jQuery.parseJSON(response); 
+    			$('#tabs-2').empty(); 
+    			$('#tabs-2').html(result);
+    		}
+    	});
+        
     }
     
     /**
@@ -810,8 +849,8 @@
     		    		url: chemin ,
     		    		data:({'idDemande':idDemande, 'id_cons':id_cons}),
     		    		success: function(data) {    
-    		    			var result = jQuery.parseJSON(data);
-    		    			$("#info_liste").fadeOut(function(){$("#info_liste").html(result).fadeIn("fast"); });
+    		    			var result = jQuery.parseJSON(data); 
+    		    			$("#info_liste_table").fadeOut(function(){$("#info_liste_table").html(result).fadeIn("fast"); });
     		    			
     		    		},
     		            
@@ -913,3 +952,54 @@
 	});
       
     }
+
+    
+    function scriptAjoutVideo(){
+     	$(function () {
+     	    $('#my_form_video').change(function (e) {
+     	        // On empêche le navigateur de soumettre le formulaire
+     	        e.preventDefault();
+     	        var id_cons = $('#Examen_id_cons').val(); 
+     	        var $form = $(this);
+     	        var formdata = (window.FormData) ? new FormData($form[0]) : null;
+     	        var data = (formdata !== null) ? formdata : $form.serialize();
+
+     	        if($("#fichier-video")[0].files[0].size > 12582912 ){
+     	        	alert("La taille maximale est depassee: Choisissez une taille <= 12Mo"); 
+    	        	return false;
+    	        }
+     	      
+     	        var chemin = tabUrl[0]+'public/hospitalisation/ajouter-video';
+     	        
+    	        $.ajax({
+    	        	url: chemin ,
+    	            type: $form.attr('method'),
+    	            contentType: false, // obligatoire pour de l'upload
+    	            processData: false, // obligatoire pour de l'upload
+    	            data: data,
+    	            success: function (response) { 
+    	                // La réponse du serveur
+    	            	var result = jQuery.parseJSON(response);  
+
+    	            	$.ajax({
+            	        	url: tabUrl[0]+'public/hospitalisation/inserer-bd-video',
+            	            type: $form.attr('method'), //Cela signifie 'POST'
+            	            data: {'id_cons':id_cons, 'nom_file':result[0], 'type_file':result[1], 'ajoutVid': 1},
+            	            success: function (response) { 
+            	                // La réponse du serveur
+            	            	var result = jQuery.parseJSON(response); 
+            	            	if(result == 0){
+            	            		alert("format non reconnu"); return false;
+            	            	} else {
+                	            	$('#tabs-2').empty(); 
+                	    			$('#tabs-2').html(result);
+            	            	}
+
+            	            }
+            	        });
+    	            }
+    	        });
+    		});
+
+     	});
+     }
